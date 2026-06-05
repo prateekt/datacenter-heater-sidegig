@@ -34,6 +34,11 @@ public final class Simulator {
     private int totalSteps;
     private boolean faultInjected;
     private double lastSimDuration;
+    private double sumBufferTemp;
+    private double sumPoolTemp;
+    private double sumAquacultureTemp;
+    private double sumAlgaeTemp;
+    private double sumPrimaryTOut;
 
     public Simulator(Map<String, Object> config) {
         this.config = config;
@@ -99,6 +104,7 @@ public final class Simulator {
 
         physics.applyHxAndLoads(state, actuators, dt);
         trackSatisfaction();
+        trackTemperatures();
         state.time += dt;
         state.totalSteps++;
         totalSteps++;
@@ -153,6 +159,34 @@ public final class Simulator {
         if (Math.abs(state.house.temperature - state.house.setpoint) <= 2.0) {
             houseInBandSteps++;
         }
+    }
+
+    private void trackTemperatures() {
+        sumBufferTemp += state.buffer.temperature;
+        sumPoolTemp += state.pool.temperature;
+        sumAquacultureTemp += state.aquaculture.temperature;
+        sumAlgaeTemp += state.algae.temperature;
+        sumPrimaryTOut += state.primary.tOut;
+    }
+
+    public double meanBufferTempC() {
+        return totalSteps > 0 ? sumBufferTemp / totalSteps : 0.0;
+    }
+
+    public double meanPoolTempC() {
+        return totalSteps > 0 ? sumPoolTemp / totalSteps : 0.0;
+    }
+
+    public double meanAquacultureTempC() {
+        return totalSteps > 0 ? sumAquacultureTemp / totalSteps : 0.0;
+    }
+
+    public double meanAlgaeTempC() {
+        return totalSteps > 0 ? sumAlgaeTemp / totalSteps : 0.0;
+    }
+
+    public double meanPrimaryTOutC() {
+        return totalSteps > 0 ? sumPrimaryTOut / totalSteps : 0.0;
     }
 
     private static PhysicsConfig physicsConfigFromYaml(Map<String, Object> config) {

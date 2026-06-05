@@ -108,6 +108,11 @@ public final class ResultsSummary {
                 "\"gross_co2_kg\":" + fmt(p.grossCo2Kg()) + "," +
                 "\"annualized_net_tonnes\":" + fmt(p.annualizedNetTonnes()) + "," +
                 "\"annualized_gross_tonnes\":" + fmt(p.annualizedGrossTonnes()) + "," +
+                "\"annualized_recovered_gwh\":" + fmt(p.thermal().annualizedRecoveredGwh()) + "," +
+                "\"annualized_rejected_gwh\":" + fmt(p.thermal().rejectedMwh() / 1000.0) + "," +
+                "\"annualized_dac_mwh\":" + fmt(p.thermal().dacMwh()) + "," +
+                "\"annualized_algae_mwh\":" + fmt(p.thermal().algaeMwh()) + "," +
+                "\"mean_buffer_temp_c\":" + fmt(p.thermal().meanBufferTempC()) + "," +
                 "\"forecast\":" + p.forecast() +
                 "}";
     }

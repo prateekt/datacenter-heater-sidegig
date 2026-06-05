@@ -17,6 +17,8 @@ public final class ChartGenerator {
 
     private static final int W = 1000;
     private static final int H = 580;
+    private static final String Y_THERMAL_ANNUAL = "Thermal service delivered (GWh / year)";
+    private static final String Y_THERMAL_7DAY = "Thermal service delivered (GWh, 7-day sim)";
     private static final String Y_ANNUAL = "Net CO₂e removed (metric tonnes / year)";
     private static final String Y_GROSS_NET = "CO₂e removed (metric tonnes / year)";
     private static final String Y_7DAY = "Net CO₂e removed (metric tonnes, 7-day sim)";
@@ -32,16 +34,128 @@ public final class ChartGenerator {
     public List<String> generateAll(ResultsSummary summary, GpuProfile.GpuProfileRegistry registry) throws IOException {
         Files.createDirectories(outputDir);
         List<String> paths = new ArrayList<>();
+        paths.add(writeThermalVsGpuCount(summary));
+        paths.add(writeThermalByGeneration(summary));
+        paths.add(writeThermalSaturation(summary));
+        paths.add(writeThermalMultiHall(summary));
+        paths.add(writeThermalLoadSplit(summary, registry));
+        paths.add(writeGpuTdpTimeline(registry));
         paths.add(writeCo2VsGpuCount(summary));
         paths.add(writeCo2VsGeneration(summary));
         paths.add(writeCo2Saturation(summary));
         paths.add(writeMultiHall(summary));
         paths.add(writeGrossVsNet(summary));
-        paths.add(writeGpuTdpTimeline(registry));
         for (String p : paths) {
             summary.addChart(p);
         }
         return paths;
+    }
+
+    private String writeThermalVsGpuCount(ResultsSummary summary) throws IOException {
+        List<SweepPoint> pts = summary.bySweep("gpu_count_ramp");
+        List<String> xLabels = pts.stream()
+                .map(p -> formatGpuLabel(p.gpuCount(), p.avgWasteHeatMw()))
+                .toList();
+        List<Double> y = pts.stream().map(p -> p.thermal().annualizedRecoveredGwh()).toList();
+        CategoryChart chart = new CategoryChartBuilder()
+                .width(W).height(H)
+                .title("Thermal Service vs. GPU Count")
+                .xAxisTitle("GPU count — H100-class, plant scales with hall (MW shown)")
+                .yAxisTitle(Y_THERMAL_ANNUAL)
+                .build();
+        ChartStyle.applyCategory(chart, ChartStyle.TEAL);
+        chart.getStyler().setXAxisLabelRotation(30);
+        chart.getStyler().setYAxisDecimalPattern("#,###");
+        chart.addSeries("thermal service", xLabels, y);
+        return save(chart, "thermal_service_vs_gpu_count.png");
+    }
+
+    private String writeThermalByGeneration(ResultsSummary summary) throws IOException {
+        List<SweepPoint> pts = summary.bySweep("gpu_generation");
+        List<String> labels = pts.stream()
+                .map(p -> p.forecast() ? p.profileName() + " †" : p.profileName())
+                .toList();
+        List<Double> y = pts.stream().map(p -> p.thermal().annualizedRecoveredGwh()).toList();
+        int gpus = pts.isEmpty() ? 0 : pts.get(0).gpuCount();
+        CategoryChart chart = new CategoryChartBuilder()
+                .width(W).height(H)
+                .title("Thermal Service by GPU Generation")
+                .xAxisTitle("GPU generation (" + String.format(Locale.US, "%,d", gpus) + " GPUs, † = forecast)")
+                .yAxisTitle(Y_THERMAL_ANNUAL)
+                .build();
+        ChartStyle.applyCategory(chart, ChartStyle.INDIGO);
+        chart.getStyler().setXAxisLabelRotation(35);
+        chart.getStyler().setYAxisDecimalPattern("#,###");
+        chart.addSeries("thermal service", labels, y);
+        return save(chart, "thermal_by_generation.png");
+    }
+
+    private String writeThermalSaturation(ResultsSummary summary) throws IOException {
+        List<SweepPoint> pts = summary.bySweep("saturation");
+        List<String> labels = pts.stream()
+                .map(p -> String.format(Locale.US, "%.1f×\n(%,d GPU-equiv.)",
+                        heatMultiplierFromLabel(p.label()), p.gpuCount()))
+                .toList();
+        List<Double> y = pts.stream().map(p -> p.thermal().recoveredMwh() / 1000.0).toList();
+        CategoryChart chart = new CategoryChartBuilder()
+                .width(W).height(H)
+                .title("Thermal Saturation — Fixed Plant, Rising Waste Heat")
+                .xAxisTitle("Heat multiplier vs. reference hall (capture equipment fixed)")
+                .yAxisTitle(Y_THERMAL_7DAY)
+                .build();
+        ChartStyle.applyCategory(chart, ChartStyle.AMBER);
+        chart.getStyler().setXAxisLabelRotation(0);
+        chart.getStyler().setYAxisDecimalPattern("#,###");
+        chart.addSeries("thermal service", labels, y);
+        return save(chart, "thermal_saturation_gpu.png");
+    }
+
+    private String writeThermalMultiHall(ResultsSummary summary) throws IOException {
+        List<SweepPoint> pts = summary.bySweep("multi_hall");
+        List<Integer> halls = pts.stream().map(SweepPoint::halls).toList();
+        List<Double> y = pts.stream().map(p -> p.thermal().annualizedRecoveredGwh()).toList();
+        XYChart chart = new XYChartBuilder()
+                .width(W).height(H)
+                .title("Campus Thermal Service — Multi-Hall Rollout")
+                .xAxisTitle("Number of halls (~25,000 B200 liquid GPUs each)")
+                .yAxisTitle(Y_THERMAL_ANNUAL)
+                .build();
+        ChartStyle.applyXy(chart, ChartStyle.GREEN);
+        chart.getStyler().setYAxisDecimalPattern("#,###");
+        chart.addSeries("thermal service", halls, y);
+        ChartStyle.applyLineMarkers(chart);
+        return save(chart, "thermal_multi_hall.png");
+    }
+
+    private String writeThermalLoadSplit(ResultsSummary summary, GpuProfile.GpuProfileRegistry registry) throws IOException {
+        SweepPoint ref = summary.bySweep("gpu_generation").stream()
+                .filter(p -> registry.referenceProfileId().equals(p.profileId()))
+                .findFirst()
+                .orElse(summary.bySweep("gpu_generation").isEmpty() ? null
+                        : summary.bySweep("gpu_generation").get(0));
+        if (ref == null) {
+            ref = summary.points().isEmpty() ? null : summary.points().get(0);
+        }
+        if (ref == null) {
+            return "docs/figures/thermal_load_split.png";
+        }
+        ThermalReport t = ref.thermal();
+        List<String> labels = List.of("25k reference hall");
+        CategoryChart chart = new CategoryChartBuilder()
+                .width(W).height(H)
+                .title("Thermal Load Split — Reference Hall (DAC priority)")
+                .xAxisTitle("Downstream process")
+                .yAxisTitle("Annual thermal service (GWh / year)")
+                .build();
+        ChartStyle.applyCategory(chart, ChartStyle.TEAL);
+        chart.getStyler().setStacked(true);
+        chart.getStyler().setYAxisDecimalPattern("#,###");
+        chart.addSeries("DAC", labels, List.of(t.dacMwh() / 1000.0));
+        chart.addSeries("Algae", labels, List.of(t.algaeMwh() / 1000.0));
+        chart.addSeries("Pool", labels, List.of(t.poolMwh() / 1000.0));
+        chart.addSeries("Aquaculture", labels, List.of(t.aquacultureMwh() / 1000.0));
+        chart.addSeries("Rejected", labels, List.of(t.rejectedMwh() / 1000.0));
+        return save(chart, "thermal_load_split.png");
     }
 
     private String writeCo2VsGpuCount(ResultsSummary summary) throws IOException {

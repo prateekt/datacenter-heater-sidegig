@@ -1,5 +1,7 @@
 package com.heater;
 
+import com.heater.analysis.HeatApplicationAnalyzer;
+import com.heater.analysis.ThermalReport;
 import com.heater.carbon.ClimateImpactCalculator;
 import com.heater.config.ConfigLoader;
 import com.heater.robot.RobotTaskLog;
@@ -8,6 +10,7 @@ import com.heater.thermal.ScenarioUtil;
 import com.heater.thermal.SimulationMetrics;
 import com.heater.thermal.Simulator;
 
+import java.util.Locale;
 import java.util.Map;
 
 public final class App {
@@ -53,34 +56,46 @@ public final class App {
         Simulator sim = new Simulator(config);
         SimulationMetrics metrics = sim.run(scenario, faultAt);
 
-        printReport(scenario, metrics);
+        double avgMw = (scenario.qWasteBase() + scenario.qWastePeak()) / 2.0 / 1_000_000.0;
+        ThermalReport thermal = ThermalReport.fromSimulator(sim, scenario, scenario.duration(), avgMw, 1);
+        printReport(config, scenario, metrics, thermal);
         return metrics.primaryUnsafeTimeS() > 0 ? 1 : 0;
     }
 
-    private static void printReport(ScenarioProfile scenario, SimulationMetrics metrics) {
+    private static void printReport(
+            Map<String, Object> config, ScenarioProfile scenario,
+            SimulationMetrics metrics, ThermalReport thermal
+    ) {
         ClimateImpactCalculator.ClimateReport c = metrics.climate();
+        double gridKg = ConfigLoader.d(ConfigLoader.map(config, "climate"), "grid_co2_kg_per_kwh", 0.39);
 
         System.out.println("Scenario: " + scenario.name());
         System.out.printf("Duration: %.0f s (%.1f h)%n", scenario.duration(), scenario.duration() / 3600.0);
         System.out.println();
-        System.out.println("--- Energy ---");
-        System.out.printf("Energy recovered:     %,.1f kWh%n", metrics.energyRecoveredKwh());
-        System.out.printf("Energy rejected:      %,.1f kWh%n", metrics.energyRejectedKwh());
+        System.out.println("--- Thermal outputs (grid-agnostic) ---");
+        System.out.printf("Waste heat (avg):       %.1f MW%n", thermal.wasteHeatAvgMw());
+        System.out.printf("Thermal service:        %,.1f MWh/yr (%.2f GWh/yr)%n",
+                thermal.recoveredMwh(), thermal.annualizedRecoveredGwh());
+        System.out.printf("Rejected to ambient:    %,.1f MWh/yr%n", thermal.rejectedMwh());
+        System.out.printf("  DAC:                  %,.1f MWh/yr%n", thermal.dacMwh());
+        System.out.printf("  Algae:                %,.1f MWh/yr%n", thermal.algaeMwh());
+        System.out.printf("  Pool:                 %,.1f MWh/yr%n", thermal.poolMwh());
+        System.out.printf("  Aquaculture:          %,.1f MWh/yr%n", thermal.aquacultureMwh());
+        System.out.printf("Mean buffer temp:       %.1f C%n", thermal.meanBufferTempC());
+        System.out.printf("Mean GPU loop out:      %.1f C%n", thermal.meanPrimaryTOutC());
+        System.out.printf("Shelter showers equiv:  %s%n",
+                HeatApplicationAnalyzer.formatHotShowers(thermal.recoveredMwh() * 1000.0 / 2.5));
         System.out.println();
-        System.out.println("--- CO2 Removal ---");
-        System.out.printf("DAC CO2 captured:     %,.1f kg%n", c.dacCo2Kg());
-        System.out.printf("Algae CO2 fixed:      %,.1f kg%n", c.algaeCo2Kg());
-        System.out.printf("Gross removal:        %,.1f kg%n", c.grossRemovalKg());
-        System.out.printf("Operational penalty:  %,.1f kg CO2e%n", c.operationalPenaltyKg());
-        System.out.printf("Net CO2e removed:     %,.1f kg%n", c.netCo2eRemovedKg());
-        System.out.println();
-        System.out.println("--- Climate Impact (illustrative) ---");
-        System.out.printf("Annualized net removal: %,.1f tonnes CO2e/yr%n", c.annualizedTonnesCo2e());
-        System.out.printf("Radiative forcing offset: %.2f µW/m²%n", c.radiativeForcingOffsetWM2() * 1e6);
-        System.out.printf("Warming offset:         %.2f mK (toy model)%n", c.warmingOffsetMilliKelvin());
+        System.out.printf("--- Grid scenario (%.2f kg CO2/kWh) ---%n", gridKg);
+        System.out.printf("DAC CO2 captured:       %,.1f kg%n", c.dacCo2Kg());
+        System.out.printf("Algae CO2 fixed:        %,.1f kg%n", c.algaeCo2Kg());
+        System.out.printf("Gross removal:          %,.1f kg%n", c.grossRemovalKg());
+        System.out.printf("Heat-pump penalty:      %,.1f kg CO2e%n", c.operationalPenaltyKg());
+        System.out.printf("Net CO2e removed:       %,.1f kg%n", c.netCo2eRemovedKg());
+        System.out.printf("Annualized net:         %,.1f tonnes CO2e/yr%n", c.annualizedTonnesCo2e());
         System.out.println();
         System.out.println("--- System ---");
-        System.out.printf("Heat pump electricity:  %,.1f kWh%n", c.heatPumpElectricKwh());
+        System.out.printf(Locale.US, "Heat pump electricity:  %,.1f kWh%n", c.heatPumpElectricKwh());
         System.out.printf("CCS active time:        %.1f%%%n", c.ccsActivePct());
         System.out.printf("Primary unsafe time:    %.1f s%n", metrics.primaryUnsafeTimeS());
         System.out.printf("Pool satisfaction:      %.1f%%%n", metrics.poolSatisfactionPct());

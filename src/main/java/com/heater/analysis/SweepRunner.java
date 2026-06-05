@@ -103,22 +103,7 @@ public final class SweepRunner {
                 FacilityScaler.ScaleMode.PROPORTIONAL, simDurationS);
         SweepPoint oneHall = runPoint("multi_hall", "1 hall", refGpus, profile, 1, hall);
         for (int h : halls) {
-            double netTonnes = oneHall.annualizedNetTonnes() * h;
-            double grossTonnes = oneHall.annualizedGrossTonnes() * h;
-            summary.addPoint(new SweepPoint(
-                    "multi_hall",
-                    h + (h == 1 ? " hall" : " halls"),
-                    refGpus,
-                    profile.id(),
-                    profile.displayName(),
-                    h,
-                    profile.avgWasteHeatMw(refGpus) * h,
-                    oneHall.netCo2eKg() * h,
-                    oneHall.grossCo2Kg() * h,
-                    netTonnes,
-                    grossTonnes,
-                    profile.forecast()
-            ));
+            summary.addPoint(oneHall.withHalls(h).withLabel(h + (h == 1 ? " hall" : " halls")));
         }
     }
 
@@ -152,6 +137,9 @@ public final class SweepRunner {
         double annualFactor = simDurationS > 0 ? (365.0 * 86400.0 / simDurationS) : 0.0;
         double annualNet = c.annualizedTonnesCo2e() * halls;
         double annualGross = c.grossRemovalKg() * annualFactor / 1000.0 * halls;
+        double wasteMw = profile.avgWasteHeatMw(gpuCount);
+        ThermalReport thermal = ThermalReport.fromSimulator(
+                sim, facility.scenario(), simDurationS, wasteMw, halls);
         return new SweepPoint(
                 sweepId,
                 label,
@@ -159,12 +147,13 @@ public final class SweepRunner {
                 profile.id(),
                 profile.displayName(),
                 halls,
-                profile.avgWasteHeatMw(gpuCount) * halls,
+                wasteMw * halls,
                 c.netCo2eRemovedKg() * halls,
                 c.grossRemovalKg() * halls,
                 annualNet,
                 annualGross,
-                profile.forecast()
+                profile.forecast(),
+                thermal
         );
     }
 

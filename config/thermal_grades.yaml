@@ -1,0 +1,35 @@
+# Deliverable temperature grades for downstream processes (reference + sim mapping).
+
+gpu_loop:
+  typical_range_c: "40–65"
+  sim_field: primary.tOut
+  source: "Liquid-cooled GPU return loop"
+
+buffer_secondary:
+  typical_range_c: "35–55"
+  sim_field: buffer.temperature
+  source: "Thermal storage / secondary loop after HX"
+
+dac_regeneration:
+  target_c: 90
+  sim_field: carbonCapture.regenerationTemp
+  source: "DAC sorbent regeneration (often via heat pump boost)"
+
+algae_pond:
+  typical_range_c: "25–30"
+  sim_field: algae.temperature
+  source: "Open pond / PBR maintenance"
+
+aquaculture_raceway:
+  setpoint_c: 22
+  sim_field: aquaculture.temperature
+  source: "Intensive raceway tilapia/trout"
+
+shelter_shower:
+  delivery_c: 42
+  source: "Mobile shower unit translation metric (not simulated load)"
+
+community_pool:
+  typical_range_c: "28–32"
+  sim_field: pool.temperature
+  source: "Municipal / campus pool"

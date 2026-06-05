@@ -1,13 +1,13 @@
 <p align="center">
   <strong>Data Center Heater Side Gig</strong><br>
-  <em>Job 1: cool the GPUs. Side gig: pull CO₂ from the air.</em>
+  <em>Job 1: cool the GPUs. Side gig: use the exhaust before it's thrown away.</em>
 </p>
 
 <p align="center">
   <a href="#start-here">Start here</a> ·
   <a href="#the-big-idea">Big idea</a> ·
-  <a href="#what-we-found-nvidia-us">NVIDIA results</a> ·
-  <a href="#scalability-charts">Scalability</a> ·
+  <a href="#what-we-found-nvidia-us">Thermal results</a> ·
+  <a href="#scalability-charts">Full analysis</a> ·
   <a href="#how-the-simulation-works">Methods</a> ·
   <a href="#try-it-yourself">Run it</a> ·
   <a href="#glossary">Glossary</a>
@@ -25,17 +25,15 @@
 
 ## Start here
 
-> **In one sentence:** Data centers are giant heaters. What if that heat had a **side gig** — removing CO₂ from the atmosphere instead of only warming the planet?
+> **In one sentence:** Data centers are giant heaters. We quantify **how much exhaust they produce**, **what temperatures are available**, and **which downstream processes can use that heat** before it is dissipated — without assuming a clean grid.
 
-Companies like **NVIDIA** are building huge **data centers** full of powerful **GPUs** (the chips that train AI). Those chips get **hot**. Cooling them produces **waste heat** — the data center’s unwanted “heater” output. Today, most of that heat is thrown away.
+Companies like **NVIDIA** are building huge **data centers** full of powerful **GPUs**. Almost all the electricity they use becomes **waste heat** — usually dumped to ambient. **Data Center Heater Side Gig** simulates routing that exhaust to useful loads:
 
-**Data Center Heater Side Gig** is a **computer simulation** of a smarter second job for that heat:
+1. Capture hot water from liquid-cooled GPU loops.
+2. Deliver thermal service to **DAC**, **algae**, **pools**, **fisheries**, **shelter showers**, and more.
+3. Report **MW**, **GWh/yr**, and **temperature grades** (grid-agnostic). Grid-dependent CO₂ accounting is a separate, labeled scenario.
 
-1. Capture the hot water cooling the GPUs.
-2. Use that heat to run **carbon capture** machines and **algae ponds**.
-3. Measure how much CO₂ is removed — and whether it actually helps the climate after you pay for electricity.
-
-Read [The big idea](#the-big-idea) first, then [What we found](#what-we-found-nvidia-us).
+Read [The big idea](#the-big-idea), then [Thermal results](#what-we-found-nvidia-us).
 
 ---
 
@@ -48,9 +46,7 @@ Read [The big idea](#the-big-idea) first, then [What we found](#what-we-found-nv
 | GPUs crunch numbers for AI | They use a lot of electricity |
 | Almost all that electricity becomes **heat** | Heat has to go somewhere |
 | Data centers **cool** the chips with water or air | Then dump the heat outside |
-| That heat is **waste** | It does not help anyone |
-
-At the same time, Earth has **too much CO₂** in the atmosphere from burning fossil fuels. CO₂ acts like a blanket and traps heat — that is the main driver of **global warming**.
+| That heat is **waste** | It does not help anyone — yet |
 
 ### The idea we simulate
 
@@ -80,9 +76,9 @@ A **robotic controller** in our simulation decides *where* to send the heat: car
 
 ## What we found (NVIDIA U.S.)
 
-**TL;DR:** One **25,000-GPU** hall can remove **~38,000 tonnes CO₂/year** from the air using its own waste heat — recovering **~25%** of the carbon it took to power those chips.
+**TL;DR:** One **25,000-GPU** hall throws off **~34 MW** of waste heat and can deliver **~71 GWh/yr** of usable thermal service — enough for **~28 million shelter hot showers/year** or colocated DAC/algae. *Grid scenario:* ~38,000 tonnes CO₂/yr net removed.
 
-Full charts, trade-offs (DAC vs. pools vs. fisheries vs. **shelter hot showers**), and scale analogies are in [Scalability](#scalability-charts) below. Numbers are **auto-generated** when you run `./gradlew generateFigures`.
+Full thermal charts, downstream trade-offs, and the grid-dependent carbon appendix are in [Full analysis](#scalability-charts) below. Auto-generated when you run `./gradlew generateFigures`.
 
 For a balanced DAC + algae rotation (one pipe at a time), see [balanced run](#balanced-dac--algae) in [Try it yourself](#try-it-yourself).
 
@@ -112,144 +108,230 @@ An earlier draft used ~37,000 GPUs (~50 MW). That was internally consistent but 
 
 Forecast rows use **public GTC / analyst targets**, not NVIDIA engineering data. See [`config/gpu_profiles.yaml`](config/gpu_profiles.yaml).
 
-### How we explain scale (charts stay in tonnes)
+### How we explain outputs (thermal first)
 
-| Metric | Role |
+| Output | Role |
 |--------|------|
-| **Tonnes CO₂e/year** | Primary unit on all charts |
-| **% operational recovery** | DAC net ÷ GPU grid CO₂ — the fair “worth it?” test |
-| **Cover-crop acres** | USDA-style soil carbon (~0.5 t/acre/yr) |
-| **Gasoline / EV cars** | Legacy transport intuition — **less meaningful as grids electrify** |
+| **MW waste heat** | Continuous thermal exhaust (grid-agnostic) |
+| **GWh/yr thermal service** | Heat delivered to downstream loads before rejection |
+| **Temperature grades** | Which processes can use available heat ([`config/thermal_grades.yaml`](config/thermal_grades.yaml)) |
+| **Tonnes CO₂e/year** | *Grid scenario appendix only* — assumes 0.39 kg CO₂/kWh |
 
-See [`config/impact_analogies.yaml`](config/impact_analogies.yaml). Auto-generated narratives are in [Scalability](#scalability-charts).
+Auto-generated analysis is in [Full analysis](#scalability-charts).
 
 ---
 
 <a id="scalability-charts"></a>
 
 <!-- SCALABILITY:BEGIN — auto-generated by ./gradlew generateFigures; do not edit -->
-## Scalability: GPUs, heat, and CO₂
+## Thermal results: hyperscale waste-heat potential
 
-*Auto-generated simulation results for **Data Center Heater Side Gig** — waste-heat-driven DAC at NVIDIA-scale U.S. AI halls. Charts use **metric tonnes CO₂e/year**; prose adds scale analogies.*
+*Auto-generated **output-side** results for **Data Center Heater Side Gig** — how much heat hyperscale AI halls produce, what temperatures are available, and which downstream processes can use it before dissipation. Grid-dependent carbon accounting is in the [appendix](#appendix-grid-dependent-carbon-scenario).*
+
+### Thesis
+
+> We do not assume clean electricity. We quantify the **output-side thermodynamic potential** of hyperscale AI data centers: how much heat is produced, what temperatures are available, and which downstream processes can use it before it is dissipated.
 
 ### Executive summary
 
-> **TL;DR** — One Colossus-class AI hall can use its own waste heat to pull **~38,000 tonnes of CO₂ out of the air every year** — giving back **~one quarter** of the carbon emitted to power those GPUs.
+> **TL;DR** — One Colossus-class hall throws off **~34 MW** of waste heat and delivers **~71 GWh/yr** of usable thermal service before rejection — enough for **~28 million shelter hot showers/yr** or colocated DAC/algae loads.
 
 #### The question
 
-- NVIDIA-scale partners are building **~25,000-GPU liquid-cooled halls** (documented at xAI Colossus)
-- Each hall runs **~34 MW of waste heat** 24/7 — heat that is usually dumped outside
-- **What if** that heat powered **direct air capture (DAC)** on the same campus instead?
+- Hyperscalers are building **~25,000-GPU liquid-cooled halls** (documented at xAI Colossus)
+- Each hall runs **~34 MW of waste heat** 24/7 — usually dumped to ambient
+- **What downstream processes** can use that exhaust **before it is wasted**?
 
-#### The answer — reference hall (25k B200, DAC priority)
+#### The answer — reference hall (25k B200)
 
 | | |
 |---|---|
-| **CO₂ removed** | **37,776 tonnes/year** (net, after heat-pump electricity) |
-| **Operational recovery** | **25%** of GPU-grid emissions clawed back |
-| **Net balance** | Still **111,489 tonnes/year emitted** — partial offset, not carbon-neutral |
+| **Waste heat** | **34 MW** continuous exhaust |
+| **Thermal service** | **70.9 GWh/yr** delivered to loads |
+| **Load split** | DAC **71** · algae **0** · rejected **0 GWh/yr** |
+| **Mean delivery temp** | Buffer **53.7°C** · GPU loop **49.9°C** |
 
-#### How big is that? *(intuition — not the main metric)*
+#### Downstream equivalents
 
-- **~75,552 acres** of high-performing USDA cover-crop program
-- **~8,212 gasoline cars** parked for a year *(fades as transport electrifies)*
-- National context: **38 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 132,359**) — meaningful at campus scale, not a national fix alone
+- ~28.4 million shelter hot showers/yr (~77,718/day)
+- **~8,865 homes**-worth of annual heat · details in [Secondary heat applications](#secondary-heat-applications)
 
-#### Same heat, different job
+#### Grid scenario footnote
 
-- **DAC priority** → max climate: **~38k tonnes/yr** removed
-- **Pools + fisheries first** → **1,721 tonnes/yr** removed, but **~814 homes**-worth of community heat
-- **If routed to shelter showers instead:** ~28.4 million shelter hot showers/yr (~77,718/day) from one hall's waste heat
-- Details in [Secondary heat applications](#secondary-heat-applications) below
+If this heat powers DAC on today's U.S. grid: **~37,776 tonnes CO₂e/yr** net removed — see [appendix](#appendix-grid-dependent-carbon-scenario).
 
-#### Bottom line
+### How to read the outputs
 
-Waste-heat DAC is **colocated carbon clawback** on exhaust you already paid for — meaningful partial recovery, not permission to build without limit. **Blackwell and Rubin run hotter** → more potential per hall if capture plant scales with silicon.
-
-### How to read the metrics
-
-| Metric | Use for |
+| Output | Use for |
 |--------|--------|
-| **Tonnes CO₂e/year** | Engineering, reporting, charts — the primary unit |
-| **% operational recovery** | Fair "worth it?" test vs. the hall's own GPU grid emissions |
-| **Cars / farms / homes** | Intuition only — see electrification note below |
+| **MW waste heat** | Continuous thermal exhaust from GPU operations (grid-agnostic) |
+| **GWh/yr thermal service** | Heat actually delivered to downstream loads before rejection |
+| **Temperature grades** | Which processes can physically use the available heat |
+| **MWh by load** | DAC, algae, pools, fisheries, showers (translation metrics) |
+| **Tonnes CO₂e/yr** | *Grid scenario only* — see appendix |
 
-As the U.S. grid decarbonizes, **GPU operational CO₂ falls** but **waste heat remains** — DAC's job is still to use that heat. Gasoline-car analogies (4.6 t/car) overstate the future; EV analogies (2.0 t/car on today's grid) are a better tailpipe mental model. **Tonnes and % recovery** stay the right metrics either way.
+### Reference hall — thermal envelope
 
-### Reference hall — scale and sources
+**25,000 B200 (liquid) GPUs** · **~34 MW** average waste heat · U.S. Southwest · 7-day sim, annualized
 
-**25,000 B200 (liquid) GPUs** · **~34 MW** average waste heat · U.S. Southwest climate · 7-day sim, annualized
+| Output | Reference hall |
+|--------|----------------|
+| Waste heat | **34 MW** (296 GWh/yr input) |
+| Thermal service delivered | **70.9 GWh/yr** |
+| Rejected to ambient | **0.1 GWh/yr** |
+| Mean buffer temp | **53.7 °C** |
+| Mean GPU loop out | **49.9 °C** |
+| Mean algae pond | **24.7 °C** |
+
+**Temperature grades** (see `config/thermal_grades.yaml`): GPU loop 40–65°C · buffer 35–55°C · DAC regeneration ~90°C (heat pump) · algae 25–30°C · aquaculture ~22°C · showers ~42°C.
 
 | Source | Finding |
 |--------|--------|
-| [ServeTheHome / Supermicro](https://www.servethehome.com/inside-100000-nvidia-gpu-xai-colossus-cluster-supermicro-helped-build-for-elon-musk/) | **~25,000 GPUs per compute hall** (4 halls → 100k H100) |
-| [Introl B200 guide](https://introl.com/blog/nvidia-b200-vs-gb200-deployment-guide) | **~160–224 GPUs/MW** (B200 HGX, 8-GPU racks) |
-| [SemiAnalysis NVL72](https://semianalysis.substack.com/p/gb200-hardware-architecture-and-component) | **72 GPUs @ ~120 kW/rack** |
+| [ServeTheHome / Supermicro](https://www.servethehome.com/inside-100000-nvidia-gpu-xai-colossus-cluster-supermicro-helped-build-for-elon-musk/) | **~25,000 GPUs per compute hall** |
+| [Introl B200 guide](https://introl.com/blog/nvidia-b200-vs-gb200-deployment-guide) | **~160–224 GPUs/MW** (B200 HGX) |
 
-### Chart 1 — Removal scales with GPU count
+### Chart 1 — Thermal service scales with GPU count
 
 *Proportional plant growth*
 
-![Chart 1 — Removal scales with GPU count](docs/figures/co2_vs_gpu_count.png)
+![Chart 1 — Thermal service scales with GPU count](docs/figures/thermal_service_vs_gpu_count.png)
 
-*Y-axis: net CO₂e removed (metric tonnes per year, annualized from simulation)*
+*Y-axis: thermal service delivered (GWh/yr annualized from simulation)*
 
-**Read:** Each doubling of GPUs (with scaled DAC) roughly doubles net removal until equipment limits bind.
+**Read:** Each doubling of GPUs (with scaled plant) roughly doubles **GWh/yr delivered** until equipment limits bind.
 
-**Highlighted point:** 25000 GPUs → **26,583 tonnes CO₂e/year** net removed — **27 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 188,090**). Roughly **~53,166 acres** of USDA cover-crop program (~119 farms), or **~5,779 cars** gasoline cars / **~13,292 cars** EVs parked for a year.
+**Highlighted point:** 25000 GPUs → **49.9 GWh/yr** thermal service at **24 MW** waste heat.
 
 ### Chart 2 — Hotter generations, same hall
 
 *Blackwell → Rubin thermal envelope*
 
-![Chart 2 — Hotter generations, same hall](docs/figures/co2_vs_gpu_generation.png)
+![Chart 2 — Hotter generations, same hall](docs/figures/thermal_by_generation.png)
 
-*Y-axis: net CO₂e removed (metric tonnes per year, annualized from simulation)*
+*Y-axis: thermal service delivered (GWh/yr annualized from simulation)*
 
-**Read:** Same 25,000-GPU hall removes more CO₂ as TDP rises — relevant for Blackwell and Vera Rubin planning.
+**Read:** Same 25,000-GPU hall delivers more **GWh/yr** as chip TDP rises.
 
-**Highlighted point:** Blackwell Ultra → **43,372 tonnes CO₂e/year** net removed — **43 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 115,281**). Roughly **~86,745 acres** of USDA cover-crop program (~195 farms), or **~9,429 cars** gasoline cars / **~21,686 cars** EVs parked for a year.
+**Highlighted point:** Blackwell Ultra → **81.4 GWh/yr** thermal service at **39 MW** waste heat.
 
-### Chart 3 — Saturation at fixed DAC capacity
+### Chart 3 — Thermal saturation at fixed plant
 
-*Oversized heat, fixed capture plant*
+*Oversized heat, fixed downstream plant*
 
-![Chart 3 — Saturation at fixed DAC capacity](docs/figures/co2_saturation_gpu.png)
+![Chart 3 — Thermal saturation at fixed plant](docs/figures/thermal_saturation_gpu.png)
 
-*Y-axis: net CO₂e removed (metric tonnes per year, annualized from simulation)*
+*Y-axis: thermal service delivered (GWh/yr annualized from simulation)*
 
-**Read:** Pasting more GPUs onto a hall **without** scaling DAC hits a plateau — capex must match heat.
+**Read:** Pasting more GPUs onto a hall **without** scaling capture plant hits a **thermal service plateau**.
 
-**Highlighted point:** 1.3x heat (31250 GPUs equiv.) → **37,597 tonnes CO₂e/year** net removed — **38 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 132,991**). Roughly **~75,193 acres** of USDA cover-crop program (~169 farms), or **~8,173 cars** gasoline cars / **~18,798 cars** EVs parked for a year.
+**Highlighted point:** 1.3x heat (31250 GPUs equiv.) → **70.6 GWh/yr** thermal service at **30 MW** waste heat.
 
 ### Chart 4 — Multi-hall campus rollout
 
 *NVIDIA-scale campus expansion*
 
-![Chart 4 — Multi-hall campus rollout](docs/figures/co2_multi_hall.png)
+![Chart 4 — Multi-hall campus rollout](docs/figures/thermal_multi_hall.png)
 
-*Y-axis: net CO₂e removed (metric tonnes per year, annualized from simulation)*
+*Y-axis: thermal service delivered (GWh/yr annualized from simulation)*
 
-**Read:** Ten halls ≈ 250k GPUs — where regional climate impact becomes policy-visible.
+**Read:** Ten halls ≈ 250k GPUs — cumulative **GWh/yr** scales linearly when each hall is provisioned.
 
-**Highlighted point:** 20 halls → **755,519 tonnes CO₂e/year** net removed — **756 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 6,618**). Roughly **~1,511,038 acres** of USDA cover-crop program (~3396 farms), or **~164,243 cars** gasoline cars / **~377,760 cars** EVs parked for a year.
+**Highlighted point:** 20 halls → **1418.4 GWh/yr** thermal service at **675 MW** waste heat.
 
-### Chart 5 — Gross vs. net (heat-pump electricity penalty)
+### Chart 5 — Thermal load split (reference hall)
 
-![Gross vs net](docs/figures/gross_vs_net_co2.png)
+![Thermal load split](docs/figures/thermal_load_split.png)
 
-*Y-axis: net CO₂e removed (metric tonnes per year, annualized from simulation)*
-
-At **50,000 GPUs**: **65,331 tonnes** gross captured vs **53,166 tonnes** net — the gap is grid CO₂ from heat-pump electricity (~19% of gross).
+*Stacked annual thermal service by downstream load (DAC priority routing).*
 
 ### Chart 6 — Waste heat per GPU by generation
 
 ![GPU waste heat timeline](docs/figures/gpu_tdp_timeline.png)
 
-Watts per GPU to the coolant loop (TDP + rack overhead). † = public roadmap forecast.
+**Input-side thermal envelope** — watts per GPU to the coolant loop (TDP + rack overhead). † = public roadmap forecast. Drives output GWh regardless of grid mix.
 
-### Operational CO₂ recovery — the primary "worth it?" metric
+<a id="secondary-heat-applications"></a>
+
+### Secondary heat applications — pools, fisheries, showers, community heat
+
+The same **~34 MW** waste-heat stream can be routed to **DAC**, **heated pools**, **aquaculture raceways**, **algae**, or **shelter hot showers** (MVP: one path at a time). Metrics translate delivered MWh into real-world equivalents (olympic pool ~180 MWh/yr; shelter hot shower ~2.5 kWh; U.S. home ~8 MWh/yr heat).
+
+| Priority scenario | Heat (MWh/yr) | Hot showers/yr | Net CO₂e (t/yr, grid) | Olympic pools | Raceways | Homes equiv. |
+|-------------------|---------------|----------------|------------------------|---------------|----------|-------------|
+| DAC priority (climate) | **70,918** | **28.4M** | 37,776 | 0.0 | 0.0 | 8,865 |
+| Community heat (pools + fisheries) | **6,510** | **2.6M** | 1,721 | 0.5 | 0.4 | 814 |
+| Algae + DAC balanced | **9,894** | **4.0M** | 3,623 | 0.0 | 0.0 | 1,237 |
+
+*Hot showers: dignified **8-min shelter/mobile unit** shower (~60 L warmed to 42°C, ~2.5 kWh each). Illustrates community heat potential — not a modeled load in the simulator yet.*
+
+
+**Trade-off (community vs. DAC priority):** ~36,055 fewer tonnes CO₂e removed per year, but **201 MWh/yr** to pools/fisheries and **~814 homes** heat equivalent — a campus **amenity + food + district heat** story alongside partial climate clawback.
+
+- **DAC priority (climate)** — **37,776 tonnes CO₂e/yr** net. Heat delivered: **70,918 MWh/yr** total (pools **0** · fisheries **0** · algae **0** · DAC **70,918**). ≈ **0.0 olympic pools**, **0.0 raceways** (500 m³), **~0 kg fish/yr** potential, **1.7 ha** algae, **~8,865 homes** heat equivalent, **~28.4 million shelter hot showers/yr (~77,718/day)**.
+- **Community heat (pools + fisheries)** — **1,721 tonnes CO₂e/yr** net. Heat delivered: **6,510 MWh/yr** total (pools **97** · fisheries **104** · algae **3,409** · DAC **2,900**). ≈ **0.5 olympic pools**, **0.4 raceways** (500 m³), **~5,393 kg fish/yr** potential, **1.7 ha** algae, **~814 homes** heat equivalent, **~2.6 million shelter hot showers/yr (~7,134/day)**.
+- **Algae + DAC balanced** — **3,623 tonnes CO₂e/yr** net. Heat delivered: **9,894 MWh/yr** total (pools **0** · fisheries **0** · algae **3,683** · DAC **6,212**). ≈ **0.0 olympic pools**, **0.0 raceways** (500 m³), **~0 kg fish/yr** potential, **2.5 ha** algae, **~1,237 homes** heat equivalent, **~4.0 million shelter hot showers/yr (~10,843/day)**.
+
+### Results at a glance
+
+| Scenario | GPUs | Chip | Halls | **Thermal (GWh/yr)** | Net CO₂e (t/yr, grid scenario) |
+|----------|------|------|-------|----------------------|-------------------------------|
+| AI lab | 5,000 | H100 SXM | 1 | **10.0** | 5,317 (grid scenario) |
+| One hall (H100) | 25,000 | H100 SXM | 1 | **49.9** | 26,583 (grid scenario) |
+| One hall (B200) | 25,000 | B200 (liquid) | 1 | **70.9** | 37,776 (grid scenario) |
+| 10-hall campus | 25,000 | B200 (liquid) | 1 | **70.9** | 37,776 (grid scenario) |
+| Rubin hall | 13,200 | Vera Rubin Max-P | 1 | **70.7** | 37,675 (grid scenario) |
+
+### Scenario narratives
+
+**Lab footprint (~5k H100)** — **10.0 GWh/yr** thermal service at **5 MW** waste heat (DAC **10** · algae **0** · rejected **0 GWh/yr**). Grid scenario: **5,317 tonnes CO₂e/yr** net removed.
+
+**Single Colossus-class hall (25k B200)** — **70.9 GWh/yr** thermal service at **34 MW** waste heat (DAC **71** · algae **0** · rejected **0 GWh/yr**). Grid scenario: **37,776 tonnes CO₂e/yr** net removed.
+
+**Regional campus (10 halls)** — **709.2 GWh/yr** thermal service at **338 MW** waste heat (DAC **709** · algae **0** · rejected **1 GWh/yr**). Grid scenario: **377,760 tonnes CO₂e/yr** net removed.
+
+**Rubin-era hall (forecast)** — **70.7 GWh/yr** thermal service at **34 MW** waste heat (DAC **71** · algae **0** · rejected **0 GWh/yr**). Grid scenario: **37,675 tonnes CO₂e/yr** net removed.
+
+### Conclusion — significance, limits, and what's worth it
+
+> **Verdict:** Routing hyperscale exhaust before dissipation is **worth doing** — **~34 MW** and **~71 GWh/yr** of deliverable thermal service per Colossus-class hall, regardless of whether the grid is coal, gas, solar, nuclear, or geothermal.
+
+#### What is significant
+
+- **34 MW** continuous waste heat — a physical output of compute, not a grid assumption
+- **70.9 GWh/yr** thermal service delivered from one hall — DAC, algae, or community loads
+- **709 GWh/yr at 10 halls** — campus-scale thermal budget for colocated industry
+- **+42% thermal service** H100 → B200 at same 25k footprint — hotter silicon = more output GWh
+- **Plant saturation is real** — past ~1.3× heat, GWh delivered barely moves without scaling downstream plant
+- **~28.4 million shelter hot showers/yr (~77,718/day)** from the same exhaust — enormous community heat potential
+
+#### What is not significant
+
+- **Debating grid cleanliness to prove heat exists** — the exhaust is there either way
+- **National climate salvation from one hall** — see grid appendix for tonne-scale limits
+- **Assuming more GPUs automatically add service** — without proportional plant, **GWh plateaus** (Chart 3)
+- **Treating CO₂ charts as the primary output** — they are a **labeled grid scenario**, not thermodynamics
+
+#### What's worth it? — decision guide
+
+| If your goal is… | Worth it? | Simulation says… |
+|------------------|-----------|------------------|
+| Use waste heat before dumping to ambient | **Yes** | **70.9 GWh/yr** deliverable per hall |
+| Shelter showers / community heat near campus | **Yes — trade-off** | **~28.4 million shelter hot showers/yr (~77,718/day)** possible; routing choice sets DAC vs. showers |
+| Size Blackwell / Rubin halls with matched downstream plant | **Yes** | Hotter generations raise **GWh/hall** when plant scales |
+| Prove the hall is carbon-neutral | **No** | Grid scenario still shows net emitter — see appendix |
+| Replace national mitigation strategy | **No** | Output story is **per-campus thermodynamics**, not U.S. inventory |
+
+#### Bottom line
+
+**Significant:** tens of MW and tens of GWh/yr of routable exhaust, temperature grades for real downstream loads, and clear saturation lessons for plant sizing. **Not significant:** grid mix as a prerequisite, national CO₂ %, or carbon-neutral claims. **Worth it?** **Yes** to extract value from unavoidable exhaust; climate tonnes are a **separate question** under explicit grid assumptions.
+
+<a id="appendix-grid-dependent-carbon-scenario"></a>
+
+## Appendix: Grid-dependent carbon scenario
+
+> **Assumption:** U.S. grid **0.39 kg CO₂/kWh**, facility **PUE 1.15**. This layer answers *net climate impact* — not whether waste heat exists.
+
+### Operational CO₂ recovery (grid scenario)
 
 For NVIDIA-scale infrastructure, compare DAC removal to **CO₂ from powering the same GPUs** (average waste heat × PUE 1.15 × U.S. grid 0.39 kg/kWh). This stays valid as transport electrifies.
 
@@ -264,113 +346,79 @@ For NVIDIA-scale infrastructure, compare DAC removal to **CO₂ from powering th
 
 **Strategic framing for NVIDIA:** Waste-heat DAC is **colocated carbon clawback** on heat already paid for — ~one quarter of operational CO₂ today, rising if grid greens and DAC scales with Blackwell/Rubin thermals. Not a license to build; a way to **extract value from unavoidable exhaust**.
 
-<a id="secondary-heat-applications"></a>
+#### CO₂ vs. GPU count
 
-### Secondary heat applications — pools, fisheries, showers, community heat
+*Grid scenario*
 
-The same **~34 MW** waste-heat stream can be routed to **DAC**, **heated pools**, **aquaculture raceways**, **algae**, or **shelter hot showers** (MVP: one path at a time). Metrics translate delivered MWh into real-world equivalents (olympic pool ~180 MWh/yr; shelter hot shower ~2.5 kWh; U.S. home ~8 MWh/yr heat).
+![CO₂ vs. GPU count](docs/figures/co2_vs_gpu_count.png)
 
-| Priority scenario | Net CO₂e (t/yr) | Heat (MWh/yr) | Hot showers/yr | Olympic pools | Raceways | Homes equiv. |
-|-------------------|-----------------|---------------|----------------|---------------|----------|-------------|
-| DAC priority (climate) | **37,776** | 70,918 | **28.4M** | 0.0 | 0.0 | 8,865 |
-| Community heat (pools + fisheries) | **1,721** | 6,510 | **2.6M** | 0.5 | 0.4 | 814 |
-| Algae + DAC balanced | **3,623** | 9,894 | **4.0M** | 0.0 | 0.0 | 1,237 |
+*Y-axis: net CO₂e removed (metric tonnes per year, annualized from simulation)*
 
-*Hot showers: dignified **8-min shelter/mobile unit** shower (~60 L warmed to 42°C, ~2.5 kWh each). Illustrates community heat potential — not a modeled load in the simulator yet.*
+**Read:** Net tonnes scale with GPUs when plant scales.
 
+**Highlighted point:** 25000 GPUs → **26,583 tonnes CO₂e/year** net removed — **27 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 188,090**). Roughly **~53,166 acres** of USDA cover-crop program (~119 farms), or **~5,779 cars** gasoline cars / **~13,292 cars** EVs parked for a year.
 
-**Trade-off (community vs. DAC priority):** ~36,055 fewer tonnes CO₂e removed per year, but **201 MWh/yr** to pools/fisheries and **~814 homes** heat equivalent — a campus **amenity + food + district heat** story alongside partial climate clawback.
+#### CO₂ vs. GPU generation
 
-- **DAC priority (climate)** — **37,776 tonnes CO₂e/yr** net. Heat delivered: **70,918 MWh/yr** total (pools **0** · fisheries **0** · algae **0** · DAC **70,918**). ≈ **0.0 olympic pools**, **0.0 raceways** (500 m³), **~0 kg fish/yr** potential, **1.7 ha** algae, **~8,865 homes** heat equivalent, **~28.4 million shelter hot showers/yr (~77,718/day)**.
-- **Community heat (pools + fisheries)** — **1,721 tonnes CO₂e/yr** net. Heat delivered: **6,510 MWh/yr** total (pools **97** · fisheries **104** · algae **3,409** · DAC **2,900**). ≈ **0.5 olympic pools**, **0.4 raceways** (500 m³), **~5,393 kg fish/yr** potential, **1.7 ha** algae, **~814 homes** heat equivalent, **~2.6 million shelter hot showers/yr (~7,134/day)**.
-- **Algae + DAC balanced** — **3,623 tonnes CO₂e/yr** net. Heat delivered: **9,894 MWh/yr** total (pools **0** · fisheries **0** · algae **3,683** · DAC **6,212**). ≈ **0.0 olympic pools**, **0.0 raceways** (500 m³), **~0 kg fish/yr** potential, **2.5 ha** algae, **~1,237 homes** heat equivalent, **~4.0 million shelter hot showers/yr (~10,843/day)**.
+*Grid scenario*
 
-### Results at a glance
+![CO₂ vs. GPU generation](docs/figures/co2_vs_gpu_generation.png)
 
-| Scenario | GPUs | Chip | Halls | **Net CO₂e (t/yr)** | Scale intuition |
-|----------|------|------|-------|---------------------|------------------|
-| AI lab | 5,000 | H100 SXM | 1 | **5,317** | ~10,633 acres cover-crop equiv.; ~1,156 cars gasoline cars (legacy proxy) |
-| One hall (H100) | 25,000 | H100 SXM | 1 | **26,583** | ~53,166 acres cover-crop equiv.; ~5,779 cars gasoline cars (legacy proxy) |
-| One hall (B200) | 25,000 | B200 (liquid) | 1 | **37,776** | ~75,552 acres cover-crop equiv.; ~8,212 cars gasoline cars (legacy proxy) |
-| 10-hall campus | 25,000 | B200 (liquid) | 10 | **377,760** | ~755,519 acres cover-crop equiv.; ~82,122 cars gasoline cars (legacy proxy) |
-| Rubin hall | 13,200 | Vera Rubin Max-P | 1 | **37,675** | ~75,350 acres cover-crop equiv.; ~8,190 cars gasoline cars (legacy proxy) |
+*Y-axis: net CO₂e removed (metric tonnes per year, annualized from simulation)*
 
-### Scenario narratives
+**Read:** Hotter chips → more net removal at same hall size.
 
-**Lab footprint (~5k H100)** — **5,317 tonnes CO₂e/year** net removed — **5 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 940,448**). Roughly **~10,633 acres** of USDA cover-crop program (~24 farms), or **~1,156 cars** gasoline cars / **~2,658 cars** EVs parked for a year. *(MVP: single heat path; parallel DAC+algae would raise totals.)*
+**Highlighted point:** Blackwell Ultra → **43,372 tonnes CO₂e/year** net removed — **43 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 115,281**). Roughly **~86,745 acres** of USDA cover-crop program (~195 farms), or **~9,429 cars** gasoline cars / **~21,686 cars** EVs parked for a year.
 
-**Single Colossus-class hall (25k B200)** — **37,776 tonnes CO₂e/year** net removed — **38 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 132,359**). Roughly **~75,552 acres** of USDA cover-crop program (~170 farms), or **~8,212 cars** gasoline cars / **~18,888 cars** EVs parked for a year. *(MVP: single heat path; parallel DAC+algae would raise totals.)*
+#### CO₂ saturation
 
-**Regional campus (10 halls)** — **377,760 tonnes CO₂e/year** net removed — **378 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 13,236**). Roughly **~755,519 acres** of USDA cover-crop program (~1698 farms), or **~82,122 cars** gasoline cars / **~188,880 cars** EVs parked for a year. *(MVP: single heat path; parallel DAC+algae would raise totals.)*
+*Grid scenario*
 
-**Rubin-era hall (forecast)** — **37,675 tonnes CO₂e/year** net removed — **38 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 132,713**). Roughly **~75,350 acres** of USDA cover-crop program (~169 farms), or **~8,190 cars** gasoline cars / **~18,838 cars** EVs parked for a year. *(MVP: single heat path; parallel DAC+algae would raise totals.)*
+![CO₂ saturation](docs/figures/co2_saturation_gpu.png)
 
-### Conclusion — significance, limits, and what's worth it
+*Y-axis: net CO₂e removed (metric tonnes per year, annualized from simulation)*
 
-> **Verdict:** Waste-heat DAC at a Colossus-class hall is **worth doing as colocated clawback** (not as a national climate strategy). You recuperate **25%** of the hall's own GPU-grid CO₂ while still emitting **111,489 tonnes/yr** net — real value on heat already paid for, **not** permission to build without limit.
+**Read:** Fixed DAC plant → CO₂ plateau as heat rises.
 
-#### What is significant ✅
+**Highlighted point:** 1.3x heat (31250 GPUs equiv.) → **37,597 tonnes CO₂e/year** net removed — **38 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 132,991**). Roughly **~75,193 acres** of USDA cover-crop program (~169 farms), or **~8,173 cars** gasoline cars / **~18,798 cars** EVs parked for a year.
 
-- **37,776 tonnes CO₂e/year** net removed from **one hall** — audit-grade, reportable climate benefit
-- **25% operational recovery** — the fairest "worth it?" score: DAC vs. the same hall's GPU electricity
-- **377,760 tonnes/yr at 10 halls** — campus-scale impact that starts to show up in regional planning
-- **+42% removal** moving H100 → B200 at the same 25k-GPU footprint — hotter silicon = more DAC headroom
-- **Saturation is real** — past ~1.3× heat, net removal barely moves; **DAC plant must scale with GPUs**
-- **~28.4 million shelter hot showers/yr (~77,718/day)** if heat went to shelter showers — enormous **human dignity** potential from the same exhaust
+#### CO₂ multi-hall
 
-#### What is not significant ❌
+*Grid scenario*
 
-- **Fixing U.S. or global climate alone** — **38 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 132,359**); one hall cannot offset national inventory
-- **"Cars off the road" headlines** — transport electrifies; tonnes and **% recovery** are the durable metrics
-- **Calling the hall carbon-neutral** — still **111,489 tonnes/yr net emitted** after DAC at reference settings
-- **Assuming more GPUs automatically help** — without proportional DAC capex, removal **plateaus** (see Chart 3)
-- **Community-first routing as a climate play** — prioritizing pools/fisheries drops removal by **~95%**
+![CO₂ multi-hall](docs/figures/co2_multi_hall.png)
 
-#### What matters for operators and policymakers
+*Y-axis: net CO₂e removed (metric tonnes per year, annualized from simulation)*
 
-| Question | Why it matters |
-|----------|----------------|
-| **% operational recovery** | Fair comparison to the facility's own carbon bill |
-| **Tonnes per hall / campus** | Contracting, ESG reporting, offset claims |
-| **DAC scales with heat?** | Capex decision — oversizing GPUs without capture wastes potential |
-| **Heat routing priority** | Climate vs. community benefit is a **policy choice**, not physics |
-| **Grid decarbonization** | GPU ops CO₂ falls over time; **waste heat stays** — DAC value per MWh can rise |
+**Read:** Campus-scale cumulative net removal.
 
-#### What's worth it? — decision guide
+**Highlighted point:** 20 halls → **755,519 tonnes CO₂e/year** net removed — **756 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 6,618**). Roughly **~1,511,038 acres** of USDA cover-crop program (~3396 farms), or **~164,243 cars** gasoline cars / **~377,760 cars** EVs parked for a year.
 
-| If your goal is… | Worth it? | Simulation says… |
-|------------------|-----------|------------------|
-| Claw back GPU operational CO₂ on waste heat you already produce | **Yes — partially** | **25% recovery**, **37,776 t/yr** net removed per hall |
-| Replace national or global mitigation strategy | **No** | One hall ≈ **1 in 132,359** of U.S. annual emissions |
-| ESG disclosure / measurable removal at AI campuses | **Yes** | Tonnes are engineering-grade; charts scale to multi-hall rollouts |
-| Shelter showers, pools, fisheries near the campus | **Trade-off** | **1,721 t/yr** removed vs. **37,776 t/yr** DAC-first — but **~28.4 million shelter hot showers/yr (~77,718/day)** possible |
-| Build more GPU capacity *because* DAC exists | **No** | Hall remains a **net emitter**; DAC extracts value from exhaust, not a blank check |
-| Plan Blackwell / Rubin halls with colocated capture | **Yes — if sized together** | Hotter generations and proportional plants raise **tonnes/hall** |
+#### Gross vs. net CO₂ (heat-pump grid penalty)
 
-#### Bottom line
+![Gross vs net](docs/figures/gross_vs_net_co2.png)
 
-**Significant:** tens of thousands of tonnes per hall, ~one-quarter operational recovery, and clear scaling lessons for NVIDIA-era buildouts. **Not significant:** national climate salvation, car analogies, or carbon-neutral claims. **Worth it?** **Yes** as **colocated exhaust recovery + optional community heat** on infrastructure that will exist anyway; **no** as a substitute for grid greening, efficient silicon, or proportional DAC investment.
+*Y-axis: net CO₂e removed (metric tonnes per year, annualized from simulation)*
+
+At **50,000 GPUs**: **65,331 tonnes** gross captured vs **53,166 tonnes** net — the gap is grid CO₂ from heat-pump electricity (~19% of gross).
+
+As the U.S. grid decarbonizes, **GPU operational CO₂ falls** but **waste heat remains** — DAC's job is still to use that heat. Gasoline-car analogies (4.6 t/car) overstate the future; EV analogies (2.0 t/car on today's grid) are a better tailpipe mental model. **Tonnes and % recovery** stay the right metrics either way.
 
 ### FAQ
 
-**Why tonnes on charts, not cars?** Tonnes are the engineering and reporting unit. Cars are a fading proxy as transport electrifies — we keep them in prose with an EV caveat.
+**Why lead with GWh, not CO₂?** Waste heat is a **physical output** of compute — it exists whether the grid is coal, gas, solar, nuclear, or geothermal. GWh and temperature grades are grid-agnostic.
 
-**What is the right "worth it?" metric?** **% operational recovery** — how much of the hall's own GPU-grid CO₂ DAC gives back. Not global cars off the road.
+**When does grid carbon matter?** When you ask whether DAC **net-removes** CO₂ after heat-pump electricity — see the [grid appendix](#appendix-grid-dependent-carbon-scenario).
 
-**Does a greener grid hurt this story?** GPU **operational** CO₂ drops; **waste heat** does not. DAC becomes *more* valuable per MWh of heat, but heat-pump electricity penalty also shrinks.
+**Pools, fisheries, showers vs. DAC?** Same exhaust, different router priority — a **policy choice** about where to send thermal service before dissipation.
 
-**Agriculture comparison — serious or gimmick?** USDA cover-crop programs sequester **~0.3–0.8 t CO₂e/acre/year**. Our reference hall matches **~75,000 acres** of high-performing cover crop — real land programs, not a substitute for cutting GPU power.
-
-**NVIDIA-specific takeaway:** Blackwell and Rubin halls run hotter → **more DAC potential per hall** if capture plant scales with silicon. Saturation chart shows **DAC capex must track heat**.
-
-**Pools and fisheries vs. DAC?** Same waste heat, different router priority. Community scenarios trade some CO₂ removal for **pools, raceway aquaculture, and district-heat equivalents** — see Secondary heat applications above.
-
-### Generated at: 2026-06-05T09:40:57.941272Z
+### Generated at: 2026-06-05T10:17:58.659653Z
 
 ### Sources
 
 - Hall sizing: ServeTheHome xAI Colossus; Introl B200; SemiAnalysis NVL72
-- Analogies: EPA (transport, national inventory), USDA NRCS (cover crops), EIA (homes)
+- Thermal grades: `config/thermal_grades.yaml`; heat analogies: `config/heat_applications.yaml`
+- Grid scenario: U.S. grid 0.39 kg CO₂/kWh, PUE 1.15 (`config/nvidia_us_expansion.yaml`)
 - Forecast SKUs: public GTC roadmaps — not NVIDIA confidential data
 <!-- SCALABILITY:END -->
 

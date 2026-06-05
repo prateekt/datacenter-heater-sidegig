@@ -25,13 +25,23 @@ public final class ExplainerValidator {
 
         int numbersFound = 0;
         for (SweepPoint p : summary.points()) {
+            String gwh = String.format("%.1f", p.thermal().annualizedRecoveredGwh());
             String tonnes = String.format("%.0f", p.annualizedNetTonnes());
-            if (markdown.contains(tonnes) || markdown.contains(String.format("%.1f", p.annualizedNetTonnes()))) {
+            if (markdown.contains(gwh) || markdown.contains(tonnes)) {
                 numbersFound++;
             }
         }
         if (numbersFound < Math.min(3, summary.points().size())) {
             warnings.add("Few simulation numbers appear in generated text");
+        }
+
+        for (String thermalChart : List.of(
+                "thermal_service_vs_gpu_count.png",
+                "thermal_by_generation.png",
+                "thermal_load_split.png")) {
+            if (!markdown.contains(thermalChart)) {
+                warnings.add("Missing primary thermal chart: " + thermalChart);
+            }
         }
 
         return new ValidationResult(warnings.isEmpty(), warnings);

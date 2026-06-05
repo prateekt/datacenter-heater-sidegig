@@ -13,161 +13,217 @@ public final class TemplateExplainer {
         ClimateAnalogies scale = ClimateAnalogies.loadDefault();
         StringBuilder sb = new StringBuilder();
 
-        sb.append("## Scalability: GPUs, heat, and CO₂\n\n");
-        sb.append("*Auto-generated simulation results for **Data Center Heater Side Gig** — ")
-                .append("waste-heat-driven DAC at NVIDIA-scale U.S. AI halls. ")
-                .append("Charts use **metric tonnes CO₂e/year**; prose adds scale analogies.*\n\n");
+        sb.append("## Thermal results: hyperscale waste-heat potential\n\n");
+        sb.append("*Auto-generated **output-side** results for **Data Center Heater Side Gig** — ")
+                .append("how much heat hyperscale AI halls produce, what temperatures are available, ")
+                .append("and which downstream processes can use it before dissipation. ")
+                .append("Grid-dependent carbon accounting is in the [appendix](#appendix-grid-dependent-carbon-scenario).*\n\n");
 
+        appendThesis(sb);
         appendExecutiveSummary(sb, summary, scale, registry);
-
-        sb.append("### How to read the metrics\n\n");
-        sb.append("| Metric | Use for |\n|--------|--------|\n");
-        sb.append("| **Tonnes CO₂e/year** | Engineering, reporting, charts — the primary unit |\n");
-        sb.append("| **% operational recovery** | Fair \"worth it?\" test vs. the hall's own GPU grid emissions |\n");
-        sb.append("| **Cars / farms / homes** | Intuition only — see electrification note below |\n\n");
-        sb.append(scale.electrificationNote()).append("\n\n");
-
-        sb.append("### Reference hall — scale and sources\n\n");
-        sb.append(String.format(Locale.US,
-                "**%,d %s GPUs** · **~%.0f MW** average waste heat · U.S. Southwest climate · 7-day sim, annualized\n\n",
-                registry.referenceGpuCount(),
-                registry.referenceProfile().displayName(),
-                registry.referenceProfile().avgWasteHeatMw(registry.referenceGpuCount())));
-        sb.append("| Source | Finding |\n|--------|--------|\n");
-        sb.append("| [ServeTheHome / Supermicro](https://www.servethehome.com/inside-100000-nvidia-gpu-xai-colossus-cluster-supermicro-helped-build-for-elon-musk/) | **~25,000 GPUs per compute hall** (4 halls → 100k H100) |\n");
-        sb.append("| [Introl B200 guide](https://introl.com/blog/nvidia-b200-vs-gb200-deployment-guide) | **~160–224 GPUs/MW** (B200 HGX, 8-GPU racks) |\n");
-        sb.append("| [SemiAnalysis NVL72](https://semianalysis.substack.com/p/gb200-hardware-architecture-and-component) | **72 GPUs @ ~120 kW/rack** |\n\n");
-
-        appendChartSection(sb, summary, scale, "gpu_count_ramp", "co2_vs_gpu_count.png",
-                "Chart 1 — Removal scales with GPU count",
+        appendHowToReadOutputs(sb);
+        appendThermalEnvelope(sb, summary, registry);
+        appendThermalChartSection(sb, summary, "gpu_count_ramp", "thermal_service_vs_gpu_count.png",
+                "Chart 1 — Thermal service scales with GPU count",
                 "Proportional plant growth",
-                "Each doubling of GPUs (with scaled DAC) roughly doubles net removal until equipment limits bind.");
-        appendChartSection(sb, summary, scale, "gpu_generation", "co2_vs_gpu_generation.png",
+                "Each doubling of GPUs (with scaled plant) roughly doubles **GWh/yr delivered** until equipment limits bind.");
+        appendThermalChartSection(sb, summary, "gpu_generation", "thermal_by_generation.png",
                 "Chart 2 — Hotter generations, same hall",
                 "Blackwell → Rubin thermal envelope",
-                "Same 25,000-GPU hall removes more CO₂ as TDP rises — relevant for Blackwell and Vera Rubin planning.");
-        appendChartSection(sb, summary, scale, "saturation", "co2_saturation_gpu.png",
-                "Chart 3 — Saturation at fixed DAC capacity",
-                "Oversized heat, fixed capture plant",
-                "Pasting more GPUs onto a hall **without** scaling DAC hits a plateau — capex must match heat.");
-        appendChartSection(sb, summary, scale, "multi_hall", "co2_multi_hall.png",
+                "Same 25,000-GPU hall delivers more **GWh/yr** as chip TDP rises.");
+        appendThermalChartSection(sb, summary, "saturation", "thermal_saturation_gpu.png",
+                "Chart 3 — Thermal saturation at fixed plant",
+                "Oversized heat, fixed downstream plant",
+                "Pasting more GPUs onto a hall **without** scaling capture plant hits a **thermal service plateau**.");
+        appendThermalChartSection(sb, summary, "multi_hall", "thermal_multi_hall.png",
                 "Chart 4 — Multi-hall campus rollout",
                 "NVIDIA-scale campus expansion",
-                "Ten halls ≈ 250k GPUs — where regional climate impact becomes policy-visible.");
-        appendGrossNetSection(sb, summary, scale);
+                "Ten halls ≈ 250k GPUs — cumulative **GWh/yr** scales linearly when each hall is provisioned.");
+        appendThermalLoadSplitSection(sb, summary);
         appendGpuTimelineSection(sb);
 
-        appendWorthItSection(sb, summary, scale, registry);
         appendHeatApplicationsSection(sb, summary);
 
         sb.append("### Results at a glance\n\n");
-        sb.append("| Scenario | GPUs | Chip | Halls | **Net CO₂e (t/yr)** | Scale intuition |\n");
-        sb.append("|----------|------|------|-------|---------------------|------------------|\n");
-        appendResultRow(sb, summary, scale, "gpu_count_ramp", 5000, null, "AI lab");
-        appendResultRow(sb, summary, scale, "gpu_count_ramp", 25000, null, "One hall (H100)");
-        appendResultRow(sb, summary, scale, "gpu_generation", 25000, "B200_LC", "One hall (B200)");
-        appendResultRow(sb, summary, scale, "multi_hall", 10, "B200_LC", "10-hall campus");
-        appendForecastRow(sb, summary, scale, "2026", "Rubin hall");
+        sb.append("| Scenario | GPUs | Chip | Halls | **Thermal (GWh/yr)** | Net CO₂e (t/yr, grid scenario) |\n");
+        sb.append("|----------|------|------|-------|----------------------|-------------------------------|\n");
+        appendResultRow(sb, summary, "gpu_count_ramp", 5000, null, "AI lab");
+        appendResultRow(sb, summary, "gpu_count_ramp", 25000, null, "One hall (H100)");
+        appendResultRow(sb, summary, "gpu_generation", 25000, "B200_LC", "One hall (B200)");
+        appendResultRow(sb, summary, "multi_hall", 10, "B200_LC", "10-hall campus");
+        appendForecastRow(sb, summary, "2026", "Rubin hall");
 
         sb.append("\n### Scenario narratives\n\n");
-        appendNarrative(sb, summary, scale, "Lab footprint (~5k H100)", "gpu_count_ramp", 5000, null);
-        appendNarrative(sb, summary, scale, "Single Colossus-class hall (25k B200)", "gpu_generation", 25000, "B200_LC");
-        appendNarrative(sb, summary, scale, "Regional campus (10 halls)", "multi_hall", 10, null);
-        appendNarrative(sb, summary, scale, "Rubin-era hall (forecast)", "forecast_timeline", 2026, null);
+        appendThermalNarrative(sb, summary, "Lab footprint (~5k H100)", "gpu_count_ramp", 5000, null);
+        appendThermalNarrative(sb, summary, "Single Colossus-class hall (25k B200)", "gpu_generation", 25000, "B200_LC");
+        appendThermalNarrative(sb, summary, "Regional campus (10 halls)", "multi_hall", 10, null);
+        appendThermalNarrative(sb, summary, "Rubin-era hall (forecast)", "forecast_timeline", 2026, null);
 
         appendConclusionSection(sb, summary, scale, registry);
+        appendGridScenarioAppendix(sb, summary, scale, registry);
 
         sb.append("### FAQ\n\n");
-        sb.append("**Why tonnes on charts, not cars?** Tonnes are the engineering and reporting unit. Cars are a fading proxy as transport electrifies — we keep them in prose with an EV caveat.\n\n");
-        sb.append("**What is the right \"worth it?\" metric?** **% operational recovery** — how much of the hall's own GPU-grid CO₂ DAC gives back. Not global cars off the road.\n\n");
-        sb.append("**Does a greener grid hurt this story?** GPU **operational** CO₂ drops; **waste heat** does not. DAC becomes *more* valuable per MWh of heat, but heat-pump electricity penalty also shrinks.\n\n");
-        sb.append("**Agriculture comparison — serious or gimmick?** USDA cover-crop programs sequester **~0.3–0.8 t CO₂e/acre/year**. Our reference hall matches **~75,000 acres** of high-performing cover crop — real land programs, not a substitute for cutting GPU power.\n\n");
-        sb.append("**NVIDIA-specific takeaway:** Blackwell and Rubin halls run hotter → **more DAC potential per hall** if capture plant scales with silicon. Saturation chart shows **DAC capex must track heat**.\n\n");
-        sb.append("**Pools and fisheries vs. DAC?** Same waste heat, different router priority. Community scenarios trade some CO₂ removal for **pools, raceway aquaculture, and district-heat equivalents** — see Secondary heat applications above.\n\n");
+        sb.append("**Why lead with GWh, not CO₂?** Waste heat is a **physical output** of compute — it exists whether the grid is coal, gas, solar, nuclear, or geothermal. GWh and temperature grades are grid-agnostic.\n\n");
+        sb.append("**When does grid carbon matter?** When you ask whether DAC **net-removes** CO₂ after heat-pump electricity — see the [grid appendix](#appendix-grid-dependent-carbon-scenario).\n\n");
+        sb.append("**Pools, fisheries, showers vs. DAC?** Same exhaust, different router priority — a **policy choice** about where to send thermal service before dissipation.\n\n");
 
         sb.append("### Generated at: ").append(summary.generatedAt()).append("\n\n");
         sb.append("### Sources\n\n");
         sb.append("- Hall sizing: ServeTheHome xAI Colossus; Introl B200; SemiAnalysis NVL72\n");
-        sb.append("- Analogies: EPA (transport, national inventory), USDA NRCS (cover crops), EIA (homes)\n");
+        sb.append("- Thermal grades: `config/thermal_grades.yaml`; heat analogies: `config/heat_applications.yaml`\n");
+        sb.append("- Grid scenario: U.S. grid 0.39 kg CO₂/kWh, PUE 1.15 (`config/nvidia_us_expansion.yaml`)\n");
         sb.append("- Forecast SKUs: public GTC roadmaps — not NVIDIA confidential data\n");
 
         return sb.toString();
     }
 
+    private static void appendThesis(StringBuilder sb) {
+        sb.append("### Thesis\n\n");
+        sb.append("> We do not assume clean electricity. We quantify the **output-side thermodynamic potential** ")
+                .append("of hyperscale AI data centers: how much heat is produced, what temperatures are available, ")
+                .append("and which downstream processes can use it before it is dissipated.\n\n");
+    }
+
+    private static void appendHowToReadOutputs(StringBuilder sb) {
+        sb.append("### How to read the outputs\n\n");
+        sb.append("| Output | Use for |\n|--------|--------|\n");
+        sb.append("| **MW waste heat** | Continuous thermal exhaust from GPU operations (grid-agnostic) |\n");
+        sb.append("| **GWh/yr thermal service** | Heat actually delivered to downstream loads before rejection |\n");
+        sb.append("| **Temperature grades** | Which processes can physically use the available heat |\n");
+        sb.append("| **MWh by load** | DAC, algae, pools, fisheries, showers (translation metrics) |\n");
+        sb.append("| **Tonnes CO₂e/yr** | *Grid scenario only* — see appendix |\n\n");
+    }
+
+    private static void appendThermalEnvelope(
+            StringBuilder sb, ResultsSummary summary, GpuProfile.GpuProfileRegistry registry
+    ) {
+        SweepPoint ref = findByProfile(summary, "gpu_generation", registry.referenceProfileId());
+        sb.append("### Reference hall — thermal envelope\n\n");
+        sb.append(String.format(Locale.US,
+                "**%,d %s GPUs** · **~%.0f MW** average waste heat · U.S. Southwest · 7-day sim, annualized\n\n",
+                registry.referenceGpuCount(),
+                registry.referenceProfile().displayName(),
+                registry.referenceProfile().avgWasteHeatMw(registry.referenceGpuCount())));
+        if (ref != null) {
+            ThermalReport t = ref.thermal();
+            sb.append("| Output | Reference hall |\n|--------|----------------|\n");
+            sb.append(String.format(Locale.US,
+                    "| Waste heat | **%.0f MW** (%.0f GWh/yr input) |\n",
+                    ref.avgWasteHeatMw(), t.wasteHeatAnnualGwh()));
+            sb.append(String.format(Locale.US,
+                    "| Thermal service delivered | **%.1f GWh/yr** |\n", t.annualizedRecoveredGwh()));
+            sb.append(String.format(Locale.US,
+                    "| Rejected to ambient | **%.1f GWh/yr** |\n", t.rejectedMwh() / 1000.0));
+            sb.append(String.format(Locale.US,
+                    "| Mean buffer temp | **%.1f °C** |\n", t.meanBufferTempC()));
+            sb.append(String.format(Locale.US,
+                    "| Mean GPU loop out | **%.1f °C** |\n", t.meanPrimaryTOutC()));
+            sb.append(String.format(Locale.US,
+                    "| Mean algae pond | **%.1f °C** |\n\n", t.meanAlgaeTempC()));
+        }
+        sb.append("**Temperature grades** (see `config/thermal_grades.yaml`): GPU loop 40–65°C · buffer 35–55°C · ")
+                .append("DAC regeneration ~90°C (heat pump) · algae 25–30°C · aquaculture ~22°C · showers ~42°C.\n\n");
+        sb.append("| Source | Finding |\n|--------|--------|\n");
+        sb.append("| [ServeTheHome / Supermicro](https://www.servethehome.com/inside-100000-nvidia-gpu-xai-colossus-cluster-supermicro-helped-build-for-elon-musk/) | **~25,000 GPUs per compute hall** |\n");
+        sb.append("| [Introl B200 guide](https://introl.com/blog/nvidia-b200-vs-gb200-deployment-guide) | **~160–224 GPUs/MW** (B200 HGX) |\n\n");
+    }
+
     private static void appendExecutiveSummary(
             StringBuilder sb, ResultsSummary summary, ClimateAnalogies scale,
             GpuProfile.GpuProfileRegistry registry
-    ) throws IOException {
+    ) {
         SweepPoint b200 = findByProfile(summary, "gpu_generation", "B200_LC");
 
         sb.append("### Executive summary\n\n");
-        sb.append("> **TL;DR** — One Colossus-class AI hall can use its own waste heat to pull ")
-                .append("**~38,000 tonnes of CO₂ out of the air every year** — giving back ")
-                .append("**~one quarter** of the carbon emitted to power those GPUs.\n\n");
+        if (b200 != null) {
+            ThermalReport t = b200.thermal();
+            sb.append(String.format(Locale.US,
+                    "> **TL;DR** — One Colossus-class hall throws off **~%.0f MW** of waste heat and delivers "
+                            + "**~%.0f GWh/yr** of usable thermal service before rejection — enough for "
+                            + "**~%.0f million shelter hot showers/yr** or colocated DAC/algae loads.\n\n",
+                    b200.avgWasteHeatMw(), t.annualizedRecoveredGwh(),
+                    showerMillions(summary)));
+        } else {
+            sb.append("> **TL;DR** — Hyperscale AI halls produce continuous waste heat that can be routed to ")
+                    .append("downstream loads before dissipation.\n\n");
+        }
 
         sb.append("#### The question\n\n");
-        sb.append("- NVIDIA-scale partners are building **~25,000-GPU liquid-cooled halls** (documented at xAI Colossus)\n");
+        sb.append("- Hyperscalers are building **~25,000-GPU liquid-cooled halls** (documented at xAI Colossus)\n");
         sb.append(String.format(Locale.US,
-                "- Each hall runs **~%.0f MW of waste heat** 24/7 — heat that is usually dumped outside\n",
+                "- Each hall runs **~%.0f MW of waste heat** 24/7 — usually dumped to ambient\n",
                 registry.referenceProfile().avgWasteHeatMw(registry.referenceGpuCount())));
-        sb.append("- **What if** that heat powered **direct air capture (DAC)** on the same campus instead?\n\n");
+        sb.append("- **What downstream processes** can use that exhaust **before it is wasted**?\n\n");
 
         if (b200 != null) {
-            OperationalCarbon ops = OperationalCarbon.fromConfig();
-            OperationalCarbon.RecoveryAnalysis rec = ops.forHall(
-                    registry.require("B200_LC"), b200.gpuCount(), registry, b200.annualizedNetTonnes());
-            double coverCropAcres = b200.annualizedNetTonnes() / 0.5;
-            double iceCars = scale.iceCarsFromTonnes(b200.annualizedNetTonnes());
-
-            sb.append("#### The answer — reference hall (25k B200, DAC priority)\n\n");
+            ThermalReport t = b200.thermal();
+            sb.append("#### The answer — reference hall (25k B200)\n\n");
             sb.append(String.format(Locale.US,
                     "| | |\n|---|---|\n"
-                            + "| **CO₂ removed** | **%,.0f tonnes/year** (net, after heat-pump electricity) |\n"
-                            + "| **Operational recovery** | **%.0f%%** of GPU-grid emissions clawed back |\n"
-                            + "| **Net balance** | Still **%,.0f tonnes/year emitted** — partial offset, not carbon-neutral |\n\n",
-                    b200.annualizedNetTonnes(), rec.recoveryPercent(), -rec.netBalanceTonnes()));
-
-            sb.append("#### How big is that? *(intuition — not the main metric)*\n\n");
-            sb.append(String.format(Locale.US,
-                    "- **~%,.0f acres** of high-performing USDA cover-crop program\n",
-                    coverCropAcres));
-            sb.append(String.format(Locale.US,
-                    "- **~%,.0f gasoline cars** parked for a year *(fades as transport electrifies)*\n",
-                    iceCars));
-            sb.append("- National context: ").append(scale.formatUsEmissionsShare(b200.annualizedNetTonnes()))
-                    .append(" — meaningful at campus scale, not a national fix alone\n\n");
+                            + "| **Waste heat** | **%.0f MW** continuous exhaust |\n"
+                            + "| **Thermal service** | **%.1f GWh/yr** delivered to loads |\n"
+                            + "| **Load split** | DAC **%.0f** · algae **%.0f** · rejected **%.0f GWh/yr** |\n"
+                            + "| **Mean delivery temp** | Buffer **%.1f°C** · GPU loop **%.1f°C** |\n\n",
+                    b200.avgWasteHeatMw(), t.annualizedRecoveredGwh(),
+                    t.dacMwh() / 1000.0, t.algaeMwh() / 1000.0, t.rejectedMwh() / 1000.0,
+                    t.meanBufferTempC(), t.meanPrimaryTOutC()));
 
             List<HeatApplicationPoint> apps = summary.applications();
-            HeatApplicationPoint community = apps.stream()
-                    .filter(a -> "community_heat".equals(a.scenarioId())).findFirst().orElse(null);
-            if (community != null) {
-                sb.append("#### Same heat, different job\n\n");
-                sb.append("- **DAC priority** → max climate: **~38k tonnes/yr** removed\n");
+            HeatApplicationPoint dacApp = apps.stream()
+                    .filter(a -> "dac_priority".equals(a.scenarioId())).findFirst().orElse(null);
+            if (dacApp != null) {
+                sb.append("#### Downstream equivalents\n\n");
+                sb.append("- ").append(HeatApplicationAnalyzer.formatHotShowers(dacApp.hotShowersEquivalent())).append("\n");
                 sb.append(String.format(Locale.US,
-                        "- **Pools + fisheries first** → **%,.0f tonnes/yr** removed, but **~%,.0f homes**-worth of community heat\n",
-                        community.netCo2eTonnesPerYear(), community.homesHeatedEquivalent()));
-                HeatApplicationPoint dacApp = apps.stream()
-                        .filter(a -> "dac_priority".equals(a.scenarioId())).findFirst().orElse(null);
-                if (dacApp != null) {
-                    sb.append("- **If routed to shelter showers instead:** ")
-                            .append(HeatApplicationAnalyzer.formatHotShowers(dacApp.hotShowersEquivalent()))
-                            .append(" from one hall's waste heat\n");
-                }
-                sb.append("- Details in [Secondary heat applications](#secondary-heat-applications) below\n\n");
+                        "- **~%,.0f homes**-worth of annual heat · details in [Secondary heat applications](#secondary-heat-applications)\n\n",
+                        dacApp.homesHeatedEquivalent()));
             }
 
-            sb.append("#### Bottom line\n\n");
-            sb.append("Waste-heat DAC is **colocated carbon clawback** on exhaust you already paid for — ")
-                    .append("meaningful partial recovery, not permission to build without limit. ")
-                    .append("**Blackwell and Rubin run hotter** → more potential per hall if capture plant scales with silicon.\n\n");
+            sb.append("#### Grid scenario footnote\n\n");
+            sb.append(String.format(Locale.US,
+                    "If this heat powers DAC on today's U.S. grid: **~%,.0f tonnes CO₂e/yr** net removed — "
+                            + "see [appendix](#appendix-grid-dependent-carbon-scenario).\n\n",
+                    b200.annualizedNetTonnes()));
         }
     }
 
-    private static void appendChartSection(
-            StringBuilder sb, ResultsSummary summary, ClimateAnalogies scale,
+    private static double showerMillions(ResultsSummary summary) {
+        return summary.applications().stream()
+                .filter(a -> "dac_priority".equals(a.scenarioId()))
+                .findFirst()
+                .map(a -> a.hotShowersEquivalent() / 1_000_000.0)
+                .orElse(0.0);
+    }
+
+    private static void appendThermalChartSection(
+            StringBuilder sb, ResultsSummary summary,
             String sweepId, String chartFile, String title, String subtitle, String lesson
     ) {
         sb.append("### ").append(title).append("\n\n");
+        sb.append("*").append(subtitle).append("*\n\n");
+        sb.append("![").append(title).append("](docs/figures/").append(chartFile).append(")\n\n");
+        sb.append("*Y-axis: thermal service delivered (GWh/yr annualized from simulation)*\n\n");
+        sb.append("**Read:** ").append(lesson).append("\n\n");
+        List<SweepPoint> pts = summary.bySweep(sweepId);
+        if (!pts.isEmpty()) {
+            SweepPoint h = pts.get(Math.min(pts.size() / 2, pts.size() - 1));
+            sb.append(String.format(Locale.US,
+                    "**Highlighted point:** %s → **%.1f GWh/yr** thermal service at **%.0f MW** waste heat.\n\n",
+                    h.label(), h.thermal().annualizedRecoveredGwh(), h.avgWasteHeatMw()));
+        }
+    }
+
+    private static void appendThermalLoadSplitSection(StringBuilder sb, ResultsSummary summary) {
+        sb.append("### Chart 5 — Thermal load split (reference hall)\n\n");
+        sb.append("![Thermal load split](docs/figures/thermal_load_split.png)\n\n");
+        sb.append("*Stacked annual thermal service by downstream load (DAC priority routing).*\n\n");
+    }
+
+    private static void appendCo2ChartSection(
+            StringBuilder sb, ResultsSummary summary, ClimateAnalogies scale,
+            String sweepId, String chartFile, String title, String subtitle, String lesson
+    ) {
+        sb.append("#### ").append(title).append("\n\n");
         sb.append("*").append(subtitle).append("*\n\n");
         sb.append("![").append(title).append("](docs/figures/").append(chartFile).append(")\n\n");
         sb.append("*").append(scale.chartSubtitleTonnes()).append("*\n\n");
@@ -180,8 +236,31 @@ public final class TemplateExplainer {
         }
     }
 
+    private static void appendGridScenarioAppendix(
+            StringBuilder sb, ResultsSummary summary, ClimateAnalogies scale,
+            GpuProfile.GpuProfileRegistry registry
+    ) throws IOException {
+        sb.append("<a id=\"appendix-grid-dependent-carbon-scenario\"></a>\n\n");
+        sb.append("## Appendix: Grid-dependent carbon scenario\n\n");
+        sb.append("> **Assumption:** U.S. grid **0.39 kg CO₂/kWh**, facility **PUE 1.15**. ")
+                .append("This layer answers *net climate impact* — not whether waste heat exists.\n\n");
+
+        appendWorthItSection(sb, summary, scale, registry);
+
+        appendCo2ChartSection(sb, summary, scale, "gpu_count_ramp", "co2_vs_gpu_count.png",
+                "CO₂ vs. GPU count", "Grid scenario", "Net tonnes scale with GPUs when plant scales.");
+        appendCo2ChartSection(sb, summary, scale, "gpu_generation", "co2_vs_gpu_generation.png",
+                "CO₂ vs. GPU generation", "Grid scenario", "Hotter chips → more net removal at same hall size.");
+        appendCo2ChartSection(sb, summary, scale, "saturation", "co2_saturation_gpu.png",
+                "CO₂ saturation", "Grid scenario", "Fixed DAC plant → CO₂ plateau as heat rises.");
+        appendCo2ChartSection(sb, summary, scale, "multi_hall", "co2_multi_hall.png",
+                "CO₂ multi-hall", "Grid scenario", "Campus-scale cumulative net removal.");
+        appendGrossNetSection(sb, summary, scale);
+        sb.append(scale.electrificationNote()).append("\n\n");
+    }
+
     private static void appendGrossNetSection(StringBuilder sb, ResultsSummary summary, ClimateAnalogies scale) {
-        sb.append("### Chart 5 — Gross vs. net (heat-pump electricity penalty)\n\n");
+        sb.append("#### Gross vs. net CO₂ (heat-pump grid penalty)\n\n");
         sb.append("![Gross vs net](docs/figures/gross_vs_net_co2.png)\n\n");
         sb.append("*").append(scale.chartSubtitleTonnes()).append("*\n\n");
         List<SweepPoint> pts = summary.bySweep("gpu_count_ramp");
@@ -198,7 +277,8 @@ public final class TemplateExplainer {
     private static void appendGpuTimelineSection(StringBuilder sb) {
         sb.append("### Chart 6 — Waste heat per GPU by generation\n\n");
         sb.append("![GPU waste heat timeline](docs/figures/gpu_tdp_timeline.png)\n\n");
-        sb.append("Watts per GPU to the coolant loop (TDP + rack overhead). † = public roadmap forecast.\n\n");
+        sb.append("**Input-side thermal envelope** — watts per GPU to the coolant loop (TDP + rack overhead). ")
+                .append("† = public roadmap forecast. Drives output GWh regardless of grid mix.\n\n");
     }
 
     private static void appendWorthItSection(
@@ -206,7 +286,7 @@ public final class TemplateExplainer {
             GpuProfile.GpuProfileRegistry registry
     ) throws IOException {
         OperationalCarbon ops = OperationalCarbon.fromConfig();
-        sb.append("### Operational CO₂ recovery — the primary \"worth it?\" metric\n\n");
+        sb.append("### Operational CO₂ recovery (grid scenario)\n\n");
         sb.append("For NVIDIA-scale infrastructure, compare DAC removal to **CO₂ from powering the same GPUs** ")
                 .append("(average waste heat × PUE 1.15 × U.S. grid 0.39 kg/kWh). This stays valid as transport electrifies.\n\n");
         sb.append("| Scenario | GPU ops CO₂ (t/yr) | DAC net (t/yr) | **Recovery** | Net balance (t/yr) |\n");
@@ -265,47 +345,51 @@ public final class TemplateExplainer {
                 label, r.operationalCo2Tonnes(), r.netRemovedTonnes(), r.recoveryPercent(), r.netBalanceTonnes()));
     }
 
-    private static void appendResultRow(StringBuilder sb, ResultsSummary summary, ClimateAnalogies scale,
+    private static void appendResultRow(StringBuilder sb, ResultsSummary summary,
             String sweepId, int key, String profileId, String label) {
-        SweepPoint p;
-        if ("multi_hall".equals(sweepId)) {
-            p = summary.bySweep(sweepId).stream().filter(pt -> pt.halls() == key).findFirst().orElse(null);
-        } else if (profileId != null) {
-            p = findByProfile(summary, sweepId, profileId);
-        } else {
-            p = findPoint(summary, sweepId, key);
-        }
+        SweepPoint p = resolvePoint(summary, sweepId, key, profileId);
         if (p == null) return;
-        double acres = p.annualizedNetTonnes() / 0.5;
         sb.append(String.format(Locale.US,
-                "| %s | %,d | %s | %d | **%,.0f** | ~%,.0f acres cover-crop equiv.; %s |\n",
-                label, p.gpuCount(), p.profileName(), p.halls(), p.annualizedNetTonnes(), acres,
-                scale.formatCars(scale.iceCarsFromTonnes(p.annualizedNetTonnes())) + " gasoline cars (legacy proxy)"));
+                "| %s | %,d | %s | %d | **%.1f** | %,.0f (grid scenario) |\n",
+                label, p.gpuCount(), p.profileName(), p.halls(),
+                p.thermal().annualizedRecoveredGwh(), p.annualizedNetTonnes()));
     }
 
-    private static void appendForecastRow(StringBuilder sb, ResultsSummary summary, ClimateAnalogies scale,
+    private static void appendForecastRow(StringBuilder sb, ResultsSummary summary,
             String year, String label) {
         SweepPoint p = summary.bySweep("forecast_timeline").stream()
                 .filter(pt -> pt.label().startsWith(year)).findFirst().orElse(null);
         if (p == null) return;
-        double acres = p.annualizedNetTonnes() / 0.5;
         sb.append(String.format(Locale.US,
-                "| %s | %,d | %s | %d | **%,.0f** | ~%,.0f acres cover-crop equiv.; %s |\n",
-                label, p.gpuCount(), p.profileName(), p.halls(), p.annualizedNetTonnes(), acres,
-                scale.formatCars(scale.iceCarsFromTonnes(p.annualizedNetTonnes())) + " gasoline cars (legacy proxy)"));
+                "| %s | %,d | %s | %d | **%.1f** | %,.0f (grid scenario) |\n",
+                label, p.gpuCount(), p.profileName(), p.halls(),
+                p.thermal().annualizedRecoveredGwh(), p.annualizedNetTonnes()));
     }
 
-    private static void appendNarrative(StringBuilder sb, ResultsSummary summary, ClimateAnalogies scale,
+    private static void appendThermalNarrative(StringBuilder sb, ResultsSummary summary,
             String title, String sweepId, int key, String profileId) {
-        SweepPoint p = profileId != null ? findByProfile(summary, sweepId, profileId)
-                : key >= 2020 ? summary.bySweep(sweepId).stream().filter(pt -> pt.label().startsWith(String.valueOf(key))).findFirst().orElse(null)
-                : findPoint(summary, sweepId, key);
-        if (p == null && key == 10) {
-            p = summary.bySweep(sweepId).stream().filter(pt -> pt.halls() == 10).findFirst().orElse(null);
-        }
+        SweepPoint p = resolvePoint(summary, sweepId, key, profileId);
         if (p == null) return;
-        sb.append("**").append(title).append("** — ").append(scale.scaleNarrative(p.annualizedNetTonnes()));
-        sb.append(" *(MVP: single heat path; parallel DAC+algae would raise totals.)*\n\n");
+        ThermalReport t = p.thermal();
+        sb.append(String.format(Locale.US,
+                "**%s** — **%.1f GWh/yr** thermal service at **%.0f MW** waste heat "
+                        + "(DAC **%.0f** · algae **%.0f** · rejected **%.0f GWh/yr**). "
+                        + "Grid scenario: **%,.0f tonnes CO₂e/yr** net removed.\n\n",
+                title, t.annualizedRecoveredGwh(), p.avgWasteHeatMw(),
+                t.dacMwh() / 1000.0, t.algaeMwh() / 1000.0, t.rejectedMwh() / 1000.0,
+                p.annualizedNetTonnes()));
+    }
+
+    private static SweepPoint resolvePoint(ResultsSummary summary, String sweepId, int key, String profileId) {
+        if (profileId != null) return findByProfile(summary, sweepId, profileId);
+        if (key >= 2020) {
+            return summary.bySweep(sweepId).stream()
+                    .filter(pt -> pt.label().startsWith(String.valueOf(key))).findFirst().orElse(null);
+        }
+        if ("multi_hall".equals(sweepId)) {
+            return summary.bySweep(sweepId).stream().filter(pt -> pt.halls() == key).findFirst().orElse(null);
+        }
+        return findPoint(summary, sweepId, key);
     }
 
     private static SweepPoint findByProfile(ResultsSummary summary, String sweepId, String profileId) {
@@ -321,122 +405,90 @@ public final class TemplateExplainer {
     private static void appendConclusionSection(
             StringBuilder sb, ResultsSummary summary, ClimateAnalogies scale,
             GpuProfile.GpuProfileRegistry registry
-    ) throws IOException {
+    ) {
         SweepPoint b200 = findByProfile(summary, "gpu_generation", "B200_LC");
         if (b200 == null) return;
 
-        OperationalCarbon ops = OperationalCarbon.fromConfig();
-        OperationalCarbon.RecoveryAnalysis ref = ops.forHall(
-                registry.require("B200_LC"), b200.gpuCount(), registry, b200.annualizedNetTonnes());
+        ThermalReport t = b200.thermal();
         SweepPoint campus10 = summary.bySweep("multi_hall").stream()
                 .filter(p -> p.halls() == 10).findFirst().orElse(null);
         SweepPoint h100 = findByProfile(summary, "gpu_generation", "H100_SXM");
-        List<HeatApplicationPoint> apps = summary.applications();
-        HeatApplicationPoint dacApp = apps.stream()
+        HeatApplicationPoint dacApp = summary.applications().stream()
                 .filter(a -> "dac_priority".equals(a.scenarioId())).findFirst().orElse(null);
-        HeatApplicationPoint communityApp = apps.stream()
-                .filter(a -> "community_heat".equals(a.scenarioId())).findFirst().orElse(null);
 
-        double saturationGainPct = saturationUpliftPercent(summary);
-        double h100UpliftPct = h100 != null && h100.annualizedNetTonnes() > 0
-                ? 100.0 * (b200.annualizedNetTonnes() - h100.annualizedNetTonnes()) / h100.annualizedNetTonnes()
-                : 0.0;
-        double communityClimateLossPct = dacApp != null && communityApp != null && dacApp.netCo2eTonnesPerYear() > 0
-                ? 100.0 * (dacApp.netCo2eTonnesPerYear() - communityApp.netCo2eTonnesPerYear())
-                        / dacApp.netCo2eTonnesPerYear()
+        double thermalSaturationPct = thermalSaturationUpliftPercent(summary);
+        double thermalUpliftPct = h100 != null && h100.thermal().annualizedRecoveredGwh() > 0
+                ? 100.0 * (b200.thermal().annualizedRecoveredGwh() - h100.thermal().annualizedRecoveredGwh())
+                        / h100.thermal().annualizedRecoveredGwh()
                 : 0.0;
 
         sb.append("### Conclusion — significance, limits, and what's worth it\n\n");
-        sb.append("> **Verdict:** Waste-heat DAC at a Colossus-class hall is **worth doing as colocated clawback** ")
-                .append("(not as a national climate strategy). ");
         sb.append(String.format(Locale.US,
-                "You recuperate **%.0f%%** of the hall's own GPU-grid CO₂ while still emitting **%,.0f tonnes/yr** net — ",
-                ref.recoveryPercent(), -ref.netBalanceTonnes()));
-        sb.append("real value on heat already paid for, **not** permission to build without limit.\n\n");
+                "> **Verdict:** Routing hyperscale exhaust before dissipation is **worth doing** — "
+                        + "**~%.0f MW** and **~%.0f GWh/yr** of deliverable thermal service per Colossus-class hall, "
+                        + "regardless of whether the grid is coal, gas, solar, nuclear, or geothermal.\n\n",
+                b200.avgWasteHeatMw(), t.annualizedRecoveredGwh()));
 
-        sb.append("#### What is significant ✅\n\n");
+        sb.append("#### What is significant\n\n");
         sb.append(String.format(Locale.US,
-                "- **%,.0f tonnes CO₂e/year** net removed from **one hall** — audit-grade, reportable climate benefit\n",
-                b200.annualizedNetTonnes()));
+                "- **%.0f MW** continuous waste heat — a physical output of compute, not a grid assumption\n",
+                b200.avgWasteHeatMw()));
         sb.append(String.format(Locale.US,
-                "- **%.0f%% operational recovery** — the fairest \"worth it?\" score: DAC vs. the same hall's GPU electricity\n",
-                ref.recoveryPercent()));
+                "- **%.1f GWh/yr** thermal service delivered from one hall — DAC, algae, or community loads\n",
+                t.annualizedRecoveredGwh()));
         if (campus10 != null) {
             sb.append(String.format(Locale.US,
-                    "- **%,.0f tonnes/yr at 10 halls** — campus-scale impact that starts to show up in regional planning\n",
-                    campus10.annualizedNetTonnes()));
+                    "- **%.0f GWh/yr at 10 halls** — campus-scale thermal budget for colocated industry\n",
+                    campus10.thermal().annualizedRecoveredGwh()));
         }
-        if (h100UpliftPct > 1) {
+        if (thermalUpliftPct > 1) {
             sb.append(String.format(Locale.US,
-                    "- **+%.0f%% removal** moving H100 → B200 at the same 25k-GPU footprint — hotter silicon = more DAC headroom\n",
-                    h100UpliftPct));
+                    "- **+%.0f%% thermal service** H100 → B200 at same 25k footprint — hotter silicon = more output GWh\n",
+                    thermalUpliftPct));
         }
-        if (saturationGainPct < 5) {
-            sb.append("- **Saturation is real** — past ~1.3× heat, net removal barely moves; **DAC plant must scale with GPUs**\n");
+        if (thermalSaturationPct < 5) {
+            sb.append("- **Plant saturation is real** — past ~1.3× heat, GWh delivered barely moves without scaling downstream plant\n");
         }
         if (dacApp != null) {
             sb.append("- **").append(HeatApplicationAnalyzer.formatHotShowers(dacApp.hotShowersEquivalent()))
-                    .append("** if heat went to shelter showers — enormous **human dignity** potential from the same exhaust\n");
+                    .append("** from the same exhaust — enormous community heat potential\n");
         }
         sb.append("\n");
 
-        sb.append("#### What is not significant ❌\n\n");
-        sb.append("- **Fixing U.S. or global climate alone** — ").append(scale.formatUsEmissionsShare(b200.annualizedNetTonnes()))
-                .append("; one hall cannot offset national inventory\n");
-        sb.append("- **\"Cars off the road\" headlines** — transport electrifies; tonnes and **% recovery** are the durable metrics\n");
-        sb.append(String.format(Locale.US,
-                "- **Calling the hall carbon-neutral** — still **%,.0f tonnes/yr net emitted** after DAC at reference settings\n",
-                -ref.netBalanceTonnes()));
-        sb.append("- **Assuming more GPUs automatically help** — without proportional DAC capex, removal **plateaus** (see Chart 3)\n");
-        if (communityClimateLossPct > 50) {
-            sb.append(String.format(Locale.US,
-                    "- **Community-first routing as a climate play** — prioritizing pools/fisheries drops removal by **~%.0f%%**\n",
-                    communityClimateLossPct));
-        }
-        sb.append("\n");
-
-        sb.append("#### What matters for operators and policymakers\n\n");
-        sb.append("| Question | Why it matters |\n");
-        sb.append("|----------|----------------|\n");
-        sb.append("| **% operational recovery** | Fair comparison to the facility's own carbon bill |\n");
-        sb.append("| **Tonnes per hall / campus** | Contracting, ESG reporting, offset claims |\n");
-        sb.append("| **DAC scales with heat?** | Capex decision — oversizing GPUs without capture wastes potential |\n");
-        sb.append("| **Heat routing priority** | Climate vs. community benefit is a **policy choice**, not physics |\n");
-        sb.append("| **Grid decarbonization** | GPU ops CO₂ falls over time; **waste heat stays** — DAC value per MWh can rise |\n\n");
+        sb.append("#### What is not significant\n\n");
+        sb.append("- **Debating grid cleanliness to prove heat exists** — the exhaust is there either way\n");
+        sb.append("- **National climate salvation from one hall** — see grid appendix for tonne-scale limits\n");
+        sb.append("- **Assuming more GPUs automatically add service** — without proportional plant, **GWh plateaus** (Chart 3)\n");
+        sb.append("- **Treating CO₂ charts as the primary output** — they are a **labeled grid scenario**, not thermodynamics\n\n");
 
         sb.append("#### What's worth it? — decision guide\n\n");
         sb.append("| If your goal is… | Worth it? | Simulation says… |\n");
         sb.append("|------------------|-----------|------------------|\n");
         sb.append(String.format(Locale.US,
-                "| Claw back GPU operational CO₂ on waste heat you already produce | **Yes — partially** | **%.0f%% recovery**, **%,.0f t/yr** net removed per hall |\n",
-                ref.recoveryPercent(), b200.annualizedNetTonnes()));
-        sb.append(String.format(Locale.US,
-                "| Replace national or global mitigation strategy | **No** | One hall ≈ **1 in %,d** of U.S. annual emissions |\n",
-                scale.usEmissionsOneIn(b200.annualizedNetTonnes())));
-        sb.append("| ESG disclosure / measurable removal at AI campuses | **Yes** | Tonnes are engineering-grade; charts scale to multi-hall rollouts |\n");
-        if (dacApp != null && communityApp != null) {
+                "| Use waste heat before dumping to ambient | **Yes** | **%.1f GWh/yr** deliverable per hall |\n",
+                t.annualizedRecoveredGwh()));
+        if (dacApp != null) {
             sb.append(String.format(Locale.US,
-                    "| Shelter showers, pools, fisheries near the campus | **Trade-off** | **%,.0f t/yr** removed vs. **%,.0f t/yr** DAC-first — but **%s** possible |\n",
-                    communityApp.netCo2eTonnesPerYear(), dacApp.netCo2eTonnesPerYear(),
+                    "| Shelter showers / community heat near campus | **Yes — trade-off** | **%s** possible; routing choice sets DAC vs. showers |\n",
                     HeatApplicationAnalyzer.formatHotShowers(dacApp.hotShowersEquivalent())));
         }
-        sb.append("| Build more GPU capacity *because* DAC exists | **No** | Hall remains a **net emitter**; DAC extracts value from exhaust, not a blank check |\n");
-        sb.append("| Plan Blackwell / Rubin halls with colocated capture | **Yes — if sized together** | Hotter generations and proportional plants raise **tonnes/hall** |\n\n");
+        sb.append("| Size Blackwell / Rubin halls with matched downstream plant | **Yes** | Hotter generations raise **GWh/hall** when plant scales |\n");
+        sb.append("| Prove the hall is carbon-neutral | **No** | Grid scenario still shows net emitter — see appendix |\n");
+        sb.append("| Replace national mitigation strategy | **No** | Output story is **per-campus thermodynamics**, not U.S. inventory |\n\n");
 
         sb.append("#### Bottom line\n\n");
-        sb.append("**Significant:** tens of thousands of tonnes per hall, ~one-quarter operational recovery, and clear scaling lessons for NVIDIA-era buildouts. ");
-        sb.append("**Not significant:** national climate salvation, car analogies, or carbon-neutral claims. ");
-        sb.append("**Worth it?** **Yes** as **colocated exhaust recovery + optional community heat** on infrastructure that will exist anyway; ")
-                .append("**no** as a substitute for grid greening, efficient silicon, or proportional DAC investment.\n\n");
+        sb.append("**Significant:** tens of MW and tens of GWh/yr of routable exhaust, temperature grades for real downstream loads, ")
+                .append("and clear saturation lessons for plant sizing. ");
+        sb.append("**Not significant:** grid mix as a prerequisite, national CO₂ %, or carbon-neutral claims. ");
+        sb.append("**Worth it?** **Yes** to extract value from unavoidable exhaust; climate tonnes are a **separate question** under explicit grid assumptions.\n\n");
     }
 
-    /** How much net removal gains from 1.0× → max heat multiplier in saturation sweep (percent). */
-    private static double saturationUpliftPercent(ResultsSummary summary) {
+    private static double thermalSaturationUpliftPercent(ResultsSummary summary) {
         List<SweepPoint> pts = summary.bySweep("saturation");
         if (pts.size() < 2) return 0.0;
         double base = pts.stream().filter(p -> p.label().contains("1.0x")).findFirst()
-                .map(SweepPoint::annualizedNetTonnes).orElse(pts.get(0).annualizedNetTonnes());
-        double max = pts.stream().mapToDouble(SweepPoint::annualizedNetTonnes).max().orElse(base);
+                .map(p -> p.thermal().annualizedRecoveredGwh()).orElse(pts.get(0).thermal().annualizedRecoveredGwh());
+        double max = pts.stream().mapToDouble(p -> p.thermal().annualizedRecoveredGwh()).max().orElse(base);
         if (base <= 0) return 0.0;
         return 100.0 * (max - base) / base;
     }
@@ -451,13 +503,14 @@ public final class TemplateExplainer {
                 .append("(MVP: one path at a time). Metrics translate delivered MWh into real-world equivalents ")
                 .append("(olympic pool ~180 MWh/yr; shelter hot shower ~2.5 kWh; U.S. home ~8 MWh/yr heat).\n\n");
 
-        sb.append("| Priority scenario | Net CO₂e (t/yr) | Heat (MWh/yr) | Hot showers/yr | Olympic pools | Raceways | Homes equiv. |\n");
-        sb.append("|-------------------|-----------------|---------------|----------------|---------------|----------|-------------|\n");
+        sb.append("| Priority scenario | Heat (MWh/yr) | Hot showers/yr | Net CO₂e (t/yr, grid) | Olympic pools | Raceways | Homes equiv. |\n");
+        sb.append("|-------------------|---------------|----------------|------------------------|---------------|----------|-------------|\n");
         for (HeatApplicationPoint p : apps) {
             sb.append(String.format(Locale.US,
-                    "| %s | **%,.0f** | %,.0f | **%s** | %.1f | %.1f | %,.0f |\n",
-                    p.label(), p.netCo2eTonnesPerYear(), p.heatTotalMwh(),
+                    "| %s | **%,.0f** | **%s** | %,.0f | %.1f | %.1f | %,.0f |\n",
+                    p.label(), p.heatTotalMwh(),
                     HeatApplicationAnalyzer.formatHotShowersCompact(p.hotShowersEquivalent()),
+                    p.netCo2eTonnesPerYear(),
                     p.olympicPoolsEquivalent(), p.aquacultureRacewaysEquivalent(),
                     p.homesHeatedEquivalent()));
         }

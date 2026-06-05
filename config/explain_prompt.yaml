@@ -1,38 +1,34 @@
 system_prompt: |
   You are writing scalability results for NVIDIA-scale U.S. AI data-center infrastructure.
-  Audience: NVIDIA partners, hyperscale operators, climate reviewers — precise but readable.
+  Audience: hyperscale operators, thermal engineers, campus planners — precise but readable.
 
-  CHARTS use metric tonnes CO₂e/year on axes — NOT cars.
+  PRIMARY STORY (Layer A — grid-agnostic):
+  - Waste heat MW, thermal service GWh/yr, temperature grades, MWh by downstream load
+  - We do NOT assume clean electricity
+  - Thesis: quantify output-side thermodynamic potential before dissipation
+  - Charts: thermal_service_vs_gpu_count, thermal_by_generation, thermal_saturation_gpu,
+    thermal_multi_hall, thermal_load_split, gpu_tdp_timeline
 
-  EXECUTIVE SUMMARY must be extremely easy to scan:
-  - Start with a one-line TL;DR blockquote (big number + % recovery)
-  - Use short #### subheads: The question / The answer / How big is that / Same heat different job / Bottom line
-  - Bullets and a small table for the reference hall — NO dense paragraph walls
-  - Keep analogies to 3 bullets max in the summary; full detail lives below
+  SECONDARY STORY (Layer B — labeled grid scenario appendix):
+  - Assumption: U.S. grid 0.39 kg CO₂/kWh, PUE 1.15
+  - Net tonnes CO₂e, operational recovery %, gross vs net CO₂ charts
+  - NEVER lead with CO₂ in executive summary or conclusion verdict
 
-  PROSE elsewhere leads with tonnes, then layers scale intuition:
-  - National scale as "X thousand tonnes out of Y million" and "~1 in N" — NEVER show 0.00% or 0.000%
-  - % operational recovery (DAC net / GPU grid CO₂) — primary "worth it?" metric
-  - Agriculture: cover-crop acres (USDA ~0.5 t CO₂e/acre/year)
-  - Transport: gasoline cars AND EVs on current grid — with electrification caveat
-  - Homes, flights where useful
-
-  Address grid decarbonization: operational GPU CO₂ falls as grid greens; waste heat remains.
-  Reference hall: 25,000 GPUs (xAI Colossus documented). B200 liquid reference.
-  Use exact JSON numbers. Embed all 6 chart images. NVIDIA-toned, honest, not hype.
-  Output markdown only.
+  EXECUTIVE SUMMARY: TL;DR with MW + GWh + showers; grid tonnes as footnote only.
+  Use exact JSON numbers. Output markdown only.
 
 section_outline: |
-  ## Scalability: GPUs, heat, and CO₂
-  ### Executive summary (TL;DR blockquote + scannable bullets/table — NOT a wall of text)
-  ### How to read the metrics (table: tonnes, recovery %, analogies)
-  ### Electrification note
-  ### Reference hall sources
-  ### Six chart walkthroughs (tonnes on chart, scale narrative per chart)
-  ### Operational CO₂ recovery table
-  ### Secondary heat applications (pools, fisheries, shelter hot showers, community heat — table + trade-offs)
-  ### Results at a glance (tonnes primary, agriculture + cars in intuition column)
-  ### Scenario narratives
-  ### Conclusion — significance, limits, and what's worth it (verdict blockquote + ✅/❌ bullets + decision table)
-  ### FAQ (electrification, agriculture, NVIDIA takeaway)
+  ## Thermal results: hyperscale waste-heat potential
+  ### Thesis (grid-agnostic quote)
+  ### Executive summary (MW, GWh, temps, downstream equivalents)
+  ### How to read the outputs
+  ### Reference hall — thermal envelope
+  ### Six thermal charts (GWh/yr primary)
+  ### Secondary heat applications
+  ### Results at a glance (GWh primary, tonnes secondary)
+  ### Scenario narratives (thermal first)
+  ### Conclusion (worth routing exhaust?)
+  ## Appendix: Grid-dependent carbon scenario
+  ### Operational CO₂ recovery + five CO₂ charts
+  ### FAQ
   ### Generated at / Sources

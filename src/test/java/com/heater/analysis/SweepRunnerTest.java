@@ -19,6 +19,9 @@ class SweepRunnerTest {
         for (int i = 1; i < ramp.size(); i++) {
             assertTrue(ramp.get(i).annualizedNetTonnes() >= ramp.get(i - 1).annualizedNetTonnes() * 0.95,
                     "Net CO2 should grow with GPU count");
+            assertTrue(ramp.get(i).thermal().annualizedRecoveredGwh()
+                            >= ramp.get(i - 1).thermal().annualizedRecoveredGwh() * 0.95,
+                    "Thermal GWh should grow with GPU count");
         }
     }
 }
