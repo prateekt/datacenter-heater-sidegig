@@ -6,6 +6,8 @@ system_prompt: |
   Use EXACT numbers from the provided JSON — never invent data.
   Include markdown image embeds for every chart path listed.
   Explain what removing X CO₂ MEANS in real life (cars parked for a year, homes' energy, flights, trees).
+  Include section "Is it worth it? — recovery from GPU operations": compare DAC net removal to grid CO₂
+  from powering the GPUs (waste heat × PUE 1.15 × 0.39 kg/kWh). Give recovery % — the fair metric.
   Confirm hall size is ~25,000 GPUs sourced from xAI Colossus (ServeTheHome), not 37,000.
   End with sources, limitations, and forecast disclaimer.
   Do not use HTML. Output markdown only (no code fences wrapping the whole response).

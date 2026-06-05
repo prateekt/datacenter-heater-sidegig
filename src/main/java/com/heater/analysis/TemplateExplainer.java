@@ -69,6 +69,8 @@ public final class TemplateExplainer {
         appendStoryRow(sb, summary, impact, "multi_hall", 10, "10-hall campus");
         appendForecastRow(sb, summary, impact, "2026", "Rubin forecast hall");
 
+        appendWorthItSection(sb, summary, impact, registry);
+
         sb.append("\n### Four stories\n\n");
         appendStory(sb, summary, impact, "The lab (~5,000 GPUs)", "gpu_count_ramp", 5000);
         appendStory(sb, summary, impact, "The hall (~25,000 GPUs)", "gpu_generation", "B200_LC");
@@ -81,6 +83,8 @@ public final class TemplateExplainer {
         sb.append("**Are 25,000 GPUs in one hall real?** Yes — xAI Colossus documents ~25k per compute hall. A full campus is 4× that or more.\n\n");
         sb.append("**Why does electricity matter?** Heat pumps use grid power, which still emits CO₂ — that shrinks the net benefit.\n\n");
         sb.append("**Is this a full climate fix?** No. Even 100 halls is tiny vs ~36 billion tonnes global emissions/year.\n\n");
+        sb.append("**Is ~8,000 cars worth it for 25,000 GPUs?** See [recovery from GPU operations](#is-it-worth-it--recovery-from-gpu-operations) — "
+                + "the fair comparison is what fraction of the hall's **own** grid emissions DAC gives back.\n\n");
 
         sb.append("### Generated at: ").append(summary.generatedAt()).append("\n\n");
         sb.append("### Sources & disclaimers\n\n");
@@ -186,6 +190,84 @@ public final class TemplateExplainer {
         sb.append("**").append(title).append("** — ");
         sb.append(impact.explainRemoval(p.annualizedNetTonnes()));
         sb.append(" Limitation: our MVP routes heat to one load at a time.\n\n");
+    }
+
+    private static void appendWorthItSection(
+            StringBuilder sb, ResultsSummary summary, ClimateAnalogies impact,
+            GpuProfile.GpuProfileRegistry registry
+    ) throws IOException {
+        OperationalCarbon ops = OperationalCarbon.fromConfig();
+        sb.append("### Is it worth it? — recovery from GPU operations\n\n");
+        sb.append("Comparing to \"cars off the road\" can feel underwhelming for 25,000 GPUs. "
+                + "The sharper question: **how much of this hall's own GPU electricity CO₂ do we recuperate?**\n\n");
+        sb.append("| Hall | Grid CO₂ from running GPUs | DAC net removes | **Recovery** | Still net emitter? |\n");
+        sb.append("|------|---------------------------|-----------------|--------------|-------------------|\n");
+
+        appendRecoveryRow(sb, summary, impact, ops, registry, "gpu_generation", "B200_LC",
+                "25k B200 (reference)");
+        appendRecoveryRow(sb, summary, impact, ops, registry, "gpu_generation", "H100_SXM",
+                "25k H100");
+        appendRecoveryRow(sb, summary, impact, ops, registry, "gpu_count_ramp", null,
+                "5k H100 lab", 5000, "H100_SXM");
+        appendRecoveryRow(sb, summary, impact, ops, registry, "multi_hall", null,
+                "10 halls × 25k B200", 10, "B200_LC");
+
+        sb.append("\n**How we compute \"GPU operations CO₂\":** average waste-heat power (same daily cycle as the sim) "
+                + "× facility PUE 1.15 × U.S. grid 0.39 kg CO₂/kWh. Waste heat ≈ IT electricity becoming heat.\n\n");
+
+        SweepPoint ref = summary.bySweep("gpu_generation").stream()
+                .filter(p -> "B200_LC".equals(p.profileId()))
+                .findFirst().orElse(null);
+        if (ref != null) {
+            OperationalCarbon.RecoveryAnalysis r = ops.forHall(
+                    registry.require("B200_LC"), ref.gpuCount(), registry, ref.annualizedNetTonnes());
+            sb.append("**Reference hall (25k B200):** ").append(ops.explainRecovery(r, impact)).append("\n\n");
+            sb.append("**Bottom line:** Waste-heat DAC is a **partial clawback** of operational emissions — "
+                    + "worth it as a side gig on heat you'd dump anyway, not as a license to build more GPUs for climate.\n\n");
+        }
+    }
+
+    private static void appendRecoveryRow(
+            StringBuilder sb, ResultsSummary summary, ClimateAnalogies impact,
+            OperationalCarbon ops, GpuProfile.GpuProfileRegistry registry,
+            String sweepId, String profileId, String label
+    ) throws IOException {
+        SweepPoint p = summary.bySweep(sweepId).stream()
+                .filter(pt -> profileId == null || pt.profileId().equals(profileId))
+                .findFirst().orElse(null);
+        if (p == null) return;
+        appendRecoveryRow(sb, summary, impact, ops, registry, sweepId, profileId, label, p.gpuCount(), p.profileId());
+    }
+
+    private static void appendRecoveryRow(
+            StringBuilder sb, ResultsSummary summary, ClimateAnalogies impact,
+            OperationalCarbon ops, GpuProfile.GpuProfileRegistry registry,
+            String sweepId, String profileId, String label,
+            int matchKey, String profileForOps
+    ) throws IOException {
+        SweepPoint p;
+        if ("multi_hall".equals(sweepId)) {
+            p = summary.bySweep(sweepId).stream().filter(pt -> pt.halls() == matchKey).findFirst().orElse(null);
+        } else {
+            p = summary.bySweep(sweepId).stream()
+                    .filter(pt -> pt.gpuCount() == matchKey
+                            && (profileId == null || pt.profileId().equals(profileId)))
+                    .findFirst().orElse(null);
+        }
+        if (p == null) return;
+        GpuProfile profile = registry.require(profileForOps != null ? profileForOps : p.profileId());
+        int gpus = "multi_hall".equals(sweepId) ? p.gpuCount() * p.halls() : p.gpuCount();
+        double netTonnes = p.annualizedNetTonnes();
+        OperationalCarbon.RecoveryAnalysis r = ops.forHall(profile, gpus, registry, netTonnes);
+        String emitter = r.netBalanceTonnes() >= 0 ? "No (net sink)" : String.format(Locale.US,
+                "Yes, by %,.0f t (≈ %s)", -r.netBalanceTonnes(),
+                impact.formatCars(impact.carsFromAnnualTonnes(-r.netBalanceTonnes())));
+        sb.append(String.format(Locale.US,
+                "| %s | %,.0f t (≈ %s) | %,.0f t (≈ %s) | **%.0f%%** | %s |\n",
+                label,
+                r.operationalCo2Tonnes(), impact.formatCars(impact.carsFromAnnualTonnes(r.operationalCo2Tonnes())),
+                r.netRemovedTonnes(), impact.formatCars(impact.carsFromAnnualTonnes(r.netRemovedTonnes())),
+                r.recoveryPercent(), emitter));
     }
 
     private static void appendForecastRow(StringBuilder sb, ResultsSummary summary, ClimateAnalogies impact,

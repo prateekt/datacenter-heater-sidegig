@@ -122,6 +122,8 @@ Forecast rows use **public GTC / analyst targets**, not NVIDIA engineering data.
 
 Charts and auto-generated results use **cars off the road** as the primary axis. See [`config/impact_analogies.yaml`](config/impact_analogies.yaml).
 
+The sharper “worth it?” question is **recovery**: what fraction of the hall’s **own GPU electricity CO₂** does DAC give back? That table is in [Scalability → recovery from GPU operations](#is-it-worth-it--recovery-from-gpu-operations) (auto-generated).
+
 ---
 
 <a id="scalability-charts"></a>
@@ -224,6 +226,23 @@ A **tonne** is a metric ton (1,000 kg) — accurate for scientists but meaningle
 | One hall (B200 liquid) | 25,000 | B200 (liquid) | 1 | ~8,212 cars | Like ~8,212 cars parked for a year, or ~4,444 homes' energy use |
 | 10-hall campus | 25,000 | B200 (liquid) | 10 | ~82,122 cars | Like ~82,122 cars parked for a year, or ~44,442 homes' energy use |
 | Rubin forecast hall | 13,200 | Vera Rubin Max-P | 1 | ~8,190 cars | Like ~8,190 cars parked for a year, or ~4,432 homes' energy use |
+### Is it worth it? — recovery from GPU operations
+
+Comparing to "cars off the road" can feel underwhelming for 25,000 GPUs. The sharper question: **how much of this hall's own GPU electricity CO₂ do we recuperate?**
+
+| Hall | Grid CO₂ from running GPUs | DAC net removes | **Recovery** | Still net emitter? |
+|------|---------------------------|-----------------|--------------|-------------------|
+| 25k B200 (reference) | 149,265 t (≈ ~32,449 cars) | 37,776 t (≈ ~8,212 cars) | **25%** | Yes, by 111,489 t (≈ ~24,237 cars) |
+| 25k H100 | 105,038 t (≈ ~22,834 cars) | 26,583 t (≈ ~5,779 cars) | **25%** | Yes, by 78,455 t (≈ ~17,055 cars) |
+| 5k H100 lab | 21,008 t (≈ ~4,567 cars) | 5,317 t (≈ ~1,156 cars) | **25%** | Yes, by 15,691 t (≈ ~3,411 cars) |
+| 10 halls × 25k B200 | 1,492,647 t (≈ ~324,488 cars) | 377,760 t (≈ ~82,122 cars) | **25%** | Yes, by 1,114,887 t (≈ ~242,367 cars) |
+
+**How we compute "GPU operations CO₂":** average waste-heat power (same daily cycle as the sim) × facility PUE 1.15 × U.S. grid 0.39 kg CO₂/kWh. Waste heat ≈ IT electricity becoming heat.
+
+**Reference hall (25k B200):** Running these GPUs draws **~382.7 GWh/year** from the grid (≈ **38 MW** average IT heat × PUE 1.15). At the U.S. average grid, that electricity emits **149,265 tonnes CO₂/year** (≈ ~32,449 cars). DAC net removal is **37,776 tonnes/year** (≈ ~8,212 cars) — about **25% recovery** of the hall's own operational CO₂. The hall is still a **net emitter** by **111,489 tonnes/year** (≈ ~24,237 cars) — DAC recovers part of the damage, not all.
+
+**Bottom line:** Waste-heat DAC is a **partial clawback** of operational emissions — worth it as a side gig on heat you'd dump anyway, not as a license to build more GPUs for climate.
+
 
 ### Four stories
 
@@ -245,7 +264,9 @@ A **tonne** is a metric ton (1,000 kg) — accurate for scientists but meaningle
 
 **Is this a full climate fix?** No. Even 100 halls is tiny vs ~36 billion tonnes global emissions/year.
 
-### Generated at: 2026-06-05T09:10:05.329596Z
+**Is ~8,000 cars worth it for 25,000 GPUs?** See [recovery from GPU operations](#is-it-worth-it--recovery-from-gpu-operations) — the fair comparison is what fraction of the hall's **own** grid emissions DAC gives back.
+
+### Generated at: 2026-06-05T09:17:05.749549Z
 
 ### Sources & disclaimers
 
