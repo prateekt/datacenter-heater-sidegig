@@ -1,0 +1,94 @@
+# Representative NVIDIA data-center GPU thermal profiles.
+# system_waste_w_per_gpu = heat delivered to secondary loop per GPU (TDP + rack overhead).
+# Forecast rows use public GTC / analyst targets — not NVIDIA engineering data.
+
+reference_hall:
+  profile_id: B200_LC
+  gpu_count: 37000
+  avg_waste_heat_mw: 50.0
+
+utilization:
+  base_factor: 0.901    # q_waste_base / (gpus * W/GPU) at reference hall
+  peak_factor: 1.442    # q_waste_peak / (gpus * W/GPU) at reference hall
+
+profiles:
+  - id: A100_SXM
+    display_name: A100 SXM
+    era: deployed
+    gpu_tdp_w: 400
+    system_waste_w_per_gpu: 550
+    cooling: air
+    forecast: false
+    source_note: NVIDIA A100 SXM datasheet; ~15% rack overhead
+
+  - id: H100_SXM
+    display_name: H100 SXM
+    era: deployed
+    gpu_tdp_w: 700
+    system_waste_w_per_gpu: 950
+    cooling: liquid
+    forecast: false
+    source_note: H100 SXM 700W TDP; baseline for today
+
+  - id: H200_SXM
+    display_name: H200 SXM
+    era: deployed
+    gpu_tdp_w: 700
+    system_waste_w_per_gpu: 950
+    cooling: liquid
+    forecast: false
+    source_note: Same thermal envelope as H100
+
+  - id: B200_AIR
+    display_name: B200 HGX (air)
+    era: ramping
+    gpu_tdp_w: 1000
+    system_waste_w_per_gpu: 1150
+    cooling: air
+    forecast: false
+    source_note: Blackwell air-cooled HGX; ~43% more than H100
+
+  - id: B200_LC
+    display_name: B200 (liquid)
+    era: ramping
+    gpu_tdp_w: 1200
+    system_waste_w_per_gpu: 1350
+    cooling: liquid
+    forecast: false
+    source_note: Max-P liquid; matches NVIDIA hall default in nvidia_us_expansion.yaml
+
+  - id: B300
+    display_name: Blackwell Ultra
+    era: forecast
+    gpu_tdp_w: 1400
+    system_waste_w_per_gpu: 1550
+    cooling: liquid
+    forecast: true
+    source_note: Public Blackwell Ultra roadmap charts (2025–26)
+
+  - id: RUBIN_MQ
+    display_name: Vera Rubin Max-Q
+    era: forecast
+    gpu_tdp_w: 1800
+    system_waste_w_per_gpu: 2000
+    cooling: liquid_only
+    forecast: true
+    source_note: GTC 2025 Vera Rubin efficiency profile
+
+  - id: RUBIN_MP
+    display_name: Vera Rubin Max-P
+    era: forecast
+    gpu_tdp_w: 2300
+    system_waste_w_per_gpu: 2550
+    cooling: liquid_only
+    forecast: true
+    source_note: GTC 2025 Vera Rubin performance profile
+
+  - id: RUBIN_ULTRA
+    display_name: Rubin Ultra (rack equiv.)
+    era: forecast
+    gpu_tdp_w: 0
+    system_waste_w_per_gpu: 3500
+    cooling: liquid_only
+    forecast: true
+    source_note: Per-GPU equivalent in 600 kW NVL576-class racks (2027 forecast)

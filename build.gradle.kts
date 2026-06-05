@@ -19,6 +19,7 @@ repositories {
 
 dependencies {
     implementation("org.yaml:snakeyaml:2.2")
+    implementation("org.knowm.xchart:xchart:3.8.7")
     testImplementation(platform("org.junit:junit-bom:5.10.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
@@ -33,4 +34,12 @@ tasks.test {
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
+}
+
+tasks.register<JavaExec>("generateFigures") {
+    group = "documentation"
+    description = "Run scalability sweeps, generate charts, and patch README"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("com.heater.analysis.FigureMain")
+    workingDir = projectDir
 }
