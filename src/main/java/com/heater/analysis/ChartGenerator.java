@@ -18,10 +18,8 @@ public final class ChartGenerator {
     private static final int W = 1000;
     private static final int H = 580;
     private static final String Y_THERMAL_ANNUAL = "Thermal service delivered (GWh / year)";
-    private static final String Y_THERMAL_7DAY = "Thermal service delivered (GWh, 7-day sim)";
     private static final String Y_ANNUAL = "Net CO₂e removed (metric tonnes / year)";
     private static final String Y_GROSS_NET = "CO₂e removed (metric tonnes / year)";
-    private static final String Y_7DAY = "Net CO₂e removed (metric tonnes, 7-day sim)";
 
     private final Path outputDir;
     private final double simDurationS;
@@ -92,21 +90,19 @@ public final class ChartGenerator {
 
     private String writeThermalSaturation(ResultsSummary summary) throws IOException {
         List<SweepPoint> pts = summary.bySweep("saturation");
-        List<String> labels = pts.stream()
-                .map(p -> String.format(Locale.US, "%.1f×\n(%,d GPU-equiv.)",
-                        heatMultiplierFromLabel(p.label()), p.gpuCount()))
-                .toList();
-        List<Double> y = pts.stream().map(p -> p.thermal().recoveredMwh() / 1000.0).toList();
-        CategoryChart chart = new CategoryChartBuilder()
+        List<Double> multipliers = pts.stream().map(p -> heatMultiplierFromLabel(p.label())).toList();
+        List<Double> y = pts.stream().map(p -> p.thermal().annualizedRecoveredGwh()).toList();
+        XYChart chart = new XYChartBuilder()
                 .width(W).height(H)
                 .title("Thermal Saturation — Fixed Plant, Rising Waste Heat")
-                .xAxisTitle("Heat multiplier vs. reference hall (capture equipment fixed)")
-                .yAxisTitle(Y_THERMAL_7DAY)
+                .xAxisTitle("Heat multiplier (× 25k-GPU reference hall — capture equipment fixed)")
+                .yAxisTitle(Y_THERMAL_ANNUAL)
                 .build();
-        ChartStyle.applyCategory(chart, ChartStyle.AMBER);
-        chart.getStyler().setXAxisLabelRotation(0);
+        ChartStyle.applyXy(chart, ChartStyle.AMBER);
+        chart.getStyler().setXAxisDecimalPattern("0.0#");
         chart.getStyler().setYAxisDecimalPattern("#,###");
-        chart.addSeries("thermal service", labels, y);
+        chart.addSeries("thermal service (GWh/yr)", multipliers, y);
+        ChartStyle.applyLineMarkers(chart);
         return save(chart, "thermal_saturation_gpu.png");
     }
 
@@ -199,21 +195,19 @@ public final class ChartGenerator {
 
     private String writeCo2Saturation(ResultsSummary summary) throws IOException {
         List<SweepPoint> pts = summary.bySweep("saturation");
-        List<String> labels = pts.stream()
-                .map(p -> String.format(Locale.US, "%.1f×\n(%,d GPU-equiv.)",
-                        heatMultiplierFromLabel(p.label()), p.gpuCount()))
-                .toList();
-        List<Double> y = pts.stream().map(p -> p.netCo2eKg() / 1000.0).toList();
-        CategoryChart chart = new CategoryChartBuilder()
+        List<Double> multipliers = pts.stream().map(p -> heatMultiplierFromLabel(p.label())).toList();
+        List<Double> y = pts.stream().map(SweepPoint::annualizedNetTonnes).toList();
+        XYChart chart = new XYChartBuilder()
                 .width(W).height(H)
                 .title("Capture Plant Saturation — Fixed DAC, Rising Waste Heat")
-                .xAxisTitle("Heat multiplier vs. reference hall (capture equipment fixed)")
-                .yAxisTitle(Y_7DAY)
+                .xAxisTitle("Heat multiplier (× 25k-GPU reference hall — capture equipment fixed)")
+                .yAxisTitle(Y_ANNUAL)
                 .build();
-        ChartStyle.applyCategory(chart, ChartStyle.AMBER);
-        chart.getStyler().setXAxisLabelRotation(0);
+        ChartStyle.applyXy(chart, ChartStyle.AMBER);
+        chart.getStyler().setXAxisDecimalPattern("0.0#");
         chart.getStyler().setYAxisDecimalPattern("#,###");
-        chart.addSeries("net CO₂e", labels, y);
+        chart.addSeries("net CO₂e (t/yr, grid scenario)", multipliers, y);
+        ChartStyle.applyLineMarkers(chart);
         return save(chart, "co2_saturation_gpu.png");
     }
 

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-05T10:38:49.285562Z",
+  "generated_at": "2026-06-05T10:41:43.968062Z",
   "metadata": {"sim_duration_s": 604800.00, "reference_profile_id": "B200_LC", "reference_gpu_count": 25000.00},
   "charts": ["docs/figures/thermal_service_vs_gpu_count.png", "docs/figures/thermal_by_generation.png", "docs/figures/thermal_saturation_gpu.png", "docs/figures/thermal_multi_hall.png", "docs/figures/thermal_load_split.png", "docs/figures/gpu_tdp_timeline.png", "docs/figures/co2_vs_gpu_count.png", "docs/figures/co2_vs_gpu_generation.png", "docs/figures/co2_saturation_gpu.png", "docs/figures/co2_multi_hall.png", "docs/figures/gross_vs_net_co2.png"],
   "applications": [

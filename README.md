@@ -462,7 +462,7 @@ As the U.S. grid decarbonizes, **GPU operational CO₂ falls** but **waste heat 
 
 **Pools, fisheries, showers vs. DAC?** Same exhaust, different router priority — a **policy choice** about where to send thermal service before dissipation.
 
-### Generated at: 2026-06-05T10:38:49.285562Z
+### Generated at: 2026-06-05T10:41:43.968062Z
 
 ### Sources
 
