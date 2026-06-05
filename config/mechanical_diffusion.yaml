@@ -1,0 +1,16 @@
+# Scheme 2 — Mechanical Diffusion Music Generator (MDMG)
+mechanical_diffusion:
+  enabled: true
+  oscillator_count: 64
+  reverse_steps: 40
+  dt_s: 0.001
+  damping: 0.15
+  coupling_strength: 0.08
+  noise_schedule_start: 0.5
+  noise_schedule_end: 0.02
+  template:
+    pink_noise_weight: 0.4
+    harmonic_frequencies_hz: [220, 330, 440, 554, 659]
+    harmonic_amplitudes: [1.0, 0.6, 0.45, 0.35, 0.25]
+  sample_rate_hz: 44100
+  clip_duration_s: 4.0

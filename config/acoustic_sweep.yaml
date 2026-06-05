@@ -1,0 +1,35 @@
+# Sweeps for speculative acoustic side-gig analysis
+q_waste_avg_w: 39523125.0
+ambient_temp_c: 22.0
+
+liner_depths_mm:
+  - 0
+  - 15
+  - 25
+  - 35
+  - 50
+
+water_flows_l_s:
+  - 0
+  - 5
+  - 12
+  - 20
+  - 30
+
+diffusion_steps:
+  - 5
+  - 10
+  - 20
+  - 40
+  - 80
+
+coupling_modes:
+  - decoupled
+  - chimney_coupled
+
+spectrum_defaults: config/acoustic_spectrum.yaml
+equalizer_defaults: config/mechanical_equalizer.yaml
+diffusion_defaults: config/mechanical_diffusion.yaml
+convection_defaults: config/passive_convection_capture.yaml
+analogies: config/acoustic_analogies.yaml
+references: config/acoustic_references.yaml

@@ -1,0 +1,34 @@
+one_liner: "Turn the data center's loud fan hum into a softer nature soundscape — or even music — using pipes, water, and tuned metal, not speakers."
+disclaimer: "Speculative — metamaterial liners are lab-demonstrated; campus-scale soundscape valorization is not built yet. Computer experiment only."
+
+concepts:
+  fan_noise: "Thousands of fans whir like leaf blowers in a stadium — mostly steady tones plus whoosh."
+  metamaterial: "Thin honeycomb panels that eat the harshest fan tones like earplugs with holes for air."
+  water_soundscape: "Warm exhaust can push water over rocks — trickling sounds that feel like a stream."
+  organ_pipes: "Chimney air can blow across tuned pipes — turning part of the hum into notes."
+  mechanical_diffusion: "Springs and masses that slowly shake noise into smoother, music-like patterns — like clay on a wheel."
+
+kid_questions:
+  - q: "Why is the data center so loud?"
+    a: "Cooling fans run 24/7 — blade tones plus air whoosh add up across thousands of racks."
+  - q: "Can we just turn it off?"
+    a: "No — GPUs overheat without fans. We ask what else the sound could become."
+  - q: "What is a mechanical equalizer?"
+    a: "Tuned holes and panels that subtract bad tones and add pleasant ones — no computer needed."
+  - q: "What is mechanical AI diffusion?"
+    a: "A wild idea — coupled springs that denoise fan rumble toward music, like software diffusion but in metal."
+  - q: "Did we build this for real?"
+    a: "No. This is a computer experiment only."
+
+steps:
+  - "Measure fan noise as tones (blade passing frequency) plus broadband whoosh"
+  - "Pass exhaust through metamaterial liners that cancel harsh tones (with a fan-power penalty)"
+  - "Add water features, organ pipes, and chimes driven by exhaust or chimney draft"
+  - "Optionally run fan noise through a coupled-oscillator 'mechanical diffusion' stack"
+  - "Report fence-line loudness, soundscape quality, and example audio clips"
+
+honest_limits:
+  - "Nobody runs campus-scale mechanical soundscape valorization yet"
+  - "Thin liners may not fix infrasound below 20 Hz"
+  - "Metamaterials add airflow resistance — fans may need more electricity"
+  - "Mechanical diffusion music uses a fixed template — training real hardware is unsolved"

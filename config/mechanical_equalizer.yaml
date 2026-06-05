@@ -1,0 +1,27 @@
+# Scheme 1 — Mechanical Soundscape Equalizer (MSE)
+mechanical_equalizer:
+  enabled: true
+  liner_depth_mm: 15
+  resonator_cell_count: 48
+  max_attenuation_db_per_band: 12.0
+  pressure_drop_pa_per_mm: 8.0
+  fan_efficiency: 0.65
+  air_density_kg_m3: 1.2
+  baseline_fan_airflow_kg_s: 800.0
+  water_feature:
+    enabled: true
+    type: upward_jet_fountain
+    flow_l_s: 12.0
+    jet_height_m: 0.8
+  organ_pipes:
+    enabled: true
+    pipe_count: 16
+    fundamental_hz: 220.0
+  aeolian:
+    enabled: true
+    element_count: 24
+  thermal_coupling:
+    enabled: false
+    use_chimney_draft: false
+    waste_heat_to_air_fraction: 0.35
+    chimney_height_m: 120

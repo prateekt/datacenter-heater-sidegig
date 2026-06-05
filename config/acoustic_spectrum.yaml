@@ -1,0 +1,12 @@
+# Data-center fan noise source model (1/3-octave bands)
+acoustic_spectrum:
+  fan_rpm: 4200
+  blades_per_fan: 7
+  fans_per_rack: 6
+  rack_count: 2500
+  distance_to_fence_m: 150
+  baseline_spl_dba_at_fence: 92.0
+  tonal_harmonics: 6
+  broadband_turbulence_fraction: 0.35
+  sample_rate_hz: 44100
+  clip_duration_s: 4.0

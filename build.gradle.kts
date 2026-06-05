@@ -51,3 +51,11 @@ tasks.register<JavaExec>("generateConvectionFigures") {
     mainClass.set("com.heater.analysis.ConvectionFigureMain")
     workingDir = projectDir
 }
+
+tasks.register<JavaExec>("generateAcousticFigures") {
+    group = "documentation"
+    description = "Run speculative acoustic side-gig sweeps, charts, audio, and patch README"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("com.heater.analysis.AcousticFigureMain")
+    workingDir = projectDir
+}

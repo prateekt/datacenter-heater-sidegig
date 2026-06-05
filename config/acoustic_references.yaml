@@ -1,0 +1,160 @@
+# Literature for acoustic side-gig comparisons (MSE + MDMG)
+comparison_intro: |
+  Our acoustic modules sit at the intersection of three literatures:
+  (1) **data-center fan noise** and community impact, (2) **passive metamaterial /
+  soundscape masking**, and (3) **physical generative computing** (analog denoising).
+  No published study yet combines GPU-campus exhaust, mechanical soundscape synthesis,
+  and mechanical diffusion music at hyperscale — that gap is why we label this experimental.
+
+papers:
+  - id: dc_noise_spectrum
+    authors: "ResearchGate contributors (DC noise study)"
+    year: 2016
+    title: "Noise within a Data Center"
+    venue: "ResearchGate publication"
+    arxiv_id: ""
+    doi: ""
+    url: "https://www.researchgate.net/publication/304079164_Noise_within_a_Data_Center"
+    category: dc_noise
+    key_numbers: "Inside DC **70–80 dBA**; BPF harmonics **150 Hz–1.5 kHz**; broadband **2–7 kHz**"
+    vs_sim: "We use the same BPF formula and band layout as our synthetic fan spectrum defaults."
+
+  - id: eesi2025
+    authors: "EESI"
+    year: 2025
+    title: "Communities Are Raising Noise Pollution Concerns About Data Centers"
+    venue: "EESI article"
+    arxiv_id: ""
+    doi: ""
+    url: "https://www.eesi.org/articles/view/communities-are-raising-noise-pollution-concernsabout-data-centers"
+    category: policy
+    key_numbers: "24/7 fan/chiller/generator noise; **low-frequency** hard to measure with A-weighting"
+    vs_sim: "Motivates fence-line metrics — we report A-weighted SPL plus tonal prominence proxy."
+
+  - id: semsa2020
+    authors: "Nokia Bell Labs"
+    year: 2020
+    title: "Fan-noise reduction of data centre server racks with acoustic metamaterial liner (SeMSA)"
+    venue: "Bell Labs publication"
+    arxiv_id: ""
+    doi: ""
+    url: "https://www.nokia.com/bell-labs/publications-and-media/publications/fan-noise-reduction-of-data-centre-telecommunications-server-racks-with-an-acoustic-metamaterial-broadband-low-frequency-sound-absorbing-liner/"
+    category: metamaterial
+    key_numbers: "**~2.5 dBA** overall reduction with **15 mm** liner; **~44%** sound power drop at BPF"
+    vs_sim: "Our metamaterial bank scales attenuation with liner depth/cell count toward this anchor."
+
+  - id: labyrinth2025
+    authors: "Composite metamaterial authors"
+    year: 2025
+    title: "Deep-Subwavelength Composite Metamaterial for Ventilation and Acoustic Insulation"
+    venue: "PMC / Materials"
+    arxiv_id: ""
+    doi: ""
+    url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC12072964/"
+    category: metamaterial
+    key_numbers: "Labyrinthine cells give **ventilation + broadband** insulation in thin form factors"
+    vs_sim: "Supports our pressure-drop vs attenuation tradeoff — airflow must continue."
+
+  - id: galbrun2013
+    authors: "Galbrun, L. & Ali, T."
+    year: 2013
+    title: "Acoustical and psychoacoustical properties of water sounds for road traffic noise masking"
+    venue: "JASA"
+    arxiv_id: ""
+    doi: ""
+    url: "https://pure.hw.ac.uk/ws/files/7638422/Paper_LG_TTA_JASA_2013.pdf"
+    category: soundscape
+    key_numbers: "Streams/fountains improve **peacefulness** via informational masking, not pure dB cover"
+    vs_sim: "Water module adds mid-band energy; soundscape index weights nature-band content."
+
+  - id: aletta2024
+    authors: "Aletta, F., et al."
+    year: 2024
+    title: "Sound mapping design of water features over road traffic noise"
+    venue: "Applied Acoustics"
+    arxiv_id: ""
+    doi: ""
+    url: "https://www.sciencedirect.com/science/article/pii/S0003682X24000987"
+    category: soundscape
+    key_numbers: "Optimum zone when water within **~3 dB** of masker; effective to **~65 dBA** traffic"
+    vs_sim: "Sweep varies water flow to map masking-zone width at the fence line."
+
+  - id: aivc_fan_noise
+    authors: "AIVC"
+    year: 1999
+    title: "Aerodynamical noise of fans (CR 01)"
+    venue: "AIVC technical note"
+    arxiv_id: ""
+    doi: ""
+    url: "https://www.aivc.org/sites/default/files/members_area/medias/pdf/CR/CR01_Aerodynamical_noise_of_fans.pdf"
+    category: dc_noise
+    key_numbers: "Tonal BPF and harmonics plus broadband turbulence shelf in ducted fans"
+    vs_sim: "BPF = blades × RPM/60 underpins our tonal line spectrum."
+
+  - id: whitelam2024
+    authors: "Whitelam, S., et al."
+    year: 2024
+    title: "Generative Thermodynamic Computing"
+    venue: "APS / arXiv preprint"
+    arxiv_id: ""
+    doi: ""
+    url: "https://res.cloudinary.com/apsphysics/image/upload/v1766014133/LF20470_uuxl1g.pdf"
+    category: physical_generative
+    key_numbers: "Langevin dynamics on coupled oscillators denoise toward learned energy landscapes"
+    vs_sim: "MDMG module uses overdamped Langevin steps with a **fixed** music template landscape."
+
+  - id: engheta2019
+    authors: "Hughes, T.W., et al."
+    year: 2019
+    title: "Wave physics as an analog recurrent neural network"
+    venue: "Science Advances"
+    arxiv_id: ""
+    doi: "10.1126/sciadv.aay6946"
+    url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC6924985/"
+    category: physical_generative
+    key_numbers: "Scattering media perform temporal processing on raw acoustic signals"
+    vs_sim: "Conceptual ancestor — we use reduced-order oscillators, not inverse-designed scatterers."
+
+  - id: mcmahon2024
+    authors: "Stein, L. (McMahon group)"
+    year: 2024
+    title: "Physical Neural Networks (thesis)"
+    venue: "Cornell University"
+    arxiv_id: ""
+    doi: ""
+    url: "https://mcmahon.aep.cornell.edu/theses/2024_Stein.pdf"
+    category: physical_generative
+    key_numbers: "Speaker-driven vibrating plate performs image classification as a PNN"
+    vs_sim: "Shows trainable physical layers — we do **not** train MDMG in this repo."
+
+  - id: mnn2024
+    authors: "Mechanical NN authors"
+    year: 2024
+    title: "In situ backpropagation in mechanical neural networks"
+    venue: "Nature Communications"
+    arxiv_id: ""
+    doi: "10.1038/s41467-024-54849-z"
+    url: "https://nature.com/articles/s41467-024-54849-z"
+    category: physical_generative
+    key_numbers: "3D-printed spring networks trained via mechanical adjoint methods"
+    vs_sim: "Future-work anchor for trainable MDMG hardware — not modeled here."
+
+  - id: r2nn2026
+    authors: "Metacircuit authors"
+    year: 2026
+    title: "Fully Analog Resonant Recurrent Neural Network via Metacircuit"
+    venue: "arXiv"
+    arxiv_id: "2604.17277"
+    doi: ""
+    url: "https://arxiv.org/abs/2604.17277"
+    category: physical_generative
+    key_numbers: "Coupled resonators for speech/tactile classification without ADC"
+    vs_sim: "Cross-domain analog — MDMG targets generative audio, not classification."
+
+plain_english_gaps:
+  - q: "Has anyone built mechanical music from GPU fan noise?"
+    a: "Not in published literature. Physical generative computing exists in lab scale; DC music diffusion is our deliberate gap."
+  - q: "Do metamaterial liners work on real racks?"
+    a: "Yes at rack scale (Bell Labs SeMSA). Perimeter soundscape valorization at AI-campus scale is not demonstrated."
+  - q: "Why not just use speakers and AI software?"
+    a: "This side gig asks what **passive/mechanical** paths could do with exhaust already on site — complementary, not exclusive."
