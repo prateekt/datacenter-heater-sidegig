@@ -28,3 +28,4 @@ waste_heat_fractions:
 
 capture_defaults: config/passive_convection_capture.yaml
 analogies: config/convection_analogies.yaml
+references: config/convection_references.yaml

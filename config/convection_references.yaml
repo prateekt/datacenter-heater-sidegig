@@ -1,0 +1,125 @@
+# State-of-the-art literature for chimney convection DAC comparisons
+# Edit here to update citations without recompiling Java.
+
+comparison_intro: |
+  Our speculative chimney model sits at the intersection of three literatures:
+  (1) **DAC regeneration energy** from low-grade heat, (2) **natural-draft chimneys**
+  for moving large air volumes, and (3) **data-center waste heat** as a colocated
+  thermal source. No published study yet combines all three at AI-campus scale —
+  that gap is why we label this module experimental.
+
+papers:
+  - id: keith2018
+    authors: "Keith, D.W., Holmes, G., St. Angelo, D., & Heidel, K."
+    year: 2018
+    title: "A process for capturing CO₂ from the atmosphere"
+    venue: "Joule"
+    doi: "10.1016/j.joule.2018.05.006"
+    url: "https://doi.org/10.1016/j.joule.2018.05.006"
+    category: liquid_dac_baseline
+    key_numbers: "5.25–8.81 GJ/t-CO₂ thermal + 77–366 kWh/t electric; $94–232/t levelized (1 Mt/yr plant)"
+    vs_sim: "Our default regen duty is **5.5 GJ/t-CO₂** (`specific_heat_duty_j_per_kg: 5.5e6`) — inside the Keith solvent-DAC envelope."
+
+  - id: sabatino2023
+    authors: "Sabatino, F., et al."
+    year: 2023
+    title: "A comprehensive review on regeneration strategies for direct air capture"
+    venue: "Journal of CO₂ Utilization"
+    doi: "10.1016/j.jcou.2023.102587"
+    url: "https://doi.org/10.1016/j.jcou.2023.102587"
+    category: regeneration_review
+    key_numbers: "Solid sorbent regen: **0.5–18.75 GJ/t**; liquid solvent: **0.62–17.28 GJ/t** (work-equivalent)"
+    vs_sim: "Heat-pump-boosted 90 °C regen in our liquid path is a conventional TSA approach within this range."
+
+  - id: shi2023
+    authors: "Shi, W.K., Zhang, X.J., Liu, X., Wei, S., Shi, X., Wu, C., & Jiang, L."
+    year: 2023
+    title: "Temperature-vacuum swing adsorption for direct air capture by using low-grade heat"
+    venue: "Journal of Cleaner Production"
+    doi: "10.1016/j.jclepro.2023.137889"
+    url: "https://doi.org/10.1016/j.jclepro.2023.137889"
+    category: low_grade_heat
+    key_numbers: "TVSA with heat pump at 373 K: **176.7 $/t** levelized DAC cost; low-grade heat cuts net LCOD 5–25%"
+    vs_sim: "Closest published analog to **waste-heat + heat-pump regen** — our cyclic convection module copies this split."
+
+  - id: hamblin2024
+    authors: "Hamblin, L., Lackner, K.S., & Green, M.D."
+    year: 2024
+    title: "Integration of Low-Grade Waste Heat in Direct Air Capture of CO₂ Systems: A Data Center Case Study"
+    venue: "2024 AIChE Annual Meeting"
+    url: "https://proceedings.aiche.org/conferences/aiche-annual-meeting/2024/proceeding/paper/365o-integration-low-grade-waste-heat-direct-air-capture-co2-systems-data-center-case-study"
+    category: datacenter_dac
+    key_numbers: "Multi-stage liquid sorbent upgrade using integrated DC waste heat; simulation + experiment"
+    vs_sim: "**Closest peer-reviewed DC + DAC case study** to our main liquid-loop path (not the chimney variant)."
+
+  - id: lackner_passive
+    authors: "Lackner, K.S., et al. (Arizona State University)"
+    year: 2018
+    title: "Passive wind-driven direct air capture with moisture-swing sorbents"
+    venue: "U.S. DOE CCE workshop / ASU Tiburio design"
+    url: "https://www.energy.gov/sites/prod/files/2018/10/f56/Klaus_Lackner_CCE_PanelDay2.pdf"
+    category: passive_airflow
+    key_numbers: "Wind-driven contactors; minimal active fanning; moisture-swing regen"
+    vs_sim: "Conceptual predecessor to **passive air contact** — our chimney draft replaces wind as the driver."
+
+  - id: zandian2013
+    authors: "Zandian, A., & Ashjaee, M."
+    year: 2013
+    title: "Thermal efficiency improvement of a steam Rankine cycle by hybrid cooling tower and solar chimney"
+    venue: "Renewable Energy"
+    doi: "10.1016/j.renene.2012.09.051"
+    url: "https://doi.org/10.1016/j.renene.2012.09.051"
+    category: chimney_physics
+    key_numbers: "Hybrid cooling-tower chimney (HCTSC): **~10×** draft vs. Manzanares solar chimney; up to **3 MW** with 50 m diameter"
+    vs_sim: "Validates **waste-heat-warmed chimneys** as serious airflow engines — we reuse the stack-effect physics, not power-gen."
+
+  - id: mcqueen2020
+    authors: "McQueen, N., et al."
+    year: 2020
+    title: "Natural Gas vs. Electricity for Solvent-Based Direct Air Capture"
+    venue: "Frontiers in Climate"
+    doi: "10.3389/fclim.2020.618644"
+    url: "https://doi.org/10.3389/fclim.2020.618644"
+    category: dac_economics
+    key_numbers: "1 Mt/yr solvent DAC: **$250–690/t** all-electric; thermal energy ~80% of total duty"
+    vs_sim: "Our **~630 t/yr** chimney result is **lab-scale throughput** — commercial DAC papers target 1,000× larger capture."
+
+  - id: real2023
+    authors: "Real, F.S., et al."
+    year: 2023
+    title: "The cost of direct air capture and storage can be reduced via strategic deployment but is unlikely to fall below stated cost targets"
+    venue: "One Earth"
+    doi: "10.1016/j.oneear.2023.11.004"
+    url: "https://doi.org/10.1016/j.oneear.2023.11.004"
+    category: dac_economics
+    key_numbers: "Four DAC technologies plateau **$100–600/t-CO₂** by 2050 with learning + siting"
+    vs_sim: "Sets realistic **$/t expectations** — our sim reports tonnes/yr only, not LCO₂."
+
+  - id: prats2024
+    authors: "Prats-Salvado, E., Jagtap, N., Monnerie, N., & Sattler, C."
+    year: 2024
+    title: "Solar-Powered Direct Air Capture: Techno-Economic and Environmental Assessment"
+    venue: "Environmental Science & Technology"
+    doi: "10.1021/acs.est.3c08269"
+    url: "https://doi.org/10.1021/acs.est.3c08269"
+    category: low_grade_heat
+    key_numbers: "Solar thermal for high-temp calcination; arid-site L-DAC cost vs. fossil baseline"
+    vs_sim: "Complements Shi (2023): external heat source for regen — we use **DC waste heat** instead of solar."
+
+  - id: industry_meta_x
+    authors: "Meta; Alphabet X (reported by DataCenterDynamics, 2024)"
+    year: 2024
+    title: "Direct air capture prototypes using data-center waste heat"
+    venue: "Industry reports (not peer-reviewed)"
+    url: "https://www.datacenterdynamics.com/en/news/meta-and-alphabets-x-developing-direct-air-capture-systems-using-data-center-waste-heat/"
+    category: industry
+    key_numbers: "Liquid DAC + heat-pump regen from DC exhaust; patent filings 2021–2023"
+    vs_sim: "Real companies pursue **liquid-loop regen**, not passive chimney contactors — our chimney path is more speculative than industry R&D."
+
+plain_english_gaps:
+  - q: "Has anyone built chimney DAC at a GPU campus?"
+    a: "Not in published literature. Zandian & Ashjaee (2013) use power-plant cooling towers; Hamblin et al. (2024) study DC liquid-loop DAC — neither is our exact design."
+  - q: "Is 5.5 GJ per tonne of CO₂ realistic?"
+    a: "Yes — Keith et al. (2018) report 5.25–8.81 GJ/t for solvent DAC; Sabatino et al. (2023) survey 0.5–18.75 GJ/t across sorbent types."
+  - q: "Why is our capture only ~600 tonnes/year?"
+    a: "Commercial papers size plants at **0.9–1 Mt/yr** (Keith 2018, McQueen 2020). We model one hall with lumped contactor area — throughput, not physics, is the limit."

@@ -28,6 +28,7 @@ public final class ConvectionFigureMain {
         Map<String, Object> sweepCfg = ConfigLoader.load(sweepPath);
         String defaultsPath = sweepCfg.getOrDefault("capture_defaults", "config/passive_convection_capture.yaml").toString();
         String analogiesPath = sweepCfg.getOrDefault("analogies", "config/convection_analogies.yaml").toString();
+        String referencesPath = sweepCfg.getOrDefault("references", "config/convection_references.yaml").toString();
 
         System.out.println("Running convection DAC sweeps (speculative)...");
         ConvectionCaptureAnalyzer analyzer = new ConvectionCaptureAnalyzer(sweepPath, defaultsPath);
@@ -41,7 +42,8 @@ public final class ConvectionFigureMain {
         System.out.println("Wrote " + resultsPath);
 
         ConvectionAnalogies analogies = ConvectionAnalogies.load(analogiesPath);
-        String markdown = ConvectionTemplateExplainer.explain(summary, analogies);
+        ConvectionLiterature literature = ConvectionLiterature.load(referencesPath);
+        String markdown = ConvectionTemplateExplainer.explain(summary, analogies, literature);
         ConvectionExplainerValidator.ValidationResult v = ConvectionExplainerValidator.validate(markdown, summary);
         if (!v.ok()) {
             System.err.println("Convection explainer warnings:");

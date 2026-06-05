@@ -22,6 +22,12 @@ public final class ConvectionExplainerValidator {
         if (!markdown.contains("plain English")) {
             warnings.add("Missing plain English results section");
         }
+        if (!markdown.contains("published research")) {
+            warnings.add("Missing literature comparison section");
+        }
+        if (!markdown.contains("doi.org") && !markdown.contains("proceedings.aiche.org")) {
+            warnings.add("Missing academic citations (DOI or proceedings links)");
+        }
         if (!markdown.contains("speculative") && !markdown.contains("experimental")) {
             warnings.add("Missing speculative/experimental disclaimer");
         }

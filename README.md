@@ -78,7 +78,7 @@ A **robotic controller** in our simulation decides *where* to send the heat: car
 
 > **Think of it like this:** A data center is already a giant hair dryer. What if that warm air climbed a tall chimney and pulled outdoor air through CO₂-catching sponges — so you need fewer electric fans?
 
-We added a **separate, labeled experiment** for this idea. Warm exhaust creates natural **convection** (like steam rising from soup). Air flows through passive **sorbent** walls. A **heat pump** still wrings the sponge out on a schedule — same regeneration story as liquid DAC. **Nobody has built this at campus scale yet**; our math is a cartoon, not a blueprint. Results are in [Chimney DAC (explain like I'm five)](#convection-speculative).
+We added a **separate, labeled experiment** for this idea. Warm exhaust creates natural **convection** (like steam rising from soup). Air flows through passive **sorbent** walls. A **heat pump** still wrings the sponge out on a schedule — same regeneration story as liquid DAC. **Nobody has built this at campus scale yet**; our math is a cartoon, not a blueprint. Results are in [Chimney DAC (explain like I'm five)](#convection-speculative), with [paper comparisons](#convection-speculative) against Keith et al. (2018), Shi et al. (2023), Zandian & Ashjaee (2013), and Hamblin et al. (2024).
 
 ---
 
@@ -605,11 +605,11 @@ Annualized net removal: ... tonnes CO2e/yr
 
 | Complicated word | Think of it like… |
 |------------------|-------------------|
-| Waste heat | Computers get hot like a game console — that warmth is waste heat. |
-| Regeneration | Heating the sponge to squeeze the CO₂ out, like wringing a towel. |
-| Convection / chimney | Hot air rises like steam from soup — it pulls more air along. |
-| CO₂ capture sponge | A sponge in the air that grabs CO₂ molecules. |
 | Fans | The chimney does part of the leaf-blower's job. |
+| CO₂ capture sponge | A sponge in the air that grabs CO₂ molecules. |
+| Convection / chimney | Hot air rises like steam from soup — it pulls more air along. |
+| Regeneration | Heating the sponge to squeeze the CO₂ out, like wringing a towel. |
+| Waste heat | Computers get hot like a game console — that warmth is waste heat. |
 
 ### What the simulation tried (still experimental in real life)
 
@@ -651,6 +651,57 @@ Annualized net removal: ... tonnes CO2e/yr
 
 ![convection fan savings](docs/figures/convection_fan_savings.png)
 
+### How this compares to published research
+
+Our speculative chimney model sits at the intersection of three literatures:
+(1) **DAC regeneration energy** from low-grade heat, (2) **natural-draft chimneys**
+for moving large air volumes, and (3) **data-center waste heat** as a colocated
+thermal source. No published study yet combines all three at AI-campus scale —
+that gap is why we label this module experimental.
+
+| Paper | What they report | How our sim compares |
+|-------|------------------|----------------------|
+| [Keith, D.W., Holmes, G., St. Angelo, D., & Heidel, K. (2018)](https://doi.org/10.1016/j.joule.2018.05.006) | 5.25–8.81 GJ/t-CO₂ thermal + 77–366 kWh/t electric; $94–232/t levelized (1 Mt/yr plant) | Our default regen duty is **5.5 GJ/t-CO₂** (`specific_heat_duty_j_per_kg: 5.5e6`) — inside the Keith solvent-DAC envelope. |
+| [Sabatino, F., et al. (2023)](https://doi.org/10.1016/j.jcou.2023.102587) | Solid sorbent regen: **0.5–18.75 GJ/t**; liquid solvent: **0.62–17.28 GJ/t** (work-equivalent) | Heat-pump-boosted 90 °C regen in our liquid path is a conventional TSA approach within this range. |
+| [Shi, W.K., Zhang, X.J., Liu, X., Wei, S., Shi, X., Wu, C., & Jiang, L. (2023)](https://doi.org/10.1016/j.jclepro.2023.137889) | TVSA with heat pump at 373 K: **176.7 $/t** levelized DAC cost; low-grade heat cuts net LCOD 5–25% | Closest published analog to **waste-heat + heat-pump regen** — our cyclic convection module copies this split. |
+| [Hamblin, L., Lackner, K.S., & Green, M.D. (2024)](https://proceedings.aiche.org/conferences/aiche-annual-meeting/2024/proceeding/paper/365o-integration-low-grade-waste-heat-direct-air-capture-co2-systems-data-center-case-study) | Multi-stage liquid sorbent upgrade using integrated DC waste heat; simulation + experiment | **Closest peer-reviewed DC + DAC case study** to our main liquid-loop path (not the chimney variant). |
+| [Lackner, K.S., et al. (Arizona State University) (2018)](https://www.energy.gov/sites/prod/files/2018/10/f56/Klaus_Lackner_CCE_PanelDay2.pdf) | Wind-driven contactors; minimal active fanning; moisture-swing regen | Conceptual predecessor to **passive air contact** — our chimney draft replaces wind as the driver. |
+| [Zandian, A., & Ashjaee, M. (2013)](https://doi.org/10.1016/j.renene.2012.09.051) | Hybrid cooling-tower chimney (HCTSC): **~10×** draft vs. Manzanares solar chimney; up to **3 MW** with 50 m diameter | Validates **waste-heat-warmed chimneys** as serious airflow engines — we reuse the stack-effect physics, not power-gen. |
+| [McQueen, N., et al. (2020)](https://doi.org/10.3389/fclim.2020.618644) | 1 Mt/yr solvent DAC: **$250–690/t** all-electric; thermal energy ~80% of total duty | Our **~630 t/yr** chimney result is **lab-scale throughput** — commercial DAC papers target 1,000× larger capture. |
+| [Real, F.S., et al. (2023)](https://doi.org/10.1016/j.oneear.2023.11.004) | Four DAC technologies plateau **$100–600/t-CO₂** by 2050 with learning + siting | Sets realistic **$/t expectations** — our sim reports tonnes/yr only, not LCO₂. |
+| [Prats-Salvado, E., Jagtap, N., Monnerie, N., & Sattler, C. (2024)](https://doi.org/10.1021/acs.est.3c08269) | Solar thermal for high-temp calcination; arid-site L-DAC cost vs. fossil baseline | Complements Shi (2023): external heat source for regen — we use **DC waste heat** instead of solar. |
+| [Meta; Alphabet X (reported by DataCenterDynamics, 2024) (2024)](https://www.datacenterdynamics.com/en/news/meta-and-alphabets-x-developing-direct-air-capture-systems-using-data-center-waste-heat/) | Liquid DAC + heat-pump regen from DC exhaust; patent filings 2021–2023 | Real companies pursue **liquid-loop regen**, not passive chimney contactors — our chimney path is more speculative than industry R&D. |
+
+**Our reference run vs. literature scale:**
+
+| Metric | This sim | Typical published DAC plant |
+|--------|----------|----------------------------|
+| Annual capture | **774 t/yr** | 0.9–1,000,000 t/yr (Keith 2018; McQueen 2020) |
+| Regen heat duty | **5.5 GJ/t-CO₂** (config default) | 0.5–18.75 GJ/t (Sabatino 2023 review) |
+| Air movement | **267 m³/s** natural draft | Fan-driven contactors in commercial DAC |
+| Fan electricity saved | **0.08 MW** | Not reported — fans usually fully powered |
+
+### What the papers do and do not cover
+
+| Question | Answer from literature |
+|----------|------------------------|
+| Has anyone built chimney DAC at a GPU campus? | Not in published literature. Zandian & Ashjaee (2013) use power-plant cooling towers; Hamblin et al. (2024) study DC liquid-loop DAC — neither is our exact design. |
+| Is 5.5 GJ per tonne of CO₂ realistic? | Yes — Keith et al. (2018) report 5.25–8.81 GJ/t for solvent DAC; Sabatino et al. (2023) survey 0.5–18.75 GJ/t across sorbent types. |
+| Why is our capture only ~600 tonnes/year? | Commercial papers size plants at **0.9–1 Mt/yr** (Keith 2018, McQueen 2020). We model one hall with lumped contactor area — throughput, not physics, is the limit. |
+
+#### Full references
+
+- Keith, D.W., Holmes, G., St. Angelo, D., & Heidel, K. (2018). *A process for capturing CO₂ from the atmosphere.* Joule. https://doi.org/10.1016/j.joule.2018.05.006
+- Sabatino, F., et al. (2023). *A comprehensive review on regeneration strategies for direct air capture.* Journal of CO₂ Utilization. https://doi.org/10.1016/j.jcou.2023.102587
+- Shi, W.K., Zhang, X.J., Liu, X., Wei, S., Shi, X., Wu, C., & Jiang, L. (2023). *Temperature-vacuum swing adsorption for direct air capture by using low-grade heat.* Journal of Cleaner Production. https://doi.org/10.1016/j.jclepro.2023.137889
+- Hamblin, L., Lackner, K.S., & Green, M.D. (2024). *Integration of Low-Grade Waste Heat in Direct Air Capture of CO₂ Systems: A Data Center Case Study.* 2024 AIChE Annual Meeting. https://proceedings.aiche.org/conferences/aiche-annual-meeting/2024/proceeding/paper/365o-integration-low-grade-waste-heat-direct-air-capture-co2-systems-data-center-case-study
+- Lackner, K.S., et al. (Arizona State University) (2018). *Passive wind-driven direct air capture with moisture-swing sorbents.* U.S. DOE CCE workshop / ASU Tiburio design. https://www.energy.gov/sites/prod/files/2018/10/f56/Klaus_Lackner_CCE_PanelDay2.pdf
+- Zandian, A., & Ashjaee, M. (2013). *Thermal efficiency improvement of a steam Rankine cycle by hybrid cooling tower and solar chimney.* Renewable Energy. https://doi.org/10.1016/j.renene.2012.09.051
+- McQueen, N., et al. (2020). *Natural Gas vs. Electricity for Solvent-Based Direct Air Capture.* Frontiers in Climate. https://doi.org/10.3389/fclim.2020.618644
+- Real, F.S., et al. (2023). *The cost of direct air capture and storage can be reduced via strategic deployment but is unlikely to fall below stated cost targets.* One Earth. https://doi.org/10.1016/j.oneear.2023.11.004
+- Prats-Salvado, E., Jagtap, N., Monnerie, N., & Sattler, C. (2024). *Solar-Powered Direct Air Capture: Techno-Economic and Environmental Assessment.* Environmental Science & Technology. https://doi.org/10.1021/acs.est.3c08269
+- Meta; Alphabet X (reported by DataCenterDynamics, 2024) (2024). *Direct air capture prototypes using data-center waste heat.* Industry reports (not peer-reviewed). https://www.datacenterdynamics.com/en/news/meta-and-alphabets-x-developing-direct-air-capture-systems-using-data-center-waste-heat/
+
 ### Honest limits
 
 - Nobody runs this at campus scale yet
@@ -658,13 +709,14 @@ Annualized net removal: ... tonnes CO2e/yr
 - Liquid-cooled halls may need extra steps to warm the air chimney
 - Speculative — physics is plausible, real plants are not built yet. Computer experiment only.
 
-### Generated at: 2026-06-05T10:28:09.352120Z
+### Generated at: 2026-06-05T10:33:07.779810Z
 
 ### Sources
 
 - Physics: lumped buoyancy + porous-bed resistance (`src/main/java/com/heater/carbon/ConvectionCapturePhysics.java`)
 - Defaults: `config/passive_convection_capture.yaml`
 - Analogies: `config/convection_analogies.yaml`
+- Literature: `config/convection_references.yaml`
 - Speculative — physics is plausible, real plants are not built yet. Computer experiment only.
 <!-- CONVECTION:END -->
 
@@ -683,6 +735,7 @@ datacenter-heater-sidegig/
 │   ├── passive_convection_capture.yaml  convection defaults
 │   ├── convection_sweep.yaml          convection sweep parameters
 │   ├── convection_analogies.yaml      kindergarten explainers
+│   ├── convection_references.yaml     SOTA paper comparisons
 │   ├── gpu_profiles.yaml              NVIDIA SKU thermal profiles
 │   └── scalability_sweep.yaml         sweep parameters for figures
 ├── docs/
@@ -722,6 +775,27 @@ datacenter-heater-sidegig/
 
 ---
 
+## Literature & state-of-the-art context
+
+This repo is a **teaching simulation**, not a peer-reviewed plant design. We anchor defaults to published DAC and chimney literature:
+
+| Topic | Representative sources | What they say | Our default |
+|-------|------------------------|---------------|-------------|
+| **Liquid DAC energy** | [Keith et al., 2018](https://doi.org/10.1016/j.joule.2018.05.006) | 5.25–8.81 GJ/t-CO₂ + electricity; $94–232/t at 1 Mt/yr | **5.5 GJ/t** heat duty via heat pump |
+| **Regen energy range** | [Sabatino et al., 2023](https://doi.org/10.1016/j.jcou.2023.102587) | 0.5–18.75 GJ/t (solids), 0.62–17.28 GJ/t (liquids) | 90 °C TSA regen window |
+| **Low-grade heat + DAC** | [Shi et al., 2023](https://doi.org/10.1016/j.jclepro.2023.137889) | TVSA with heat pump; **176.7 $/t** LCOD at 373 K | Closest analog to our liquid regen path |
+| **DC waste heat + DAC** | [Hamblin et al., 2024](https://proceedings.aiche.org/conferences/aiche-annual-meeting/2024/proceeding/paper/365o-integration-low-grade-waste-heat-direct-air-capture-co2-systems-data-center-case-study) | Multi-stage liquid sorbent upgrade from DC waste heat | Closest case study to main liquid loop |
+| **Passive air contact** | [Lackner, 2018](https://www.energy.gov/sites/prod/files/2018/10/f56/Klaus_Lackner_CCE_PanelDay2.pdf) | Wind-driven moisture-swing contactors | Conceptual predecessor to chimney draft |
+| **Waste-heat chimneys** | [Zandian & Ashjaee, 2013](https://doi.org/10.1016/j.renene.2012.09.051) | Hybrid cooling-tower chimney; **~10×** draft vs. Manzanares | Stack-effect physics we reuse |
+| **DAC economics** | [McQueen et al., 2020](https://doi.org/10.3389/fclim.2020.618644); [Real et al., 2023](https://doi.org/10.1016/j.oneear.2023.11.004) | $100–690/t depending on energy source; learning curves | We report **tonnes/yr**, not LCO₂ |
+| **Industry R&D** | [DataCenterDynamics, 2024](https://www.datacenterdynamics.com/en/news/meta-and-alphabets-x-developing-direct-air-capture-systems-using-data-center-waste-heat/) | Meta / Alphabet X liquid DAC + DC heat (not peer-reviewed) | Industry pursues **liquid regen**, not chimney contactors |
+
+**Gap we explore:** papers cover liquid-loop DC–DAC (Hamblin 2024) *or* passive airflow (Lackner 2018) *or* chimney physics (Zandian 2013) — but not **GPU-campus chimney contactors with cyclic regen**. That is why the convection module stays in a separate, speculative README block.
+
+Full auto-generated comparison table (with our run numbers): [Chimney DAC → published research](#convection-speculative).
+
+---
+
 ## For teachers and reviewers
 
 ### Learning goals
@@ -739,6 +813,9 @@ Students engaging with this repo can practice:
 2. Why is algae growth **zero at night** in the model?
 3. If NVIDIA builds **twice** as many GPUs, does CO₂ removal **double** forever? Why not?
 4. What would you add to make this simulation more fair or more realistic?
+5. How does our **5.5 GJ/t** regen duty compare to Keith (2018) and Sabatino (2023)?
+6. Why might **Meta/X liquid DAC** be less speculative than our chimney module?
+7. What would change if we sized contactors for **1 Mt/yr** like Keith et al. instead of ~600 t/yr?
 
 ### Technical stack
 

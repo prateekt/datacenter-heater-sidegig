@@ -14,11 +14,14 @@ class ConvectionTemplateExplainerTest {
         );
         ConvectionResultsSummary summary = analyzer.runAll();
         ConvectionAnalogies analogies = ConvectionAnalogies.load("config/convection_analogies.yaml");
-        String markdown = ConvectionTemplateExplainer.explain(summary, analogies);
+        ConvectionLiterature literature = ConvectionLiterature.load("config/convection_references.yaml");
+        String markdown = ConvectionTemplateExplainer.explain(summary, analogies, literature);
 
         assertTrue(markdown.contains("In one sentence"));
         assertTrue(markdown.contains("Picture this"));
         assertTrue(markdown.contains("plain English"));
+        assertTrue(markdown.contains("published research"));
+        assertTrue(markdown.contains("doi.org/10.1016/j.joule.2018.05.006"));
         assertTrue(markdown.contains("Honest limits"));
         assertTrue(markdown.toLowerCase().contains("speculative"));
 
