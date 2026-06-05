@@ -3,23 +3,23 @@ gpu_profiles: config/gpu_profiles.yaml
 scenario_name: nvidia_us_module
 sim_duration_s: 3600
 reference_profile_id: B200_LC
-reference_gpu_count: 37000
+reference_gpu_count: 25000
 
 sweeps:
   gpu_count_ramp:
     profile_id: H100_SXM
     mode: proportional
-    gpu_counts: [5000, 10000, 37000]
+    gpu_counts: [5000, 10000, 25000]
 
   gpu_generation:
-    gpu_count: 37000
+    gpu_count: 25000
     mode: proportional
     profile_ids: [H100_SXM, B200_LC]
 
   saturation:
     profile_id: H100_SXM
     mode: saturation
-    reference_gpu_count: 37000
+    reference_gpu_count: 25000
     heat_multipliers: [0.5, 1.0, 2.0]
 
   multi_hall:
@@ -28,6 +28,6 @@ sweeps:
 
   forecast_timeline:
     - year: 2024
-      label: H100 campus
-      gpu_count: 37000
+      label: H100 campus hall
+      gpu_count: 25000
       profile_id: H100_SXM

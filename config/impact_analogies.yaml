@@ -1,0 +1,20 @@
+# Human-scale comparisons for CO₂ — cited in README and chart labels.
+# Tonnes = metric tons (1,000 kg).
+
+us_car_tonnes_per_year: 4.6
+us_car_source: "U.S. EPA — typical passenger vehicle ~4.6 metric tons CO₂/year (2023)"
+
+us_household_tonnes_per_year: 8.5
+us_household_source: "U.S. EIA / EPA — average home energy-related CO₂ ~8–9 tonnes/year"
+
+us_per_capita_tonnes_per_year: 16.0
+us_per_capita_source: "World Bank / EPA — U.S. per-capita emissions ~15–16 tonnes CO₂e/year"
+
+flight_nyc_london_tonnes: 1.0
+flight_source: "ICAO calculator — ~1 tonne CO₂ per economy passenger NYC–London round trip"
+
+tree_kg_co2_per_year: 22.0
+tree_source: "USDA / Arbor Day — mature tree absorbs ~10–40 kg CO₂/year; we use 22 kg midpoint"
+
+miles_per_tonne_car_equiv: 11386
+miles_source: "4.6 tonnes ÷ 0.404 kg CO₂/mile (EPA avg passenger car)"

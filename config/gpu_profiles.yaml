@@ -1,15 +1,29 @@
 # Representative NVIDIA data-center GPU thermal profiles.
-# system_waste_w_per_gpu = heat delivered to secondary loop per GPU (TDP + rack overhead).
+# system_waste_w_per_gpu = heat delivered to secondary loop per GPU (TDP + rack/CDU overhead).
 # Forecast rows use public GTC / analyst targets — not NVIDIA engineering data.
 
 reference_hall:
   profile_id: B200_LC
-  gpu_count: 37000
-  avg_waste_heat_mw: 50.0
+  gpu_count: 25000
+  avg_waste_heat_mw: 33.75
+  # Sourced scale: xAI Colossus uses four ~25,000-GPU compute halls (100k H100 total).
+  # ServeTheHome / Supermicro case study, 2024. See README "Hall size sources".
 
 utilization:
   base_factor: 0.901    # q_waste_base / (gpus * W/GPU) at reference hall
   peak_factor: 1.442    # q_waste_peak / (gpus * W/GPU) at reference hall
+
+hall_size_sources:
+  - label: "xAI Colossus compute hall"
+    gpus_per_hall: 25000
+    citation: "ServeTheHome / Supermicro — four 25,000-GPU halls in 100k H100 Colossus cluster"
+  - label: "B200 HGX rack density"
+    gpus_per_mw: 200
+    citation: "Introl B200 deployment guide — ~160–224 GPUs/MW (8-GPU racks, 35–50 kW/rack)"
+  - label: "GB200 NVL72 rack"
+    gpus_per_rack: 72
+    rack_power_kw: 120
+    citation: "SemiAnalysis / NVIDIA — NVL72 ~120 kW, 72 GPUs (~1.67 kW/GPU rack power)"
 
 profiles:
   - id: A100_SXM
@@ -19,7 +33,7 @@ profiles:
     system_waste_w_per_gpu: 550
     cooling: air
     forecast: false
-    source_note: NVIDIA A100 SXM datasheet; ~15% rack overhead
+    source_note: NVIDIA A100 SXM 400W TDP; ~15% rack overhead
 
   - id: H100_SXM
     display_name: H100 SXM
@@ -28,7 +42,7 @@ profiles:
     system_waste_w_per_gpu: 950
     cooling: liquid
     forecast: false
-    source_note: H100 SXM 700W TDP; baseline for today
+    source_note: H100 SXM 700W TDP; Supermicro Colossus liquid HGX reference
 
   - id: H200_SXM
     display_name: H200 SXM
@@ -46,7 +60,7 @@ profiles:
     system_waste_w_per_gpu: 1150
     cooling: air
     forecast: false
-    source_note: Blackwell air-cooled HGX; ~43% more than H100
+    source_note: Blackwell air HGX; NVIDIA ~1 kW TDP class
 
   - id: B200_LC
     display_name: B200 (liquid)
@@ -55,7 +69,7 @@ profiles:
     system_waste_w_per_gpu: 1350
     cooling: liquid
     forecast: false
-    source_note: Max-P liquid; matches NVIDIA hall default in nvidia_us_expansion.yaml
+    source_note: Blackwell liquid Max-P ~1.2 kW TDP + overhead; reference hall chip
 
   - id: B300
     display_name: Blackwell Ultra
@@ -64,7 +78,7 @@ profiles:
     system_waste_w_per_gpu: 1550
     cooling: liquid
     forecast: true
-    source_note: Public Blackwell Ultra roadmap charts (2025–26)
+    source_note: Public Blackwell Ultra roadmap (2025–26)
 
   - id: RUBIN_MQ
     display_name: Vera Rubin Max-Q
@@ -73,7 +87,7 @@ profiles:
     system_waste_w_per_gpu: 2000
     cooling: liquid_only
     forecast: true
-    source_note: GTC 2025 Vera Rubin efficiency profile
+    source_note: GTC 2025 Vera Rubin efficiency profile (forecast)
 
   - id: RUBIN_MP
     display_name: Vera Rubin Max-P
@@ -82,7 +96,7 @@ profiles:
     system_waste_w_per_gpu: 2550
     cooling: liquid_only
     forecast: true
-    source_note: GTC 2025 Vera Rubin performance profile
+    source_note: GTC 2025 Vera Rubin performance profile (forecast)
 
   - id: RUBIN_ULTRA
     display_name: Rubin Ultra (rack equiv.)
@@ -91,4 +105,4 @@ profiles:
     system_waste_w_per_gpu: 3500
     cooling: liquid_only
     forecast: true
-    source_note: Per-GPU equivalent in 600 kW NVL576-class racks (2027 forecast)
+    source_note: Per-GPU equivalent in NVL576-class racks (2027 forecast)

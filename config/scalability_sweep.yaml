@@ -5,23 +5,23 @@ gpu_profiles: config/gpu_profiles.yaml
 scenario_name: nvidia_us_module
 sim_duration_s: 604800          # 7 days
 reference_profile_id: B200_LC
-reference_gpu_count: 37000
+reference_gpu_count: 25000
 
 sweeps:
   gpu_count_ramp:
     profile_id: H100_SXM
     mode: proportional
-    gpu_counts: [5000, 10000, 18500, 37000, 55000, 74000]
+    gpu_counts: [5000, 10000, 12500, 25000, 37500, 50000]
 
   gpu_generation:
-    gpu_count: 37000
+    gpu_count: 25000
     mode: proportional
     profile_ids: [A100_SXM, H100_SXM, B200_LC, B300, RUBIN_MQ, RUBIN_MP]
 
   saturation:
     profile_id: H100_SXM
     mode: saturation
-    reference_gpu_count: 37000
+    reference_gpu_count: 25000
     heat_multipliers: [0.3, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
 
   multi_hall:
@@ -30,18 +30,18 @@ sweeps:
 
   forecast_timeline:
     - year: 2024
-      label: H100 campus
-      gpu_count: 37000
+      label: H100 campus hall
+      gpu_count: 25000
       profile_id: H100_SXM
     - year: 2025
       label: Blackwell retrofit
-      gpu_count: 37000
+      gpu_count: 25000
       profile_id: B200_LC
     - year: 2026
-      label: Rubin ramp
-      gpu_count: 28000
+      label: Rubin ramp (same heat, fewer chips)
+      gpu_count: 13200
       profile_id: RUBIN_MP
     - year: 2028
       label: Rubin Ultra block
-      gpu_count: 17000
+      gpu_count: 9600
       profile_id: RUBIN_ULTRA

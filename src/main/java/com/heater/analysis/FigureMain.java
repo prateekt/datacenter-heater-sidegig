@@ -1,7 +1,10 @@
 package com.heater.analysis;
 
+import com.heater.config.ConfigLoader;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 public final class FigureMain {
 
@@ -25,18 +28,20 @@ public final class FigureMain {
         SweepRunner runner = new SweepRunner(sweepPath, sweepPath);
         ResultsSummary summary = runner.runAll();
 
-        GpuProfile.GpuProfileRegistry registry = GpuProfile.load(
-                runner.sweepConfig().getOrDefault("gpu_profiles", "config/gpu_profiles.yaml").toString());
+        Map<String, Object> sweepCfg = runner.sweepConfig();
+        double simDurationS = ConfigLoader.d(sweepCfg, "sim_duration_s", 604_800.0);
+        String gpuProfilesPath = sweepCfg.getOrDefault("gpu_profiles", "config/gpu_profiles.yaml").toString();
 
-        ChartGenerator charts = new ChartGenerator(figuresDir);
+        GpuProfile.GpuProfileRegistry registry = GpuProfile.load(gpuProfilesPath);
+        ClimateAnalogies analogies = ClimateAnalogies.loadDefault();
+
+        ChartGenerator charts = new ChartGenerator(figuresDir, analogies, simDurationS);
         charts.generateAll(summary, registry);
 
         Files.createDirectories(resultsPath.getParent());
         Files.writeString(resultsPath, summary.toJson());
         System.out.println("Wrote " + resultsPath);
 
-        String gpuProfilesPath = runner.sweepConfig()
-                .getOrDefault("gpu_profiles", "config/gpu_profiles.yaml").toString();
         ResultsExplainer explainer = new ResultsExplainer();
         String markdown = explainer.explain(summary, gpuProfilesPath);
 

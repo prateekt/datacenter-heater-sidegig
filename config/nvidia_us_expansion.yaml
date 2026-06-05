@@ -1,9 +1,8 @@
 # NVIDIA U.S. data-center expansion module — plausible scale assumptions
 #
-# Models one liquid-cooled GPU hall (~50 MW average IT waste heat) colocated with
+# Models one liquid-cooled GPU hall (~25,000 B200 GPUs, ~34 MW waste heat) colocated with
 # DAC + algae CO2 removal at a U.S. Southwest hyperscale site (AZ/NV climate).
-# Based on order-of-magnitude public hyperscale buildouts (tens of MW per hall,
-# liquid-cooled AI racks ~700W–1kW+ per GPU including thermal overhead).
+# Hall size matches xAI Colossus documented ~25k-GPU compute halls (ServeTheHome 2024).
 
 bootstrap_scenario: nvidia_us_module
 
@@ -12,17 +11,17 @@ physics:
   ambient_temp: 22.0
 
 primary_loop:
-  mdot: 900.0              # kg/s (~50 MW at ~13 K rise)
+  mdot: 608.0              # kg/s (scaled for ~34 MW hall)
   t_in: 35.0
   t_max: 65.0
   t_min_flow: 600.0
-  reject_capacity: 80000000.0   # 80 MW dry coolers
+  reject_capacity: 54000000.0   # dry coolers scaled to hall
 
 heat_exchanger:
-  ua: 18000000.0           # large plate HX bank
+  ua: 12160000.0           # plate HX bank scaled to hall
 
 buffer_tank:
-  volume: 2000000.0        # 2 ML thermal storage
+  volume: 1350000.0        # thermal storage scaled to hall
   initial_temp: 42.0
 
 loads:
@@ -41,13 +40,13 @@ loads:
     min_source_temp: 40.0
     heat_pump_cop: 3.2
     specific_heat_duty_j_per_kg: 5500000.0
-    hp_capacity_w: 12000000.0    # 12 MW thermal regenerator
+    hp_capacity_w: 8100000.0     # DAC regenerator scaled to hall
   algae:
     optimal_temp: 28.0
     min_temp: 15.0
     max_temp: 38.0
     volume_m3: 12000.0
-    surface_area_m2: 25000.0     # 2.5 ha raceway PBR
+    surface_area_m2: 16900.0     # algae ponds scaled to hall
     max_growth_g_m2_day: 45.0
     co2_per_kg_biomass: 1.83
     harvest_fraction: 0.85
@@ -57,7 +56,7 @@ loads:
 
 control:
   dt: 60.0                     # 1-min steps for 30-day runs
-  max_secondary_flow: 450.0      # kg/s secondary loop
+  max_secondary_flow: 304.0      # kg/s secondary loop (scaled)
   robot_interval: 300.0
   pid:
     primary:
@@ -95,8 +94,8 @@ climate:
 scenarios:
   nvidia_us_module:
     duration: 2592000              # 30 days
-    q_waste_base: 45000000.0       # 45 MW overnight/base
-    q_waste_peak: 72000000.0       # 72 MW training peak
+    q_waste_base: 30378750.0       # 25k B200 LC @ base utilization
+    q_waste_peak: 48667500.0       # 25k B200 LC @ peak utilization
     outside_temps:
       - { hour: 0,  temp: 19.0 }
       - { hour: 6,  temp: 17.0 }
@@ -106,8 +105,8 @@ scenarios:
 
   nvidia_us_annual:
     duration: 31536000             # 365 days (use dt=300 for faster runs)
-    q_waste_base: 45000000.0
-    q_waste_peak: 72000000.0
+    q_waste_base: 30378750.0
+    q_waste_peak: 48667500.0
     outside_temps:
       - { hour: 0,    temp: 12.0 }
       - { hour: 2160,  temp: 18.0 }   # ~90 days spring

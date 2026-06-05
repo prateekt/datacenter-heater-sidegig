@@ -23,10 +23,10 @@ class FacilityScalerTest {
     void doublesGpusDoublesWasteAndPlant() {
         GpuProfile profile = registry.referenceProfile();
         FacilityScaler.ScaledFacility one = FacilityScaler.scale(
-                baseConfig, "nvidia_us_module", profile, 37_000, registry,
+                baseConfig, "nvidia_us_module", profile, 25_000, registry,
                 FacilityScaler.ScaleMode.PROPORTIONAL, 3600);
         FacilityScaler.ScaledFacility two = FacilityScaler.scale(
-                baseConfig, "nvidia_us_module", profile, 74_000, registry,
+                baseConfig, "nvidia_us_module", profile, 50_000, registry,
                 FacilityScaler.ScaleMode.PROPORTIONAL, 3600);
 
         assertEquals(two.scenario().qWasteBase(), one.scenario().qWasteBase() * 2, one.scenario().qWasteBase() * 0.01);
