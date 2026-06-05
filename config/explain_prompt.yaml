@@ -3,8 +3,15 @@ system_prompt: |
   Audience: NVIDIA partners, hyperscale operators, climate reviewers — precise but readable.
 
   CHARTS use metric tonnes CO₂e/year on axes — NOT cars.
-  PROSE leads with tonnes, then layers scale intuition:
-  - % of U.S. and global emissions
+
+  EXECUTIVE SUMMARY must be extremely easy to scan:
+  - Start with a one-line TL;DR blockquote (big number + % recovery)
+  - Use short #### subheads: The question / The answer / How big is that / Same heat different job / Bottom line
+  - Bullets and a small table for the reference hall — NO dense paragraph walls
+  - Keep analogies to 3 bullets max in the summary; full detail lives below
+
+  PROSE elsewhere leads with tonnes, then layers scale intuition:
+  - National scale as "X thousand tonnes out of Y million" and "~1 in N" — NEVER show 0.00% or 0.000%
   - % operational recovery (DAC net / GPU grid CO₂) — primary "worth it?" metric
   - Agriculture: cover-crop acres (USDA ~0.5 t CO₂e/acre/year)
   - Transport: gasoline cars AND EVs on current grid — with electrification caveat
@@ -17,7 +24,7 @@ system_prompt: |
 
 section_outline: |
   ## Scalability: GPUs, heat, and CO₂
-  ### Executive summary
+  ### Executive summary (TL;DR blockquote + scannable bullets/table — NOT a wall of text)
   ### How to read the metrics (table: tonnes, recovery %, analogies)
   ### Electrification note
   ### Reference hall sources

@@ -97,33 +97,55 @@ public final class ClimateAnalogies {
     }
 
     /**
-     * Rich scale narrative: tonnes first, then layered analogies for intuition.
-     * Cars framed with electrification caveat; includes agriculture and national context.
+     * Human-readable share of a large total — never rounds to misleading 0.00%.
+     * Uses "X thousand out of Y million" plus "~1 in N" for small ratios.
+     */
+    public String formatShareReadable(double partTonnes, double wholeTonnes, String label) {
+        if (wholeTonnes <= 0 || partTonnes <= 0) {
+            return "share not computed";
+        }
+        double ratio = partTonnes / wholeTonnes;
+        if (ratio >= 0.01) {
+            return String.format(Locale.US, "**%.2f%%** of %s", ratio * 100, label);
+        }
+        long oneIn = Math.max(1L, Math.round(wholeTonnes / partTonnes));
+        double wholeMillions = wholeTonnes / 1_000_000.0;
+        if (partTonnes >= 1_000_000) {
+            return String.format(Locale.US,
+                    "**%.2f million tonnes** of **%,.0f million tonnes** %s (~**1 in %,d**)",
+                    partTonnes / 1_000_000.0, wholeMillions, label, oneIn);
+        }
+        if (partTonnes >= 1_000) {
+            return String.format(Locale.US,
+                    "**%,.0f thousand tonnes** of **%,.0f million tonnes** %s (~**1 in %,d**)",
+                    partTonnes / 1_000.0, wholeMillions, label, oneIn);
+        }
+        return String.format(Locale.US,
+                "**%,.0f tonnes** of **%,.0f million tonnes** %s (~**1 in %,d**)",
+                partTonnes, wholeMillions, label, oneIn);
+    }
+
+    public String formatUsEmissionsShare(double tonnesPerYear) {
+        return formatShareReadable(tonnesPerYear, usTotalMillionTonnes * 1_000_000.0, "U.S. annual emissions");
+    }
+
+    /**
+     * Compact scale narrative: tonnes, readable national context, agriculture, transport.
      */
     public String scaleNarrative(double tonnesPerYear) {
         double iceCars = iceCarsFromTonnes(tonnesPerYear);
         double evCars = evCarsFromTonnes(tonnesPerYear);
-        double households = tonnesPerYear / householdTonnesPerYear;
         double coverCropAcres = tonnesPerYear / coverCropAcreTonnesPerYear;
         double avgFarms = coverCropAcres / usFarmAvgAcres;
-        double pctUs = 100.0 * tonnesPerYear / (usTotalMillionTonnes * 1_000_000.0);
-        double pctUsAg = 100.0 * tonnesPerYear / (usAgSectorMillionTonnes * 1_000_000.0);
-        double pctGlobal = 100.0 * tonnesPerYear / (globalBillionTonnes * 1_000_000_000.0);
-        double flights = tonnesPerYear / flightTonnes;
 
         return String.format(Locale.US,
-                "**%,.0f tonnes CO₂e per year** net removed. "
-                        + "Scale: **%.3f%%** of U.S. emissions, **%.2f%%** of U.S. agriculture sector emissions, "
-                        + "**%.4f%%** of global anthropogenic CO₂. "
-                        + "Transport intuition (declining relevance as grids electrify): equivalent to **%s** "
-                        + "gasoline cars parked for a year, or **%s** EVs on today's U.S. grid. "
-                        + "Agriculture intuition: like running a **cover-crop carbon program on ~%,.0f acres** "
-                        + "(~%.0f average-sized U.S. farms at ~%.0f acres each). "
-                        + "Also **~%,.0f homes'** annual energy emissions, or **~%,.0f** NYC–London round-trip flights.",
-                tonnesPerYear, pctUs, pctUsAg, pctGlobal,
-                formatCars(iceCars), formatCars(evCars),
-                coverCropAcres, avgFarms, usFarmAvgAcres,
-                households, flights);
+                "**%,.0f tonnes CO₂e/year** net removed — %s. "
+                        + "Roughly **~%,.0f acres** of USDA cover-crop program (~%.0f farms), "
+                        + "or **%s** gasoline cars / **%s** EVs parked for a year.",
+                tonnesPerYear,
+                formatUsEmissionsShare(tonnesPerYear),
+                coverCropAcres, avgFarms,
+                formatCars(iceCars), formatCars(evCars));
     }
 
     public String chartSubtitleTonnes() {

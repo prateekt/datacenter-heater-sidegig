@@ -18,22 +18,7 @@ public final class TemplateExplainer {
                 .append("waste-heat-driven DAC at NVIDIA-scale U.S. AI halls. ")
                 .append("Charts use **metric tonnes CO₂e/year**; prose adds scale analogies.*\n\n");
 
-        sb.append("### Executive summary\n\n");
-        sb.append("NVIDIA and hyperscale partners are building **~25,000-GPU liquid-cooled halls** ")
-                .append("(documented at xAI Colossus). Each hall throws off **tens of MW of waste heat** 24/7. ")
-                .append("This simulation asks: if that heat powers **direct air capture (DAC)** colocated on campus, ")
-                .append("how much CO₂ comes back out of the atmosphere — and what fraction of the **hall's own GPU electricity emissions** does that recuperate?\n\n");
-
-        SweepPoint b200 = findByProfile(summary, "gpu_generation", "B200_LC");
-        if (b200 != null) {
-            sb.append("**Reference answer (25k B200 liquid, DAC priority):** ")
-                    .append(scale.formatTonnes(b200.annualizedNetTonnes())).append(" net removed; ");
-            OperationalCarbon ops = OperationalCarbon.fromConfig();
-            OperationalCarbon.RecoveryAnalysis rec = ops.forHall(
-                    registry.require("B200_LC"), b200.gpuCount(), registry, b200.annualizedNetTonnes());
-            sb.append(String.format(Locale.US, "**%.0f%% recovery** of operational GPU-grid CO₂. ", rec.recoveryPercent()));
-            sb.append(scale.scaleNarrative(b200.annualizedNetTonnes())).append("\n\n");
-        }
+        appendExecutiveSummary(sb, summary, scale, registry);
 
         sb.append("### How to read the metrics\n\n");
         sb.append("| Metric | Use for |\n|--------|--------|\n");
@@ -105,6 +90,68 @@ public final class TemplateExplainer {
         sb.append("- Forecast SKUs: public GTC roadmaps — not NVIDIA confidential data\n");
 
         return sb.toString();
+    }
+
+    private static void appendExecutiveSummary(
+            StringBuilder sb, ResultsSummary summary, ClimateAnalogies scale,
+            GpuProfile.GpuProfileRegistry registry
+    ) throws IOException {
+        SweepPoint b200 = findByProfile(summary, "gpu_generation", "B200_LC");
+
+        sb.append("### Executive summary\n\n");
+        sb.append("> **TL;DR** — One Colossus-class AI hall can use its own waste heat to pull ")
+                .append("**~38,000 tonnes of CO₂ out of the air every year** — giving back ")
+                .append("**~one quarter** of the carbon emitted to power those GPUs.\n\n");
+
+        sb.append("#### The question\n\n");
+        sb.append("- NVIDIA-scale partners are building **~25,000-GPU liquid-cooled halls** (documented at xAI Colossus)\n");
+        sb.append(String.format(Locale.US,
+                "- Each hall runs **~%.0f MW of waste heat** 24/7 — heat that is usually dumped outside\n",
+                registry.referenceProfile().avgWasteHeatMw(registry.referenceGpuCount())));
+        sb.append("- **What if** that heat powered **direct air capture (DAC)** on the same campus instead?\n\n");
+
+        if (b200 != null) {
+            OperationalCarbon ops = OperationalCarbon.fromConfig();
+            OperationalCarbon.RecoveryAnalysis rec = ops.forHall(
+                    registry.require("B200_LC"), b200.gpuCount(), registry, b200.annualizedNetTonnes());
+            double coverCropAcres = b200.annualizedNetTonnes() / 0.5;
+            double iceCars = scale.iceCarsFromTonnes(b200.annualizedNetTonnes());
+
+            sb.append("#### The answer — reference hall (25k B200, DAC priority)\n\n");
+            sb.append(String.format(Locale.US,
+                    "| | |\n|---|---|\n"
+                            + "| **CO₂ removed** | **%,.0f tonnes/year** (net, after heat-pump electricity) |\n"
+                            + "| **Operational recovery** | **%.0f%%** of GPU-grid emissions clawed back |\n"
+                            + "| **Net balance** | Still **%,.0f tonnes/year emitted** — partial offset, not carbon-neutral |\n\n",
+                    b200.annualizedNetTonnes(), rec.recoveryPercent(), -rec.netBalanceTonnes()));
+
+            sb.append("#### How big is that? *(intuition — not the main metric)*\n\n");
+            sb.append(String.format(Locale.US,
+                    "- **~%,.0f acres** of high-performing USDA cover-crop program\n",
+                    coverCropAcres));
+            sb.append(String.format(Locale.US,
+                    "- **~%,.0f gasoline cars** parked for a year *(fades as transport electrifies)*\n",
+                    iceCars));
+            sb.append("- National context: ").append(scale.formatUsEmissionsShare(b200.annualizedNetTonnes()))
+                    .append(" — meaningful at campus scale, not a national fix alone\n\n");
+
+            List<HeatApplicationPoint> apps = summary.applications();
+            HeatApplicationPoint community = apps.stream()
+                    .filter(a -> "community_heat".equals(a.scenarioId())).findFirst().orElse(null);
+            if (community != null) {
+                sb.append("#### Same heat, different job\n\n");
+                sb.append("- **DAC priority** → max climate: **~38k tonnes/yr** removed\n");
+                sb.append(String.format(Locale.US,
+                        "- **Pools + fisheries first** → **%,.0f tonnes/yr** removed, but **~%,.0f homes**-worth of community heat\n",
+                        community.netCo2eTonnesPerYear(), community.homesHeatedEquivalent()));
+                sb.append("- Details in [Secondary heat applications](#secondary-heat-applications) below\n\n");
+            }
+
+            sb.append("#### Bottom line\n\n");
+            sb.append("Waste-heat DAC is **colocated carbon clawback** on exhaust you already paid for — ")
+                    .append("meaningful partial recovery, not permission to build without limit. ")
+                    .append("**Blackwell and Rubin run hotter** → more potential per hall if capture plant scales with silicon.\n\n");
+        }
     }
 
     private static void appendChartSection(
@@ -266,6 +313,7 @@ public final class TemplateExplainer {
         List<HeatApplicationPoint> apps = summary.applications();
         if (apps.isEmpty()) return;
 
+        sb.append("<a id=\"secondary-heat-applications\"></a>\n\n");
         sb.append("### Secondary heat applications — pools, fisheries, community heat\n\n");
         sb.append("The same **~34 MW** waste-heat stream can be routed to **DAC**, **heated pools**, **aquaculture raceways**, or **algae** ")
                 .append("(MVP: one path at a time). Metrics translate delivered MWh into real-world equivalents ")

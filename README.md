@@ -80,9 +80,9 @@ A **robotic controller** in our simulation decides *where* to send the heat: car
 
 ## What we found (NVIDIA U.S.)
 
-We ran the simulator for **one liquid-cooled U.S. AI hall** (~**25,000 GPUs**, ~34 MW waste heat on B200 liquid, DAC priority). Charts report **tonnes CO₂e/year**; prose adds scale analogies (agriculture, transport, **% operational recovery**, and **secondary heat** — olympic pools, aquaculture raceways, homes heated). See [Scalability](#scalability-charts).
+**TL;DR:** One **25,000-GPU** hall can remove **~38,000 tonnes CO₂/year** from the air using its own waste heat — recovering **~25%** of the carbon it took to power those chips.
 
-**Full scalability analysis** — GPU counts, generation comparisons, campus rollout, and charts — is in [Scalability: GPUs, heat, and CO₂](#scalability-charts) below. Those numbers are **auto-generated** when you run `./gradlew generateFigures`.
+Full charts, trade-offs (DAC vs. pools vs. fisheries), and scale analogies are in [Scalability](#scalability-charts) below. Numbers are **auto-generated** when you run `./gradlew generateFigures`.
 
 For a balanced DAC + algae rotation (one pipe at a time), see [balanced run](#balanced-dac--algae) in [Try it yourself](#try-it-yourself).
 
@@ -134,9 +134,37 @@ See [`config/impact_analogies.yaml`](config/impact_analogies.yaml). Auto-generat
 
 ### Executive summary
 
-NVIDIA and hyperscale partners are building **~25,000-GPU liquid-cooled halls** (documented at xAI Colossus). Each hall throws off **tens of MW of waste heat** 24/7. This simulation asks: if that heat powers **direct air capture (DAC)** colocated on campus, how much CO₂ comes back out of the atmosphere — and what fraction of the **hall's own GPU electricity emissions** does that recuperate?
+> **TL;DR** — One Colossus-class AI hall can use its own waste heat to pull **~38,000 tonnes of CO₂ out of the air every year** — giving back **~one quarter** of the carbon emitted to power those GPUs.
 
-**Reference answer (25k B200 liquid, DAC priority):** 37,776 tonnes CO₂e/year net removed; **25% recovery** of operational GPU-grid CO₂. **37,776 tonnes CO₂e per year** net removed. Scale: **0.001%** of U.S. emissions, **0.01%** of U.S. agriculture sector emissions, **0.0001%** of global anthropogenic CO₂. Transport intuition (declining relevance as grids electrify): equivalent to **~8,212 cars** gasoline cars parked for a year, or **~18,888 cars** EVs on today's U.S. grid. Agriculture intuition: like running a **cover-crop carbon program on ~75,552 acres** (~170 average-sized U.S. farms at ~445 acres each). Also **~4,444 homes'** annual energy emissions, or **~37,776** NYC–London round-trip flights.
+#### The question
+
+- NVIDIA-scale partners are building **~25,000-GPU liquid-cooled halls** (documented at xAI Colossus)
+- Each hall runs **~34 MW of waste heat** 24/7 — heat that is usually dumped outside
+- **What if** that heat powered **direct air capture (DAC)** on the same campus instead?
+
+#### The answer — reference hall (25k B200, DAC priority)
+
+| | |
+|---|---|
+| **CO₂ removed** | **37,776 tonnes/year** (net, after heat-pump electricity) |
+| **Operational recovery** | **25%** of GPU-grid emissions clawed back |
+| **Net balance** | Still **111,489 tonnes/year emitted** — partial offset, not carbon-neutral |
+
+#### How big is that? *(intuition — not the main metric)*
+
+- **~75,552 acres** of high-performing USDA cover-crop program
+- **~8,212 gasoline cars** parked for a year *(fades as transport electrifies)*
+- National context: **38 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 132,359**) — meaningful at campus scale, not a national fix alone
+
+#### Same heat, different job
+
+- **DAC priority** → max climate: **~38k tonnes/yr** removed
+- **Pools + fisheries first** → **1,721 tonnes/yr** removed, but **~814 homes**-worth of community heat
+- Details in [Secondary heat applications](#secondary-heat-applications) below
+
+#### Bottom line
+
+Waste-heat DAC is **colocated carbon clawback** on exhaust you already paid for — meaningful partial recovery, not permission to build without limit. **Blackwell and Rubin run hotter** → more potential per hall if capture plant scales with silicon.
 
 ### How to read the metrics
 
@@ -168,7 +196,7 @@ As the U.S. grid decarbonizes, **GPU operational CO₂ falls** but **waste heat 
 
 **Read:** Each doubling of GPUs (with scaled DAC) roughly doubles net removal until equipment limits bind.
 
-**Highlighted point:** 25000 GPUs → **26,583 tonnes CO₂e per year** net removed. Scale: **0.001%** of U.S. emissions, **0.00%** of U.S. agriculture sector emissions, **0.0001%** of global anthropogenic CO₂. Transport intuition (declining relevance as grids electrify): equivalent to **~5,779 cars** gasoline cars parked for a year, or **~13,292 cars** EVs on today's U.S. grid. Agriculture intuition: like running a **cover-crop carbon program on ~53,166 acres** (~119 average-sized U.S. farms at ~445 acres each). Also **~3,127 homes'** annual energy emissions, or **~26,583** NYC–London round-trip flights.
+**Highlighted point:** 25000 GPUs → **26,583 tonnes CO₂e/year** net removed — **27 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 188,090**). Roughly **~53,166 acres** of USDA cover-crop program (~119 farms), or **~5,779 cars** gasoline cars / **~13,292 cars** EVs parked for a year.
 
 ### Chart 2 — Hotter generations, same hall
 
@@ -180,7 +208,7 @@ As the U.S. grid decarbonizes, **GPU operational CO₂ falls** but **waste heat 
 
 **Read:** Same 25,000-GPU hall removes more CO₂ as TDP rises — relevant for Blackwell and Vera Rubin planning.
 
-**Highlighted point:** Blackwell Ultra → **43,372 tonnes CO₂e per year** net removed. Scale: **0.001%** of U.S. emissions, **0.01%** of U.S. agriculture sector emissions, **0.0001%** of global anthropogenic CO₂. Transport intuition (declining relevance as grids electrify): equivalent to **~9,429 cars** gasoline cars parked for a year, or **~21,686 cars** EVs on today's U.S. grid. Agriculture intuition: like running a **cover-crop carbon program on ~86,745 acres** (~195 average-sized U.S. farms at ~445 acres each). Also **~5,103 homes'** annual energy emissions, or **~43,372** NYC–London round-trip flights.
+**Highlighted point:** Blackwell Ultra → **43,372 tonnes CO₂e/year** net removed — **43 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 115,281**). Roughly **~86,745 acres** of USDA cover-crop program (~195 farms), or **~9,429 cars** gasoline cars / **~21,686 cars** EVs parked for a year.
 
 ### Chart 3 — Saturation at fixed DAC capacity
 
@@ -192,7 +220,7 @@ As the U.S. grid decarbonizes, **GPU operational CO₂ falls** but **waste heat 
 
 **Read:** Pasting more GPUs onto a hall **without** scaling DAC hits a plateau — capex must match heat.
 
-**Highlighted point:** 1.3x heat (31250 GPUs equiv.) → **37,597 tonnes CO₂e per year** net removed. Scale: **0.001%** of U.S. emissions, **0.01%** of U.S. agriculture sector emissions, **0.0001%** of global anthropogenic CO₂. Transport intuition (declining relevance as grids electrify): equivalent to **~8,173 cars** gasoline cars parked for a year, or **~18,798 cars** EVs on today's U.S. grid. Agriculture intuition: like running a **cover-crop carbon program on ~75,193 acres** (~169 average-sized U.S. farms at ~445 acres each). Also **~4,423 homes'** annual energy emissions, or **~37,597** NYC–London round-trip flights.
+**Highlighted point:** 1.3x heat (31250 GPUs equiv.) → **37,597 tonnes CO₂e/year** net removed — **38 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 132,991**). Roughly **~75,193 acres** of USDA cover-crop program (~169 farms), or **~8,173 cars** gasoline cars / **~18,798 cars** EVs parked for a year.
 
 ### Chart 4 — Multi-hall campus rollout
 
@@ -204,7 +232,7 @@ As the U.S. grid decarbonizes, **GPU operational CO₂ falls** but **waste heat 
 
 **Read:** Ten halls ≈ 250k GPUs — where regional climate impact becomes policy-visible.
 
-**Highlighted point:** 20 halls → **755,519 tonnes CO₂e per year** net removed. Scale: **0.015%** of U.S. emissions, **0.13%** of U.S. agriculture sector emissions, **0.0021%** of global anthropogenic CO₂. Transport intuition (declining relevance as grids electrify): equivalent to **~164,243 cars** gasoline cars parked for a year, or **~377,760 cars** EVs on today's U.S. grid. Agriculture intuition: like running a **cover-crop carbon program on ~1,511,038 acres** (~3396 average-sized U.S. farms at ~445 acres each). Also **~88,885 homes'** annual energy emissions, or **~755,519** NYC–London round-trip flights.
+**Highlighted point:** 20 halls → **755,519 tonnes CO₂e/year** net removed — **756 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 6,618**). Roughly **~1,511,038 acres** of USDA cover-crop program (~3396 farms), or **~164,243 cars** gasoline cars / **~377,760 cars** EVs parked for a year.
 
 ### Chart 5 — Gross vs. net (heat-pump electricity penalty)
 
@@ -235,6 +263,8 @@ For NVIDIA-scale infrastructure, compare DAC removal to **CO₂ from powering th
 
 **Strategic framing for NVIDIA:** Waste-heat DAC is **colocated carbon clawback** on heat already paid for — ~one quarter of operational CO₂ today, rising if grid greens and DAC scales with Blackwell/Rubin thermals. Not a license to build; a way to **extract value from unavoidable exhaust**.
 
+<a id="secondary-heat-applications"></a>
+
 ### Secondary heat applications — pools, fisheries, community heat
 
 The same **~34 MW** waste-heat stream can be routed to **DAC**, **heated pools**, **aquaculture raceways**, or **algae** (MVP: one path at a time). Metrics translate delivered MWh into real-world equivalents (olympic pool ~180 MWh/yr; community pool ~45 MWh/yr; 500 m³ raceway ~241 MWh/yr maintenance; U.S. home ~8 MWh/yr heat).
@@ -263,13 +293,13 @@ The same **~34 MW** waste-heat stream can be routed to **DAC**, **heated pools**
 
 ### Scenario narratives
 
-**Lab footprint (~5k H100)** — **5,317 tonnes CO₂e per year** net removed. Scale: **0.000%** of U.S. emissions, **0.00%** of U.S. agriculture sector emissions, **0.0000%** of global anthropogenic CO₂. Transport intuition (declining relevance as grids electrify): equivalent to **~1,156 cars** gasoline cars parked for a year, or **~2,658 cars** EVs on today's U.S. grid. Agriculture intuition: like running a **cover-crop carbon program on ~10,633 acres** (~24 average-sized U.S. farms at ~445 acres each). Also **~625 homes'** annual energy emissions, or **~5,317** NYC–London round-trip flights. *(MVP: single heat path; parallel DAC+algae would raise totals.)*
+**Lab footprint (~5k H100)** — **5,317 tonnes CO₂e/year** net removed — **5 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 940,448**). Roughly **~10,633 acres** of USDA cover-crop program (~24 farms), or **~1,156 cars** gasoline cars / **~2,658 cars** EVs parked for a year. *(MVP: single heat path; parallel DAC+algae would raise totals.)*
 
-**Single Colossus-class hall (25k B200)** — **37,776 tonnes CO₂e per year** net removed. Scale: **0.001%** of U.S. emissions, **0.01%** of U.S. agriculture sector emissions, **0.0001%** of global anthropogenic CO₂. Transport intuition (declining relevance as grids electrify): equivalent to **~8,212 cars** gasoline cars parked for a year, or **~18,888 cars** EVs on today's U.S. grid. Agriculture intuition: like running a **cover-crop carbon program on ~75,552 acres** (~170 average-sized U.S. farms at ~445 acres each). Also **~4,444 homes'** annual energy emissions, or **~37,776** NYC–London round-trip flights. *(MVP: single heat path; parallel DAC+algae would raise totals.)*
+**Single Colossus-class hall (25k B200)** — **37,776 tonnes CO₂e/year** net removed — **38 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 132,359**). Roughly **~75,552 acres** of USDA cover-crop program (~170 farms), or **~8,212 cars** gasoline cars / **~18,888 cars** EVs parked for a year. *(MVP: single heat path; parallel DAC+algae would raise totals.)*
 
-**Regional campus (10 halls)** — **377,760 tonnes CO₂e per year** net removed. Scale: **0.008%** of U.S. emissions, **0.06%** of U.S. agriculture sector emissions, **0.0010%** of global anthropogenic CO₂. Transport intuition (declining relevance as grids electrify): equivalent to **~82,122 cars** gasoline cars parked for a year, or **~188,880 cars** EVs on today's U.S. grid. Agriculture intuition: like running a **cover-crop carbon program on ~755,519 acres** (~1698 average-sized U.S. farms at ~445 acres each). Also **~44,442 homes'** annual energy emissions, or **~377,760** NYC–London round-trip flights. *(MVP: single heat path; parallel DAC+algae would raise totals.)*
+**Regional campus (10 halls)** — **377,760 tonnes CO₂e/year** net removed — **378 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 13,236**). Roughly **~755,519 acres** of USDA cover-crop program (~1698 farms), or **~82,122 cars** gasoline cars / **~188,880 cars** EVs parked for a year. *(MVP: single heat path; parallel DAC+algae would raise totals.)*
 
-**Rubin-era hall (forecast)** — **37,675 tonnes CO₂e per year** net removed. Scale: **0.001%** of U.S. emissions, **0.01%** of U.S. agriculture sector emissions, **0.0001%** of global anthropogenic CO₂. Transport intuition (declining relevance as grids electrify): equivalent to **~8,190 cars** gasoline cars parked for a year, or **~18,838 cars** EVs on today's U.S. grid. Agriculture intuition: like running a **cover-crop carbon program on ~75,350 acres** (~169 average-sized U.S. farms at ~445 acres each). Also **~4,432 homes'** annual energy emissions, or **~37,675** NYC–London round-trip flights. *(MVP: single heat path; parallel DAC+algae would raise totals.)*
+**Rubin-era hall (forecast)** — **37,675 tonnes CO₂e/year** net removed — **38 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 132,713**). Roughly **~75,350 acres** of USDA cover-crop program (~169 farms), or **~8,190 cars** gasoline cars / **~18,838 cars** EVs parked for a year. *(MVP: single heat path; parallel DAC+algae would raise totals.)*
 
 ### FAQ
 
@@ -285,7 +315,7 @@ The same **~34 MW** waste-heat stream can be routed to **DAC**, **heated pools**
 
 **Pools and fisheries vs. DAC?** Same waste heat, different router priority. Community scenarios trade some CO₂ removal for **pools, raceway aquaculture, and district-heat equivalents** — see Secondary heat applications above.
 
-### Generated at: 2026-06-05T09:22:20.278772Z
+### Generated at: 2026-06-05T09:30:12.446096Z
 
 ### Sources
 

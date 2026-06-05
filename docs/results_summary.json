@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-05T09:22:20.278772Z",
+  "generated_at": "2026-06-05T09:30:12.446096Z",
   "metadata": {"sim_duration_s": 604800.00, "reference_profile_id": "B200_LC", "reference_gpu_count": 25000.00},
   "charts": ["docs/figures/co2_vs_gpu_count.png", "docs/figures/co2_vs_gpu_generation.png", "docs/figures/co2_saturation_gpu.png", "docs/figures/co2_multi_hall.png", "docs/figures/gross_vs_net_co2.png", "docs/figures/gpu_tdp_timeline.png"],
   "applications": [
