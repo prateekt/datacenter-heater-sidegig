@@ -319,7 +319,7 @@ The same **~34 MW** waste-heat stream can be routed to **DAC**, **heated pools**
 | AI lab | 5,000 | H100 SXM | 1 | **10.0** | 5,317 (grid scenario) |
 | One hall (H100) | 25,000 | H100 SXM | 1 | **49.9** | 26,583 (grid scenario) |
 | One hall (B200) | 25,000 | B200 (liquid) | 1 | **70.9** | 37,776 (grid scenario) |
-| 10-hall campus | 25,000 | B200 (liquid) | 1 | **70.9** | 37,776 (grid scenario) |
+| 10-hall campus | 250,000 (25,000/hall) | B200 (liquid) | 10 | **709.2** | 377,760 (grid scenario) |
 | Rubin hall | 13,200 | Vera Rubin Max-P | 1 | **70.7** | 37,675 (grid scenario) |
 
 ### Scenario narratives
@@ -470,7 +470,7 @@ As the U.S. grid decarbonizes, **GPU operational CO₂ falls** but **waste heat 
 
 **Pools, fisheries, showers vs. DAC?** Same exhaust, different router priority — a **policy choice** about where to send thermal service before dissipation.
 
-### Generated at: 2026-06-05T10:45:22.635853Z
+### Generated at: 2026-06-05T10:45:48.938174Z
 
 ### Sources
 

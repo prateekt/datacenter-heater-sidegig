@@ -26,5 +26,9 @@ class TemplateExplainerTest {
                 "Thermal GWh should appear before grid appendix");
         assertTrue(markdown.contains("capture yield"), "Narratives should show capture yield %");
         assertTrue(markdown.contains("linear extrapolation"), "Multi-hall caveat should be documented");
+        assertTrue(markdown.contains("250,000 (25,000/hall)"),
+                "10-hall table row should show total GPU count");
+        assertTrue(markdown.contains("10 halls (×10 linear extrapolation)"),
+                "10-hall narrative should document scaling method");
     }
 }

@@ -65,7 +65,7 @@ public final class TemplateExplainer {
         appendResultRow(sb, summary, "gpu_count_ramp", 5000, null, "AI lab");
         appendResultRow(sb, summary, "gpu_count_ramp", 25000, null, "One hall (H100)");
         appendResultRow(sb, summary, "gpu_generation", 25000, "B200_LC", "One hall (B200)");
-        appendResultRow(sb, summary, "multi_hall", 10, "B200_LC", "10-hall campus");
+        appendResultRow(sb, summary, "multi_hall", 10, null, "10-hall campus");
         appendForecastRow(sb, summary, "2026", "Rubin hall");
 
         sb.append("\n### Scenario narratives\n\n");
@@ -446,13 +446,13 @@ public final class TemplateExplainer {
     }
 
     private static SweepPoint resolvePoint(ResultsSummary summary, String sweepId, int key, String profileId) {
+        if ("multi_hall".equals(sweepId)) {
+            return summary.bySweep(sweepId).stream().filter(pt -> pt.halls() == key).findFirst().orElse(null);
+        }
         if (profileId != null) return findByProfile(summary, sweepId, profileId);
         if (key >= 2020) {
             return summary.bySweep(sweepId).stream()
                     .filter(pt -> pt.label().startsWith(String.valueOf(key))).findFirst().orElse(null);
-        }
-        if ("multi_hall".equals(sweepId)) {
-            return summary.bySweep(sweepId).stream().filter(pt -> pt.halls() == key).findFirst().orElse(null);
         }
         return findPoint(summary, sweepId, key);
     }
