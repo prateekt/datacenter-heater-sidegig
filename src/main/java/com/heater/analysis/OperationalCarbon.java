@@ -9,7 +9,6 @@ import java.util.Map;
 
 /**
  * Compares DAC net removal to CO₂ emitted powering GPU operations (grid electricity).
- * Waste-heat watts are used as a proxy for IT thermal load — nearly all GPU power becomes heat.
  */
 public final class OperationalCarbon {
 
@@ -46,14 +45,13 @@ public final class OperationalCarbon {
         double kwhPerYear = facilityAvgW * 8760.0 / 1000.0;
         double operationalTonnes = kwhPerYear * gridCo2KgPerKwh / 1000.0;
         double recoveryPct = operationalTonnes > 0 ? 100.0 * netRemovedTonnes / operationalTonnes : 0.0;
-        double netBalance = netRemovedTonnes - operationalTonnes;
         return new RecoveryAnalysis(
                 avgW / 1_000_000.0,
                 kwhPerYear / 1_000_000.0,
                 operationalTonnes,
                 netRemovedTonnes,
                 recoveryPct,
-                netBalance
+                netRemovedTonnes - operationalTonnes
         );
     }
 
@@ -78,26 +76,18 @@ public final class OperationalCarbon {
     }
 
     public String explainRecovery(RecoveryAnalysis r, ClimateAnalogies impact) {
-        double opsCars = impact.carsFromAnnualTonnes(r.operationalCo2Tonnes());
-        double netCars = impact.carsFromAnnualTonnes(r.netRemovedTonnes());
-        double balanceCars = impact.carsFromAnnualTonnes(Math.abs(r.netBalanceTonnes()));
-
         String balanceLine = r.netBalanceTonnes() >= 0
-                ? String.format(Locale.US,
-                "The hall is a **net carbon sink** by **%,.0f tonnes/year** (≈ %s).",
-                r.netBalanceTonnes(), impact.formatCars(balanceCars))
+                ? String.format(Locale.US, "Net **carbon sink** of **%,.0f tonnes CO₂e/year**.", r.netBalanceTonnes())
                 : String.format(Locale.US,
-                "The hall is still a **net emitter** by **%,.0f tonnes/year** (≈ %s) — DAC recovers part of the damage, not all.",
-                -r.netBalanceTonnes(), impact.formatCars(balanceCars));
+                "Still a **net emitter** of **%,.0f tonnes CO₂e/year** after DAC — partial clawback, not full offset.",
+                -r.netBalanceTonnes());
 
         return String.format(Locale.US,
-                "Running these GPUs draws **~%.1f GWh/year** from the grid (≈ **%.0f MW** average IT heat × PUE %.2f). "
-                        + "At the U.S. average grid, that electricity emits **%,.0f tonnes CO₂/year** (≈ %s). "
-                        + "DAC net removal is **%,.0f tonnes/year** (≈ %s) — about **%.0f%% recovery** of the hall's own operational CO₂. "
-                        + "%s",
+                "Facility draw **~%.0f GWh/year** (≈ %.0f MW IT heat × PUE %.2f). "
+                        + "At today's U.S. grid mix (0.39 kg CO₂/kWh), GPU operations emit **%,.0f tonnes CO₂e/year**. "
+                        + "DAC returns **%,.0f tonnes CO₂e/year** — **%.0f%% operational recovery**. %s "
+                        + "As the grid decarbonizes, operational emissions fall but waste heat (and DAC opportunity) remain.",
                 r.annualElectricityGwh(), r.avgItHeatMw(), pue,
-                r.operationalCo2Tonnes(), impact.formatCars(opsCars),
-                r.netRemovedTonnes(), impact.formatCars(netCars),
-                r.recoveryPercent(), balanceLine);
+                r.operationalCo2Tonnes(), r.netRemovedTonnes(), r.recoveryPercent(), balanceLine);
     }
 }

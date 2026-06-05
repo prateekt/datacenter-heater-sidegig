@@ -12,18 +12,20 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
 public final class ChartGenerator {
 
     private static final int W = 1000;
     private static final int H = 580;
+    private static final String Y_ANNUAL = "Net CO₂e removed (metric tonnes / year)";
+    private static final String Y_GROSS_NET = "CO₂e removed (metric tonnes / year)";
+    private static final String Y_7DAY = "Net CO₂e removed (metric tonnes, 7-day sim)";
 
     private final Path outputDir;
-    private final ClimateAnalogies analogies;
     private final double simDurationS;
 
     public ChartGenerator(Path outputDir, ClimateAnalogies analogies, double simDurationS) {
         this.outputDir = outputDir;
-        this.analogies = analogies;
         this.simDurationS = simDurationS;
     }
 
@@ -42,29 +44,22 @@ public final class ChartGenerator {
         return paths;
     }
 
-    private String carsAxisLabel() {
-        return "Cars off the road for one year (U.S. avg ≈ "
-                + String.format(Locale.US, "%.1f", analogies.carTonnesPerYear()) + " t CO₂/car)";
-    }
-
     private String writeCo2VsGpuCount(ResultsSummary summary) throws IOException {
         List<SweepPoint> pts = summary.bySweep("gpu_count_ramp");
         List<String> xLabels = pts.stream()
                 .map(p -> formatGpuLabel(p.gpuCount(), p.avgWasteHeatMw()))
                 .toList();
-        List<Double> cars = pts.stream()
-                .map(p -> analogies.carsFromAnnualTonnes(p.annualizedNetTonnes()))
-                .toList();
+        List<Double> y = pts.stream().map(SweepPoint::annualizedNetTonnes).toList();
         CategoryChart chart = new CategoryChartBuilder()
                 .width(W).height(H)
-                .title("More GPUs → More CO₂ Pulled From the Air")
-                .xAxisTitle("GPU count (H100-class hall, plant scales with size)")
-                .yAxisTitle(carsAxisLabel())
+                .title("Net CO₂ Removal vs. GPU Count")
+                .xAxisTitle("GPU count — H100-class, plant scales with hall (MW shown)")
+                .yAxisTitle(Y_ANNUAL)
                 .build();
         ChartStyle.applyCategory(chart, ChartStyle.TEAL);
         chart.getStyler().setXAxisLabelRotation(30);
         chart.getStyler().setYAxisDecimalPattern("#,###");
-        chart.addSeries("net removal", xLabels, cars);
+        chart.addSeries("net CO₂e", xLabels, y);
         return save(chart, "co2_vs_gpu_count.png");
     }
 
@@ -73,59 +68,54 @@ public final class ChartGenerator {
         List<String> labels = pts.stream()
                 .map(p -> p.forecast() ? p.profileName() + " †" : p.profileName())
                 .toList();
-        List<Double> cars = pts.stream()
-                .map(p -> analogies.carsFromAnnualTonnes(p.annualizedNetTonnes()))
-                .toList();
+        List<Double> y = pts.stream().map(SweepPoint::annualizedNetTonnes).toList();
+        int gpus = pts.isEmpty() ? 0 : pts.get(0).gpuCount();
         CategoryChart chart = new CategoryChartBuilder()
                 .width(W).height(H)
-                .title("Newer Chips Run Hotter → More CO₂ Removal (same hall size)")
-                .xAxisTitle("GPU generation (" + pts.get(0).gpuCount() + " GPUs per run, † = forecast)")
-                .yAxisTitle(carsAxisLabel())
+                .title("Net CO₂ Removal by GPU Generation")
+                .xAxisTitle("GPU generation (" + String.format(Locale.US, "%,d", gpus) + " GPUs, † = forecast)")
+                .yAxisTitle(Y_ANNUAL)
                 .build();
         ChartStyle.applyCategory(chart, ChartStyle.INDIGO);
         chart.getStyler().setXAxisLabelRotation(35);
         chart.getStyler().setYAxisDecimalPattern("#,###");
-        chart.addSeries("net removal", labels, cars);
+        chart.addSeries("net CO₂e", labels, y);
         return save(chart, "co2_vs_gpu_generation.png");
     }
 
     private String writeCo2Saturation(ResultsSummary summary) throws IOException {
         List<SweepPoint> pts = summary.bySweep("saturation");
         List<String> labels = pts.stream()
-                .map(p -> String.format(Locale.US, "%.0f× heat\n(%,d GPUs)", 
+                .map(p -> String.format(Locale.US, "%.1f×\n(%,d GPU-equiv.)",
                         heatMultiplierFromLabel(p.label()), p.gpuCount()))
                 .toList();
-        List<Double> cars = pts.stream()
-                .map(p -> analogies.carsFromKg(p.netCo2eKg(), simDurationS))
-                .toList();
+        List<Double> y = pts.stream().map(p -> p.netCo2eKg() / 1000.0).toList();
         CategoryChart chart = new CategoryChartBuilder()
                 .width(W).height(H)
-                .title("Fixed Capture Plant — Extra Heat Stops Helping (saturation)")
-                .xAxisTitle("Waste heat vs. reference hall (capture equipment held constant)")
-                .yAxisTitle(carsAxisLabel() + " — annualized from 7-day sim")
+                .title("Capture Plant Saturation — Fixed DAC, Rising Waste Heat")
+                .xAxisTitle("Heat multiplier vs. reference hall (capture equipment fixed)")
+                .yAxisTitle(Y_7DAY)
                 .build();
         ChartStyle.applyCategory(chart, ChartStyle.AMBER);
         chart.getStyler().setXAxisLabelRotation(0);
         chart.getStyler().setYAxisDecimalPattern("#,###");
-        chart.addSeries("net removal", labels, cars);
+        chart.addSeries("net CO₂e", labels, y);
         return save(chart, "co2_saturation_gpu.png");
     }
 
     private String writeMultiHall(ResultsSummary summary) throws IOException {
         List<SweepPoint> pts = summary.bySweep("multi_hall");
         List<Integer> halls = pts.stream().map(SweepPoint::halls).toList();
-        List<Double> cars = pts.stream()
-                .map(p -> analogies.carsFromAnnualTonnes(p.annualizedNetTonnes()))
-                .toList();
+        List<Double> y = pts.stream().map(SweepPoint::annualizedNetTonnes).toList();
         XYChart chart = new XYChartBuilder()
                 .width(W).height(H)
-                .title("Campus Rollout — Each Hall Adds More Cars-Off-Road Impact")
-                .xAxisTitle("Number of B200 halls (~25,000 GPUs each)")
-                .yAxisTitle(carsAxisLabel())
+                .title("Hyperscale Campus Rollout — Cumulative Net CO₂ Removal")
+                .xAxisTitle("Number of halls (~25,000 B200 liquid GPUs each)")
+                .yAxisTitle(Y_ANNUAL)
                 .build();
         ChartStyle.applyXy(chart, ChartStyle.GREEN);
         chart.getStyler().setYAxisDecimalPattern("#,###");
-        chart.addSeries("net removal", halls, cars);
+        chart.addSeries("net CO₂e", halls, y);
         ChartStyle.applyLineMarkers(chart);
         return save(chart, "co2_multi_hall.png");
     }
@@ -133,37 +123,33 @@ public final class ChartGenerator {
     private String writeGrossVsNet(ResultsSummary summary) throws IOException {
         List<SweepPoint> pts = summary.bySweep("gpu_count_ramp");
         List<Integer> x = pts.stream().map(SweepPoint::gpuCount).toList();
-        List<Double> grossCars = pts.stream()
-                .map(p -> analogies.carsFromAnnualTonnes(p.annualizedGrossTonnes()))
-                .toList();
-        List<Double> netCars = pts.stream()
-                .map(p -> analogies.carsFromAnnualTonnes(p.annualizedNetTonnes()))
-                .toList();
+        List<Double> gross = pts.stream().map(SweepPoint::annualizedGrossTonnes).toList();
+        List<Double> net = pts.stream().map(SweepPoint::annualizedNetTonnes).toList();
         XYChart chart = new XYChartBuilder()
                 .width(W).height(H)
-                .title("Gross vs. Net Removal — Heat Pumps Cost Some CO₂")
+                .title("Gross vs. Net CO₂ Removal — Heat-Pump Grid Penalty")
                 .xAxisTitle("GPU count (H100-class)")
-                .yAxisTitle(carsAxisLabel())
+                .yAxisTitle(Y_GROSS_NET)
                 .build();
         ChartStyle.applyXy(chart, ChartStyle.SLATE, ChartStyle.TEAL);
-        chart.addSeries("gross captured", x, grossCars);
-        chart.addSeries("net (after electricity)", x, netCars);
+        chart.addSeries("gross captured", x, gross);
+        chart.addSeries("net (after electricity)", x, net);
         ChartStyle.applyLineMarkers(chart);
         return save(chart, "gross_vs_net_co2.png");
     }
 
     private String writeGpuTdpTimeline(GpuProfile.GpuProfileRegistry registry) throws IOException {
         List<Double> years = List.of(2020.0, 2023.0, 2024.0, 2025.0, 2026.0, 2027.0, 2028.0);
-        List<Double> bulbs = List.of(5.5, 9.5, 9.5, 13.5, 15.5, 25.5, 35.0);
+        List<Double> watts = List.of(550.0, 950.0, 950.0, 1350.0, 1550.0, 2550.0, 3500.0);
         XYChart chart = new XYChartBuilder()
                 .width(W).height(H)
-                .title("Each GPU Generation Runs Hotter (100 W bulb = 1 bulb unit)")
+                .title("System Waste Heat per GPU — NVIDIA Generations")
                 .xAxisTitle("Year")
-                .yAxisTitle("Equivalent 100 W light bulbs running 24/7 per GPU")
+                .yAxisTitle("Waste heat to coolant loop (watts per GPU)")
                 .build();
         ChartStyle.applyXy(chart, ChartStyle.INDIGO);
-        chart.getStyler().setYAxisDecimalPattern("#0");
-        chart.addSeries("heat per GPU", years, bulbs);
+        chart.getStyler().setYAxisDecimalPattern("#,###");
+        chart.addSeries("W/GPU", years, watts);
         ChartStyle.applyLineMarkers(chart);
         BitmapEncoder.saveBitmap(chart, outputDir.resolve("gpu_tdp_timeline").toString(), BitmapEncoder.BitmapFormat.PNG);
         return "docs/figures/gpu_tdp_timeline.png";

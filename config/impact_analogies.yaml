@@ -1,24 +1,40 @@
-# Human-scale comparisons for CO₂ — cited in README and chart labels.
-# Tonnes = metric tons (1,000 kg).
+# Human-scale comparisons — used in prose, NOT on chart axes.
+# Charts use tonnes CO₂e/year (metric tons). Analogies help interpret results.
 
-us_car_tonnes_per_year: 4.6
-us_car_source: "U.S. EPA — typical passenger vehicle ~4.6 metric tons CO₂/year (2023)"
+# --- Transport (note electrification) ---
+us_ice_car_tonnes_per_year: 4.6
+us_ice_car_source: "U.S. EPA — gasoline passenger vehicle ~4.6 t CO₂/year (tailpipe + upstream)"
 
+us_ev_car_tonnes_per_year: 2.0
+us_ev_source: "EPA/DOE — BEV on current U.S. grid ~1.5–2.5 t CO₂/year (varies by region)"
+
+# --- Buildings ---
 us_household_tonnes_per_year: 8.5
-us_household_source: "U.S. EIA / EPA — average home energy-related CO₂ ~8–9 tonnes/year"
+us_household_source: "U.S. EIA — average home energy-related CO₂"
 
-us_per_capita_tonnes_per_year: 16.0
-us_per_capita_source: "World Bank / EPA — U.S. per-capita emissions ~15–16 tonnes CO₂e/year"
+# --- Agriculture & land ---
+cover_crop_acre_tonnes_per_year: 0.5
+cover_crop_source: "USDA NRCS — well-managed cover-crop/soil programs ~0.3–0.8 t CO₂e/acre/year sequestered"
 
+us_farm_avg_acres: 445
+us_farm_source: "USDA 2022 Census of Agriculture — mean farm size ~445 acres"
+
+us_ag_sector_million_tonnes_per_year: 598
+us_ag_source: "EPA Inventory 2023 — U.S. agriculture ~598 million t CO₂e/year (incl. soils, livestock, inputs)"
+
+# --- National / global context ---
+us_total_million_tonnes_per_year: 5000
+us_total_source: "EPA — U.S. total GHG ~5 billion t CO₂e/year (order of magnitude)"
+
+global_billion_tonnes_per_year: 36
+global_source: "IEA / Global Carbon Project — ~36 billion t CO₂/year anthropogenic"
+
+# --- Other ---
 flight_nyc_london_tonnes: 1.0
-flight_source: "ICAO calculator — ~1 tonne CO₂ per economy passenger NYC–London round trip"
+flight_source: "ICAO — ~1 t CO₂ per economy passenger NYC–London round trip"
 
-tree_kg_co2_per_year: 22.0
-tree_source: "USDA / Arbor Day — mature tree absorbs ~10–40 kg CO₂/year; we use 22 kg midpoint"
+miles_per_tonne_ice_car: 11386
+miles_source: "4.6 t ÷ 0.404 kg CO₂/mile (EPA avg gasoline car)"
 
-miles_per_tonne_car_equiv: 11386
-miles_source: "4.6 tonnes ÷ 0.404 kg CO₂/mile (EPA avg passenger car)"
-
-# Facility power usage effectiveness — grid kWh ≈ IT waste heat × PUE
 facility_pue: 1.15
-pue_source: "Liquid-cooled AI halls often quote PUE 1.1–1.3; we use 1.15 mid estimate"
+pue_source: "Liquid-cooled AI halls — PUE 1.1–1.3 typical; 1.15 mid estimate"

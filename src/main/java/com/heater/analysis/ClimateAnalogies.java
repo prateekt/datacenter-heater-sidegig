@@ -8,27 +8,39 @@ import java.util.Map;
 
 public final class ClimateAnalogies {
 
-    private final double carTonnesPerYear;
+    private final double iceCarTonnesPerYear;
+    private final double evCarTonnesPerYear;
     private final double householdTonnesPerYear;
-    private final double perCapitaTonnesPerYear;
+    private final double coverCropAcreTonnesPerYear;
+    private final double usFarmAvgAcres;
+    private final double usAgSectorMillionTonnes;
+    private final double usTotalMillionTonnes;
+    private final double globalBillionTonnes;
     private final double flightTonnes;
-    private final double treeKgPerYear;
-    private final double milesPerTonnesCar;
+    private final double milesPerTonneIceCar;
 
     public ClimateAnalogies(
-            double carTonnesPerYear,
+            double iceCarTonnesPerYear,
+            double evCarTonnesPerYear,
             double householdTonnesPerYear,
-            double perCapitaTonnesPerYear,
+            double coverCropAcreTonnesPerYear,
+            double usFarmAvgAcres,
+            double usAgSectorMillionTonnes,
+            double usTotalMillionTonnes,
+            double globalBillionTonnes,
             double flightTonnes,
-            double treeKgPerYear,
-            double milesPerTonnesCar
+            double milesPerTonneIceCar
     ) {
-        this.carTonnesPerYear = carTonnesPerYear;
+        this.iceCarTonnesPerYear = iceCarTonnesPerYear;
+        this.evCarTonnesPerYear = evCarTonnesPerYear;
         this.householdTonnesPerYear = householdTonnesPerYear;
-        this.perCapitaTonnesPerYear = perCapitaTonnesPerYear;
+        this.coverCropAcreTonnesPerYear = coverCropAcreTonnesPerYear;
+        this.usFarmAvgAcres = usFarmAvgAcres;
+        this.usAgSectorMillionTonnes = usAgSectorMillionTonnes;
+        this.usTotalMillionTonnes = usTotalMillionTonnes;
+        this.globalBillionTonnes = globalBillionTonnes;
         this.flightTonnes = flightTonnes;
-        this.treeKgPerYear = treeKgPerYear;
-        this.milesPerTonnesCar = milesPerTonnesCar;
+        this.milesPerTonneIceCar = milesPerTonneIceCar;
     }
 
     public static ClimateAnalogies loadDefault() throws IOException {
@@ -38,26 +50,25 @@ public final class ClimateAnalogies {
     public static ClimateAnalogies load(String path) throws IOException {
         Map<String, Object> cfg = ConfigLoader.load(path);
         return new ClimateAnalogies(
-                ConfigLoader.d(cfg, "us_car_tonnes_per_year", 4.6),
+                ConfigLoader.d(cfg, "us_ice_car_tonnes_per_year", 4.6),
+                ConfigLoader.d(cfg, "us_ev_car_tonnes_per_year", 2.0),
                 ConfigLoader.d(cfg, "us_household_tonnes_per_year", 8.5),
-                ConfigLoader.d(cfg, "us_per_capita_tonnes_per_year", 16.0),
+                ConfigLoader.d(cfg, "cover_crop_acre_tonnes_per_year", 0.5),
+                ConfigLoader.d(cfg, "us_farm_avg_acres", 445),
+                ConfigLoader.d(cfg, "us_ag_sector_million_tonnes_per_year", 598),
+                ConfigLoader.d(cfg, "us_total_million_tonnes_per_year", 5000),
+                ConfigLoader.d(cfg, "global_billion_tonnes_per_year", 36),
                 ConfigLoader.d(cfg, "flight_nyc_london_tonnes", 1.0),
-                ConfigLoader.d(cfg, "tree_kg_co2_per_year", 22.0),
-                ConfigLoader.d(cfg, "miles_per_tonne_car_equiv", 11_386.0)
+                ConfigLoader.d(cfg, "miles_per_tonne_ice_car", 11_386.0)
         );
     }
 
-    public double carTonnesPerYear() {
-        return carTonnesPerYear;
+    public double iceCarsFromTonnes(double tonnes) {
+        return tonnes / iceCarTonnesPerYear;
     }
 
-    public double carsFromAnnualTonnes(double tonnesPerYear) {
-        return tonnesPerYear / carTonnesPerYear;
-    }
-
-    public double carsFromKg(double kg, double simDurationS) {
-        double annualTonnes = annualizeKg(kg, simDurationS);
-        return carsFromAnnualTonnes(annualTonnes);
+    public double evCarsFromTonnes(double tonnes) {
+        return tonnes / evCarTonnesPerYear;
     }
 
     public double annualizeKg(double kg, double simDurationS) {
@@ -65,45 +76,67 @@ public final class ClimateAnalogies {
         return kg * (365.0 * 86400.0 / simDurationS) / 1000.0;
     }
 
+    public String formatTonnes(double tonnes) {
+        if (tonnes >= 1_000_000) {
+            return String.format(Locale.US, "%.2f million tonnes CO₂e/year", tonnes / 1_000_000.0);
+        }
+        if (tonnes >= 1_000) {
+            return String.format(Locale.US, "%,.0f tonnes CO₂e/year", tonnes);
+        }
+        return String.format(Locale.US, "%.0f tonnes CO₂e/year", tonnes);
+    }
+
     public String formatCars(double cars) {
         if (cars >= 1_000_000) {
             return String.format(Locale.US, "~%.1f million cars", cars / 1_000_000.0);
         }
-        if (cars >= 10_000) {
-            return String.format(Locale.US, "~%,.0f cars", cars);
-        }
-        if (cars >= 100) {
+        if (cars >= 1_000) {
             return String.format(Locale.US, "~%,.0f cars", cars);
         }
         return String.format(Locale.US, "~%.0f cars", cars);
     }
 
-    public String formatTonnesWithCars(double tonnesPerYear) {
-        double cars = carsFromAnnualTonnes(tonnesPerYear);
-        return String.format(Locale.US,
-                "**%,.0f tonnes CO₂/year** — the same climate impact as taking **%s off U.S. roads for a year** "
-                        + "(each car ≈ %.1f tonnes/year, EPA average)",
-                tonnesPerYear, formatCars(cars), carTonnesPerYear);
-    }
-
-    public String explainRemoval(double tonnesPerYear) {
-        double cars = carsFromAnnualTonnes(tonnesPerYear);
+    /**
+     * Rich scale narrative: tonnes first, then layered analogies for intuition.
+     * Cars framed with electrification caveat; includes agriculture and national context.
+     */
+    public String scaleNarrative(double tonnesPerYear) {
+        double iceCars = iceCarsFromTonnes(tonnesPerYear);
+        double evCars = evCarsFromTonnes(tonnesPerYear);
         double households = tonnesPerYear / householdTonnesPerYear;
+        double coverCropAcres = tonnesPerYear / coverCropAcreTonnesPerYear;
+        double avgFarms = coverCropAcres / usFarmAvgAcres;
+        double pctUs = 100.0 * tonnesPerYear / (usTotalMillionTonnes * 1_000_000.0);
+        double pctUsAg = 100.0 * tonnesPerYear / (usAgSectorMillionTonnes * 1_000_000.0);
+        double pctGlobal = 100.0 * tonnesPerYear / (globalBillionTonnes * 1_000_000_000.0);
         double flights = tonnesPerYear / flightTonnes;
-        long miles = Math.round(tonnesPerYear * milesPerTonnesCar);
 
         return String.format(Locale.US,
-                "That's **%s off U.S. roads for one year** — the same climate benefit as if those cars' tailpipes emitted nothing "
-                        + "(≈ %.1f tonnes CO₂ per car, EPA average). "
-                        + "Scientifically that is **%,.0f tonnes of CO₂ pulled from the air annually**. "
-                        + "Also comparable to **~%,.0f homes'** yearly energy emissions, "
-                        + "**~%,.0f NYC–London round-trip flights**, or **~%.1f million miles** of driving avoided.",
-                formatCars(cars), carTonnesPerYear, tonnesPerYear,
-                households, flights, miles / 1_000_000.0);
+                "**%,.0f tonnes CO₂e per year** net removed. "
+                        + "Scale: **%.3f%%** of U.S. emissions, **%.2f%%** of U.S. agriculture sector emissions, "
+                        + "**%.4f%%** of global anthropogenic CO₂. "
+                        + "Transport intuition (declining relevance as grids electrify): equivalent to **%s** "
+                        + "gasoline cars parked for a year, or **%s** EVs on today's U.S. grid. "
+                        + "Agriculture intuition: like running a **cover-crop carbon program on ~%,.0f acres** "
+                        + "(~%.0f average-sized U.S. farms at ~%.0f acres each). "
+                        + "Also **~%,.0f homes'** annual energy emissions, or **~%,.0f** NYC–London round-trip flights.",
+                tonnesPerYear, pctUs, pctUsAg, pctGlobal,
+                formatCars(iceCars), formatCars(evCars),
+                coverCropAcres, avgFarms, usFarmAvgAcres,
+                households, flights);
     }
 
-    public String chartSubtitle() {
+    public String chartSubtitleTonnes() {
+        return "Y-axis: net CO₂e removed (metric tonnes per year, annualized from simulation)";
+    }
+
+    public String electrificationNote() {
         return String.format(Locale.US,
-                "Y-axis: cars off the road (1 car ≈ %.1f tonnes CO₂/year, U.S. EPA)", carTonnesPerYear);
+                "As the U.S. grid decarbonizes, **GPU operational CO₂ falls** but **waste heat remains** — "
+                        + "DAC's job is still to use that heat. "
+                        + "Gasoline-car analogies (%.1f t/car) overstate the future; "
+                        + "EV analogies (%.1f t/car on today's grid) are a better tailpipe mental model. "
+                        + "**Tonnes and %% recovery** stay the right metrics either way.",
+                iceCarTonnesPerYear, evCarTonnesPerYear);
     }
 }
