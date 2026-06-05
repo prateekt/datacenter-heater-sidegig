@@ -33,3 +33,13 @@ community_pool:
   typical_range_c: "28–32"
   sim_field: pool.temperature
   source: "Municipal / campus pool"
+
+plastic_recycling_direct:
+  typical_range_c: "45–70"
+  sim_field: plasticRecycling.directTemp
+  source: "Enzymatic PET / warm rinse tanks (direct buffer heat)"
+
+plastic_recycling_boost:
+  target_c: 85
+  sim_field: plasticRecycling.boostTargetTemp
+  source: "PET hot wash / feedstock pre-dry (heat-pump boost from buffer)"

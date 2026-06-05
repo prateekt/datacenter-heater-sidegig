@@ -72,6 +72,18 @@ public final class StateFactory {
         s.algae.spargeEfficiency = ConfigLoader.d(algae, "sparge_efficiency", 0.3);
         s.algae.temperature = ConfigLoader.d(algae, "initial_temp", 20.0);
 
+        Map<String, Object> plastic = ConfigLoader.map(loads, "plastic_recycling");
+        if (!plastic.isEmpty()) {
+            s.plasticRecycling.directVolume = ConfigLoader.d(plastic, "direct_volume_m3", 80_000.0);
+            s.plasticRecycling.directTemp = ConfigLoader.d(plastic, "initial_temp", 22.0);
+            s.plasticRecycling.directSetpoint = ConfigLoader.d(plastic, "direct_setpoint_c", 65.0);
+            s.plasticRecycling.directLossUa = ConfigLoader.d(plastic, "loss_ua", 3500.0);
+            s.plasticRecycling.boostTargetTemp = ConfigLoader.d(plastic, "boost_target_c", 85.0);
+            s.plasticRecycling.minSourceTemp = ConfigLoader.d(plastic, "min_source_temp", 40.0);
+            s.plasticRecycling.heatPumpCop = ConfigLoader.d(plastic, "heat_pump_cop", 3.2);
+            s.plasticRecycling.hpCapacityW = ConfigLoader.d(plastic, "hp_capacity_w", 4_000_000.0);
+        }
+
         ConvectionCaptureConfig convection = ConvectionCaptureConfig.fromYaml(config);
         s.passiveConvection.enabled = convection.convectionHybrid();
         if (convection.convectionHybrid()) {

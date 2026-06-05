@@ -60,6 +60,7 @@ public final class TemplateExplainer {
         appendGpuTimelineSection(sb);
 
         appendHeatApplicationsSection(sb, summary);
+        appendPlasticRecyclingSection(sb, summary);
 
         sb.append("### Results at a glance\n\n");
         sb.append("| Scenario | GPUs | Chip | Halls | **Thermal (GWh/yr)** | Net CO₂e (t/yr, grid scenario) |\n");
@@ -644,22 +645,23 @@ public final class TemplateExplainer {
         SweepPoint refHall = findByProfile(summary, "gpu_generation", "B200_LC");
         double refMw = refHall != null ? refHall.avgWasteHeatMw() : 33.75;
         sb.append(String.format(Locale.US,
-                "The same **~%.1f MW** waste-heat stream can be routed to **DAC**, **heated pools**, **aquaculture raceways**, **algae**, or **shelter hot showers** ",
+                "The same **~%.1f MW** waste-heat stream can be routed to **DAC**, **heated pools**, **aquaculture raceways**, **algae**, **plastic recycling**, or **shelter hot showers** ",
                 refMw))
                 .append("(MVP: **one valve path at a time** — robot `priority` in each YAML). ")
                 .append("**Routed MWh** comes from the simulator; **pools / fisheries / algae lines are zero** when that load is not in the priority list ")
                 .append("(e.g. `nvidia_us_expansion.yaml` sends everything to DAC). ")
                 .append("**Homes** and **hot showers** are *hypothetical redirects* of the same total MWh — not simultaneous loads.\n\n");
 
-        sb.append("| Priority scenario | Robot order | Routed MWh/yr (pool · fish · algae · DAC) | Net CO₂e (t/yr) |\n");
-        sb.append("|-------------------|-------------|----------------------------------------|-----------------|\n");
+        sb.append("| Priority scenario | Robot order | Routed MWh/yr (pool · fish · algae · plastic · DAC) | Net CO₂e (t/yr) |\n");
+        sb.append("|-------------------|-------------|-----------------------------------------------------|-----------------|\n");
         for (HeatApplicationPoint p : apps) {
             sb.append(String.format(Locale.US,
-                    "| %s | %s | **%,.0f** (%.0f · %.0f · %.0f · %.0f) | %,.0f |\n",
+                    "| %s | %s | **%,.0f** (%.0f · %.0f · %.0f · %.0f · %.0f) | %,.0f |\n",
                     p.label(),
                     p.robotPriority().isBlank() ? "—" : p.robotPriority(),
                     p.heatTotalMwh(),
-                    p.heatPoolMwh(), p.heatAquacultureMwh(), p.heatAlgaeMwh(), p.heatDacMwh(),
+                    p.heatPoolMwh(), p.heatAquacultureMwh(), p.heatAlgaeMwh(),
+                    p.heatPlasticMwh(), p.heatDacMwh(),
                     p.netCo2eTonnesPerYear()));
         }
         sb.append("\n| Priority scenario | Hypothetical redirect (same MWh → homes / showers) |\n");
@@ -690,5 +692,53 @@ public final class TemplateExplainer {
             sb.append("- ").append(HeatApplicationAnalyzer.formatPoint(p)).append("\n");
         }
         sb.append("\n");
+    }
+
+    private static void appendPlasticRecyclingSection(StringBuilder sb, ResultsSummary summary) {
+        List<HeatApplicationPoint> apps = summary.applications();
+        HeatApplicationPoint plastic = apps.stream()
+                .filter(a -> "plastic_recycling_priority".equals(a.scenarioId()))
+                .findFirst()
+                .orElse(null);
+        if (plastic == null) return;
+
+        sb.append("<a id=\"plastic-recycling-speculative\"></a>\n\n");
+        sb.append("### Plastic recycling side gig (speculative)\n\n");
+        sb.append("> **In one sentence:** GPU exhaust is the wrong temperature to *pyrolyze* plastic, but it is the right grade to **wash**, **rinse**, and **run enzymatic PET reactors** — with a heat-pump boost for **85 °C hot wash**.\n\n");
+        sb.append("**Nobody has built a Colossus-class MRF on a GPU hall yet.** This module is labeled speculative, like [Chimney DAC](#convection-speculative). It models a colocated **material recovery + enzymatic PET** plant with two thermal sub-loads: direct buffer heat to **65 °C** tanks and heat-pump-boosted **85 °C** hot wash / pre-dry.\n\n");
+
+        sb.append("| Process | Typical temp | DC buffer (~35–55 °C) | Mode in sim |\n");
+        sb.append("|---------|-------------|------------------------|-------------|\n");
+        sb.append("| PET warm rinse | ~45 °C | Direct fit | `direct_setpoint_c` thermal mass |\n");
+        sb.append("| Enzymatic PET | 50–70 °C | Strong fit | Same direct tanks |\n");
+        sb.append("| PET hot wash | ~85 °C | Heat-pump boost | `hp_capacity_w` from buffer |\n");
+        sb.append("| Feedstock pre-dry | 100–150 °C | Boost only (not fully modeled) | Documented limit |\n");
+        sb.append("| Pyrolysis reactor | 350–600 °C | **No direct fit** | Not modeled — internal syngas/char |\n\n");
+
+        sb.append(String.format(Locale.US,
+                "**Plastic-recycling priority run:** **%,.0f MWh/yr** to plastic loads "
+                        + "(**~%,.0f tonnes PET/yr** thermal-service equivalent) · **%,.0f MWh/yr** leftover to DAC · "
+                        + "**%,.0f tonnes CO₂e/yr** net (grid scenario).\n\n",
+                plastic.heatPlasticMwh(),
+                plastic.petTonnesEquivalent(),
+                plastic.heatDacMwh(),
+                plastic.netCo2eTonnesPerYear()));
+
+        HeatApplicationPoint dac = apps.stream()
+                .filter(a -> "dac_priority".equals(a.scenarioId()))
+                .findFirst()
+                .orElse(null);
+        if (dac != null) {
+            sb.append(String.format(Locale.US,
+                    "**Trade-off (plastic vs. DAC priority):** plastic routing delivers **~%,.0f tonnes PET/yr** thermal equivalent "
+                            + "but **~%,.0f fewer tonnes CO₂e/yr** net removed than DAC-only.\n\n",
+                    plastic.petTonnesEquivalent(),
+                    dac.netCo2eTonnesPerYear() - plastic.netCo2eTonnesPerYear()));
+        }
+
+        sb.append("Pyrolysis for hard-to-recycle films and mixed polyolefins belongs in the same **industrial symbiosis** picture — "
+                + "DC heat handles upstream drying; reactor duty stays internal; flue CO₂ can route to the existing DAC model. "
+                + "See [`config/nvidia_us_plastic_recycling.yaml`](config/nvidia_us_plastic_recycling.yaml) and "
+                + "[`config/thermal_grades.yaml`](config/thermal_grades.yaml).\n\n");
     }
 }

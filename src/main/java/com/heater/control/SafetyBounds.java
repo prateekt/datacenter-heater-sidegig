@@ -9,6 +9,7 @@ public final class SafetyBounds {
     public boolean allowHouseValve = true;
     public boolean allowCcsValve = true;
     public boolean allowAlgaeValve = true;
+    public boolean allowPlasticValve = true;
     public boolean forceFullReject;
     public String alarm;
 }

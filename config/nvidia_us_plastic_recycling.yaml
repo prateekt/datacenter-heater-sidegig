@@ -1,0 +1,115 @@
+# Plastic recycling priority — colocated MRF + enzymatic PET (speculative side gig).
+# Direct enzymatic/warm-rinse tanks (~65°C) plus heat-pump-boosted hot wash (~85°C).
+
+bootstrap_scenario: nvidia_us_module
+
+physics:
+  cp_water: 4186.0
+  ambient_temp: 22.0
+
+primary_loop:
+  mdot: 608.0
+  t_in: 35.0
+  t_max: 65.0
+  t_min_flow: 600.0
+  reject_capacity: 54000000.0
+
+heat_exchanger:
+  ua: 12160000.0
+
+buffer_tank:
+  volume: 1350000.0
+  initial_temp: 42.0
+
+loads:
+  pool:
+    volume: 40000.0
+    setpoint: 28.0
+    initial_temp: 22.0
+    loss_ua: 1200.0
+  aquaculture:
+    volume_m3: 50000.0
+    setpoint: 22.0
+    initial_temp: 18.0
+    loss_ua: 2500.0
+  house:
+    thermal_mass: 50000.0
+    setpoint: 40.0
+    initial_temp: 18.0
+    loss_ua: 1200.0
+  carbon_capture:
+    regeneration_temp: 90.0
+    min_source_temp: 40.0
+    heat_pump_cop: 3.2
+    specific_heat_duty_j_per_kg: 5500000.0
+    hp_capacity_w: 8100000.0
+  algae:
+    optimal_temp: 28.0
+    min_temp: 15.0
+    max_temp: 38.0
+    volume_m3: 12000.0
+    surface_area_m2: 16900.0
+    max_growth_g_m2_day: 45.0
+    co2_per_kg_biomass: 1.83
+    harvest_fraction: 0.85
+    loss_ua: 45000.0
+    sparge_efficiency: 0.35
+    initial_temp: 26.0
+  plastic_recycling:
+    direct_volume_m3: 120000.0       # wash tanks + enzymatic reactor hold (~campus MRF)
+    direct_setpoint_c: 65.0           # enzymatic PET / warm rinse hold
+    initial_temp: 22.0
+    loss_ua: 5500.0
+    boost_target_c: 85.0              # APR-class PET hot wash
+    min_source_temp: 40.0
+    heat_pump_cop: 3.2
+    hp_capacity_w: 6000000.0          # hot-wash + pre-dry boost plant
+
+control:
+  dt: 60.0
+  max_secondary_flow: 304.0
+  robot_interval: 300.0
+  pid:
+    primary:
+      kp: 0.008
+      ki: 0.001
+      kd: 0.0005
+    secondary:
+      kp: 0.012
+      ki: 0.002
+      kd: 0.0
+
+safety:
+  primary_t_trip: 63.0
+  secondary_dt_max: 25.0
+  robot_task_timeout: 600.0
+
+robot:
+  connect_duration: 60.0
+  switch_duration: 180.0
+  house_outside_threshold: -100.0
+  priority:
+    - plastic_recycling
+    - carbon_capture
+    - buffer
+  thresholds:
+    house_temp_delta: 1.0
+    pool_temp_delta: 0.5
+    buffer_charge_below: 48.0
+    algae_temp_delta: 0.5
+
+climate:
+  grid_co2_kg_per_kwh: 0.39
+  climate_sensitivity: 0.8
+
+scenarios:
+  nvidia_us_module:
+    duration: 604800
+    q_waste_base: 30378750.0
+    q_waste_peak: 48667500.0
+    outside_temps:
+      - { hour: 0,  temp: 19.0 }
+      - { hour: 6,  temp: 17.0 }
+      - { hour: 12, temp: 32.0 }
+      - { hour: 18, temp: 28.0 }
+      - { hour: 24, temp: 19.0 }

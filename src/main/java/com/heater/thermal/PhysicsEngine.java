@@ -3,6 +3,7 @@ package com.heater.thermal;
 import com.heater.carbon.AlgaeGrowthModel;
 import com.heater.carbon.CarbonCaptureModel;
 import com.heater.carbon.ConvectionCaptureModel;
+import com.heater.carbon.PlasticRecyclingModel;
 import com.heater.model.ActuatorState;
 import com.heater.model.SystemState;
 
@@ -46,6 +47,17 @@ public final class PhysicsEngine {
         double qHouse = updateHouse(state, actuators, cp, dt);
         AlgaeGrowthModel.updateThermal(state.algae, state.ambientTemp, actuators, cp, dt);
 
+        PlasticRecyclingModel.IntegrationResult plastic = PlasticRecyclingModel.integrate(
+                state.plasticRecycling,
+                state.buffer.temperature,
+                mdotSec,
+                actuators.plasticValveOpen,
+                state.ambientTemp,
+                cp,
+                dt
+        );
+        PlasticRecyclingModel.accumulateElectric(state, plastic.electricW(), dt);
+
         double dacRateBefore = state.carbonCapture.currentCaptureRateKgS;
         CarbonCaptureModel.CaptureResult capture;
         ConvectionCaptureModel.IntegrationResult convection = ConvectionCaptureModel.integrate(
@@ -85,15 +97,21 @@ public final class PhysicsEngine {
         }
         double qDac = state.carbonCapture.connected && actuators.ccsValveOpen && mdotSec > 0
                 ? capture.qSourceDrawW() : 0.0;
+        double qPlasticDirect = state.plasticRecycling.connected && actuators.plasticValveOpen
+                ? plastic.qDirectW() : 0.0;
+        double qPlasticBoost = state.plasticRecycling.connected && actuators.plasticValveOpen
+                ? plastic.qSourceDrawW() : 0.0;
 
         state.energyPoolJ += qPool * dt;
         state.energyAquacultureJ += qAqua * dt;
         state.energyHouseJ += qHouse * dt;
         state.energyAlgaeJ += qAlgae * dt;
         state.energyDacJ += qDac * dt;
+        state.energyPlasticDirectJ += qPlasticDirect * dt;
+        state.energyPlasticBoostJ += qPlasticBoost * dt;
 
-        double qDelivered = qPool + qAqua + qHouse + qAlgae + qDac;
-        qDelivered = Math.min(qDelivered, hx.qTransferW() + capture.qSourceDrawW());
+        double qDelivered = qPool + qAqua + qHouse + qAlgae + qDac + qPlasticDirect + qPlasticBoost;
+        qDelivered = Math.min(qDelivered, hx.qTransferW() + capture.qSourceDrawW() + plastic.qSourceDrawW());
         state.energyRecoveredJ += qDelivered * dt;
         // First-law balance: do not count dry-cooler duty that overlaps with delivered service.
         double qRejected = Math.max(0.0, Math.min(qReject, state.primary.qWaste - qDelivered));

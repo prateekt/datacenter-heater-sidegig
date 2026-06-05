@@ -31,6 +31,8 @@ public final class LoadSelector {
                     || ctx.algaeTemp() <= ctx.algaeOptimalTemp() + th.algaeTempDelta());
             case POOL -> ctx.poolTemp() < ctx.poolSetpoint() - th.poolTempDelta();
             case AQUACULTURE -> ctx.aquacultureTemp() < ctx.aquacultureSetpoint() - th.poolTempDelta();
+            case PLASTIC_RECYCLING -> ctx.plasticDirectTemp() < ctx.plasticDirectSetpoint() - th.poolTempDelta()
+                    || ctx.plasticBoostCanRun();
             case BUFFER -> ctx.bufferTemp() < th.bufferChargeBelow();
             default -> false;
         };

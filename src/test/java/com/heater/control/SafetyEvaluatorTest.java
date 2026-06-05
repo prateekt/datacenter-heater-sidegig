@@ -34,7 +34,7 @@ class SafetyEvaluatorTest {
         b.rejectFractionMin = 1.0;
         b.allowSecondary = false;
         b.allowCcsValve = false;
-        var c = SafetyEvaluator.clamp(0.2, 0.8, true, true, true, true, b);
+        var c = SafetyEvaluator.clamp(0.2, 0.8, true, true, true, true, true, b);
         assertFalse(c.ccsValve());
         assertEquals(0, c.secondaryPumpSpeed(), 1e-6);
     }

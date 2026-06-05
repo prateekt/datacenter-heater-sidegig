@@ -9,6 +9,7 @@
   <a href="#what-we-found-nvidia-us">Side gig results</a> ·
   <a href="#scalability-charts">Full analysis</a> ·
   <a href="#convection-speculative">Chimney DAC</a> ·
+  <a href="#plastic-recycling-speculative">Plastic recycling</a> ·
   <a href="#acoustic-speculative">Acoustic side gig</a> ·
   <a href="#how-the-simulation-works">Methods</a> ·
   <a href="#try-it-yourself">Run it</a> ·
@@ -34,7 +35,7 @@ Companies like **NVIDIA** are building huge **data centers** full of powerful **
 **Data Center Heater Side Gig** is a **computer simulation** of the smarter second job:
 
 1. Capture hot water from liquid-cooled GPU loops.
-2. Give that exhaust a **side gig** — **DAC**, **algae**, **pools**, **fisheries**, **shelter showers**, and more.
+2. Give that exhaust a **side gig** — **DAC**, **algae**, **pools**, **fisheries**, **shelter showers**, **plastic recycling**, and more.
 3. Report **MW**, **GWh/yr**, and **temperature grades** (grid-agnostic). Grid-dependent CO₂ accounting is a separate, labeled scenario.
 4. *(Speculative)* Model **chimney convection** — warm exhaust rising through giant CO₂-catching walls, reducing fan power.
 
@@ -49,7 +50,7 @@ Read [The big idea](#the-big-idea), then [Side gig results](#what-we-found-nvidi
 | | **Job 1** (what data centers do today) | **Side gig** (what we simulate) |
 |---|----------------------------------------|-----------------------------------|
 | **Purpose** | Keep GPUs cool enough to run | Use exhaust **before** it's wasted |
-| **Typical fate** | Heat dumped to ambient | DAC, algae, showers, pools, fisheries |
+| **Typical fate** | Heat dumped to ambient | DAC, algae, showers, pools, fisheries, plastic recycling |
 | **Question** | How big are the chillers? | How much **GWh/yr** can that heat deliver? |
 | **Grid assumption** | Doesn't matter — heat exists either way | Same — we lead with **thermodynamics**, not grid mix |
 
@@ -325,6 +326,39 @@ The same **~33.8 MW** waste-heat stream can be routed to **DAC**, **heated pools
 - **DAC priority (climate)** — **37,776 tonnes CO₂e/yr** net. **Robot priority:** carbon_capture → algae → buffer. **Routed heat:** **70,918 MWh/yr** (pools **0** · fisheries **0** · algae **0** · DAC **70,918**). Pools and fisheries are not in the robot list — all recoverable heat goes to DAC regeneration (~71 GWh/yr). *Hypothetical redirect* (same MWh to community uses): **~8,865 homes** heat, **~28.4 million shelter hot showers/yr (~77,718/day)**.
 - **Community heat (pools + fisheries)** — **1,721 tonnes CO₂e/yr** net. **Robot priority:** pool → aquaculture → algae → carbon_capture → buffer. **Routed heat:** **6,510 MWh/yr** (pools **97** · fisheries **104** · algae **3,409** · DAC **2,900**). Amenities first; DAC gets leftover heat (~2.9 GWh/yr) — large CO₂ trade-off vs climate priority. Pool service: **0.5 olympic-pool equivalents** (2.2 community pools). Fisheries: **0.4 raceways** (500 m³), **~5,393 kg fish/yr** potential. Algae: **0.19 ha** thermal service (from **3,409 MWh/yr** to ponds). *Hypothetical redirect* (same MWh to community uses): **~814 homes** heat, **~2.6 million shelter hot showers/yr (~7,134/day)**.
 - **Algae + DAC balanced** — **3,623 tonnes CO₂e/yr** net. **Robot priority:** algae → carbon_capture → buffer. **Routed heat:** **9,894 MWh/yr** (pools **0** · fisheries **0** · algae **3,683** · DAC **6,212**). No pools/fisheries. Algae is first in line — daytime pond maintenance starves DAC (~6.2 GWh/yr), so total routed heat (~9.9 GWh/yr) is far below DAC-only (~71 GWh/yr). Algae: **0.21 ha** thermal service (from **3,683 MWh/yr** to ponds). *Hypothetical redirect* (same MWh to community uses): **~1,237 homes** heat, **~4.0 million shelter hot showers/yr (~10,843/day)**.
+
+<a id="plastic-recycling-speculative"></a>
+
+### Plastic recycling side gig (speculative)
+
+> **In one sentence:** GPU exhaust is the wrong temperature to *pyrolyze* plastic, but it is the right grade to **wash**, **rinse**, and **run enzymatic PET reactors** — with a heat-pump boost for **85 °C hot wash**.
+
+**Nobody has built a Colossus-class MRF on a GPU hall yet.** This module is labeled speculative, like [Chimney DAC](#convection-speculative). The simulation models a colocated **material recovery + enzymatic PET** plant with two thermal sub-loads: direct buffer heat to **65 °C** tanks and heat-pump-boosted **85 °C** hot wash / pre-dry.
+
+| Process | Typical temp | DC buffer (~35–55 °C) | Mode in sim |
+|---------|-------------|------------------------|-------------|
+| PET warm rinse | ~45 °C | Direct fit | `direct_setpoint_c` thermal mass |
+| Enzymatic PET | 50–70 °C | Strong fit | Same direct tanks |
+| PET hot wash | ~85 °C | Heat-pump boost | `hp_capacity_w` from buffer |
+| Feedstock pre-dry | 100–150 °C | Boost only (not fully modeled) | Documented limit |
+| Pyrolysis reactor | 350–600 °C | **No direct fit** | Not modeled — internal syngas/char |
+
+**Industrial symbiosis schemes (conceptual):**
+
+1. **MRF colocation** — warm rinse (45 °C, direct) + hot caustic wash (85 °C, boost) displaces gas boilers and improves flake quality.
+2. **Enzymatic PET hub** — 50–70 °C reactors match buffer delivery; handles dirty/mixed PET mechanical lines reject.
+3. **Pyrolysis cascade** — DC heat pre-dries feedstock only; reactor at 450–500 °C uses pyrolysis syngas + char; flue CO₂ routes to existing DAC.
+4. **Integrated campus** — robot priority: plastic → algae → DAC → buffer (same one-valve trade-offs as community heat).
+
+Run the plastic-recycling priority scenario:
+
+```bash
+./gradlew run --args="config/nvidia_us_plastic_recycling.yaml nvidia_us_module"
+```
+
+Config: [`config/nvidia_us_plastic_recycling.yaml`](config/nvidia_us_plastic_recycling.yaml) · thermal grades: [`config/thermal_grades.yaml`](config/thermal_grades.yaml) · translation metrics: [`config/heat_applications.yaml`](config/heat_applications.yaml).
+
+*Auto-generated plastic vs. DAC trade-off numbers appear in [Secondary heat applications](#secondary-heat-applications) when you run `./gradlew generateFigures`.*
 
 ### Results at a glance
 

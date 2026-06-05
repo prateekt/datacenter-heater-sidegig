@@ -7,5 +7,6 @@ public final class ActuatorState {
     public boolean houseValveOpen;
     public boolean ccsValveOpen;
     public boolean algaeValveOpen;
+    public boolean plasticValveOpen;
     public double secondaryFlowKgS;
 }

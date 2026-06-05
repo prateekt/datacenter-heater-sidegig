@@ -38,6 +38,8 @@ public final class HeatApplicationAnalyzer {
         double homeKwh = ConfigLoader.d(ConfigLoader.map(appsRoot, "district_heat"), "us_home_annual_heat_kwh", 8000);
         double showerKwh = ConfigLoader.d(ConfigLoader.map(appsRoot, "homeless_shelter_shower"), "kwh_per_shower", 2.5);
         double haPerMwHeat = ConfigLoader.d(ConfigLoader.map(appsRoot, "algae_pond"), "hectares_per_mw_heat", 0.5);
+        Map<String, Object> plasticCfg = ConfigLoader.map(appsRoot, "plastic_recycling");
+        double tonnesPetPerGwh = ConfigLoader.d(plasticCfg, "tonnes_pet_per_gwh", 6500.0);
         double racewayKwhPerYear = wPerM3 * racewayM3 * 8760.0 / 1000.0;
 
         for (Map<String, Object> sc : scenarios) {
@@ -66,7 +68,10 @@ public final class HeatApplicationAnalyzer {
             double aquaMwh = sim.state.energyAquacultureJ / 3_600_000_000.0 * annualFactor;
             double algaeMwh = sim.state.energyAlgaeJ / 3_600_000_000.0 * annualFactor;
             double dacMwh = sim.state.energyDacJ / 3_600_000_000.0 * annualFactor;
-            double totalMwh = poolMwh + aquaMwh + algaeMwh + dacMwh;
+            double plasticDirectMwh = sim.state.energyPlasticDirectJ / 3_600_000_000.0 * annualFactor;
+            double plasticBoostMwh = sim.state.energyPlasticBoostJ / 3_600_000_000.0 * annualFactor;
+            double plasticMwh = plasticDirectMwh + plasticBoostMwh;
+            double totalMwh = poolMwh + aquaMwh + algaeMwh + dacMwh + plasticMwh;
 
             double netTonnes = metrics.climate().annualizedTonnesCo2e();
             double aquaRaceways = aquaMwh * 1000.0 / racewayKwhPerYear;
@@ -83,12 +88,14 @@ public final class HeatApplicationAnalyzer {
                     aquaMwh,
                     algaeMwh,
                     dacMwh,
+                    plasticMwh,
                     totalMwh,
                     poolMwh * 1000.0 / olympicKwh,
                     poolMwh * 1000.0 / communityPoolKwh,
                     aquaRaceways,
                     fishKg,
                     algaeHaFromHeat,
+                    plasticMwh / 1000.0 * tonnesPetPerGwh,
                     totalMwh * 1000.0 / homeKwh,
                     totalMwh * 1000.0 / showerKwh,
                     metrics.poolSatisfactionPct()
@@ -114,11 +121,12 @@ public final class HeatApplicationAnalyzer {
         sb.append(String.format(Locale.US,
                 "**%s** — **%,.0f tonnes CO₂e/yr** net. **Robot priority:** %s. "
                         + "**Routed heat:** **%,.0f MWh/yr** "
-                        + "(pools **%,.0f** · fisheries **%,.0f** · algae **%,.0f** · DAC **%,.0f**).",
+                        + "(pools **%,.0f** · fisheries **%,.0f** · algae **%,.0f** · plastic **%,.0f** · DAC **%,.0f**).",
                 p.label(), p.netCo2eTonnesPerYear(),
                 p.robotPriority().isBlank() ? "see config YAML" : p.robotPriority(),
                 p.heatTotalMwh(),
-                p.heatPoolMwh(), p.heatAquacultureMwh(), p.heatAlgaeMwh(), p.heatDacMwh()));
+                p.heatPoolMwh(), p.heatAquacultureMwh(), p.heatAlgaeMwh(),
+                p.heatPlasticMwh(), p.heatDacMwh()));
         if (!p.routingNote().isBlank()) {
             sb.append(" ").append(p.routingNote());
         }
@@ -137,6 +145,11 @@ public final class HeatApplicationAnalyzer {
             sb.append(String.format(Locale.US,
                     " Algae: **%.2f ha** thermal service (from **%,.0f MWh/yr** to ponds).",
                     p.algaeHectaresEquivalent(), p.heatAlgaeMwh()));
+        }
+        if (p.heatPlasticMwh() > 0.5) {
+            sb.append(String.format(Locale.US,
+                    " Plastic recycling: **~%,.0f tonnes PET/yr** thermal-service equivalent (from **%,.0f MWh/yr**).",
+                    p.petTonnesEquivalent(), p.heatPlasticMwh()));
         }
         sb.append(String.format(Locale.US,
                 " *Hypothetical redirect* (same MWh to community uses): **~%,.0f homes** heat, **%s**.",

@@ -156,6 +156,7 @@ public final class Simulator {
             case BUFFER -> state.buffer.temperature + 5.0;
             case CARBON_CAPTURE -> state.carbonCapture.regenerationTemp;
             case ALGAE -> state.algae.optimalTemp;
+            case PLASTIC_RECYCLING -> state.plasticRecycling.directSetpoint;
             default -> 0.0;
         };
     }

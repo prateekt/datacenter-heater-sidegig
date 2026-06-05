@@ -43,6 +43,7 @@ public final class RoboticRouter {
         timeSinceDecision = 0.0;
 
         boolean ccsCanRun = system.buffer.temperature >= system.carbonCapture.minSourceTemp;
+        boolean plasticBoostCanRun = system.buffer.temperature >= system.plasticRecycling.minSourceTemp;
         RouterContext ctx = new RouterContext(
                 simTime,
                 system.pool.temperature,
@@ -56,7 +57,10 @@ public final class RoboticRouter {
                 system.algae.optimalTemp,
                 system.ambientTemp,
                 primarySafe,
-                ccsCanRun
+                ccsCanRun,
+                system.plasticRecycling.directTemp,
+                system.plasticRecycling.directSetpoint,
+                plasticBoostCanRun
         );
         LoadTarget desired = LoadSelector.selectDesiredLoad(ctx, config);
 
@@ -142,5 +146,6 @@ public final class RoboticRouter {
         system.house.connected = connectedLoad == LoadTarget.HOUSE;
         system.carbonCapture.connected = connectedLoad == LoadTarget.CARBON_CAPTURE;
         system.algae.connected = connectedLoad == LoadTarget.ALGAE;
+        system.plasticRecycling.connected = connectedLoad == LoadTarget.PLASTIC_RECYCLING;
     }
 }

@@ -35,6 +35,14 @@ algae_pond:
   hectares_per_mw_heat: 0.5
   source: "Rough PBR sizing — ~0.5 ha algae pond per MW thermal service"
 
+plastic_recycling:
+  kwh_per_tonne_pet_wash: 180
+  source: "Order-of-magnitude MRF PET wash + enzymatic hold (APR hot wash ~85°C + 65°C reactor)"
+  kwh_per_tonne_enzymatic: 120
+  source_enzymatic: "Enzymatic PET reactor thermal hold — mid-range lab-to-pilot"
+  tonnes_pet_per_gwh: 6500
+  source_throughput: "Hypothetical PET throughput if all GWh went to wash/enzyme loads (~180 kWh/t blended)"
+
 application_scenarios:
   - id: dac_priority
     label: "DAC priority (climate)"
@@ -51,3 +59,8 @@ application_scenarios:
     config: config/nvidia_us_algae.yaml
     robot_priority: "algae → carbon_capture → buffer"
     routing_note: "No pools/fisheries. Algae is first in line — daytime pond maintenance starves DAC (~6.2 GWh/yr), so total routed heat (~9.9 GWh/yr) is far below DAC-only (~71 GWh/yr)."
+  - id: plastic_recycling_priority
+    label: "Plastic recycling priority (MRF + enzymatic)"
+    config: config/nvidia_us_plastic_recycling.yaml
+    robot_priority: "plastic_recycling → carbon_capture → buffer"
+    routing_note: "Direct wash/enzyme + boosted hot wash first; DAC gets leftover heat."

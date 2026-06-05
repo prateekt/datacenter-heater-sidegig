@@ -25,6 +25,7 @@ public final class SafetyEvaluator {
             bounds.allowHouseValve = false;
             bounds.allowCcsValve = false;
             bounds.allowAlgaeValve = false;
+            bounds.allowPlasticValve = false;
             bounds.alarm = "primary_trip";
         }
 
@@ -36,6 +37,7 @@ public final class SafetyEvaluator {
             bounds.allowHouseValve = false;
             bounds.allowCcsValve = false;
             bounds.allowAlgaeValve = false;
+            bounds.allowPlasticValve = false;
             bounds.alarm = "primary_low_flow";
         }
 
@@ -59,6 +61,7 @@ public final class SafetyEvaluator {
             bounds.allowSecondary = false;
             bounds.allowCcsValve = false;
             bounds.allowAlgaeValve = false;
+            bounds.allowPlasticValve = false;
             if (bounds.alarm == null) bounds.alarm = "robot_fault";
         }
 
@@ -68,6 +71,7 @@ public final class SafetyEvaluator {
             bounds.allowSecondary = false;
             bounds.allowCcsValve = false;
             bounds.allowAlgaeValve = false;
+            bounds.allowPlasticValve = false;
             if (bounds.alarm == null) bounds.alarm = "robot_task_timeout";
         }
 
@@ -81,6 +85,7 @@ public final class SafetyEvaluator {
             boolean houseValve,
             boolean ccsValve,
             boolean algaeValve,
+            boolean plasticValve,
             SafetyBounds bounds
     ) {
         if (bounds.forceFullReject) {
@@ -98,8 +103,9 @@ public final class SafetyEvaluator {
         if (!bounds.allowHouseValve) houseValve = false;
         if (!bounds.allowCcsValve) ccsValve = false;
         if (!bounds.allowAlgaeValve) algaeValve = false;
+        if (!bounds.allowPlasticValve) plasticValve = false;
 
-        return new ActuatorClamp(rejectFraction, secondaryPumpSpeed, poolValve, houseValve, ccsValve, algaeValve);
+        return new ActuatorClamp(rejectFraction, secondaryPumpSpeed, poolValve, houseValve, ccsValve, algaeValve, plasticValve);
     }
 
     public record ActuatorClamp(
@@ -108,6 +114,7 @@ public final class SafetyEvaluator {
             boolean poolValve,
             boolean houseValve,
             boolean ccsValve,
-            boolean algaeValve
+            boolean algaeValve,
+            boolean plasticValve
     ) {}
 }

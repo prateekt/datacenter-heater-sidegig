@@ -22,7 +22,8 @@ public record SensorSnapshot(
                 || state.aquaculture.connected
                 || state.house.connected
                 || state.carbonCapture.connected
-                || state.algae.connected;
+                || state.algae.connected
+                || state.plasticRecycling.connected;
         return new SensorSnapshot(
                 state.primary.tOut,
                 state.primary.mdot,

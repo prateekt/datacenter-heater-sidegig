@@ -13,5 +13,8 @@ public record RouterContext(
         double algaeOptimalTemp,
         double ambientTemp,
         boolean primarySafe,
-        boolean ccsCanRun
+        boolean ccsCanRun,
+        double plasticDirectTemp,
+        double plasticDirectSetpoint,
+        boolean plasticBoostCanRun
 ) {}

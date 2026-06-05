@@ -43,6 +43,7 @@ public final class AutomationController {
         boolean houseValve;
         boolean ccsValve;
         boolean algaeValve;
+        boolean plasticValve;
 
         switch (target) {
             case NONE -> {
@@ -51,6 +52,7 @@ public final class AutomationController {
                 houseValve = false;
                 ccsValve = false;
                 algaeValve = false;
+                plasticValve = false;
                 reject = Math.max(reject, 0.6);
             }
             case BUFFER -> {
@@ -60,6 +62,7 @@ public final class AutomationController {
                 houseValve = false;
                 ccsValve = false;
                 algaeValve = false;
+                plasticValve = false;
             }
             case POOL -> {
                 secondaryPid.setSetpoint(state.pool.setpoint);
@@ -68,6 +71,7 @@ public final class AutomationController {
                 houseValve = false;
                 ccsValve = false;
                 algaeValve = false;
+                plasticValve = false;
             }
             case AQUACULTURE -> {
                 secondaryPid.setSetpoint(state.aquaculture.setpoint);
@@ -76,6 +80,7 @@ public final class AutomationController {
                 houseValve = false;
                 ccsValve = false;
                 algaeValve = false;
+                plasticValve = false;
             }
             case HOUSE -> {
                 secondaryPid.setSetpoint(state.house.setpoint);
@@ -84,6 +89,7 @@ public final class AutomationController {
                 houseValve = true;
                 ccsValve = false;
                 algaeValve = false;
+                plasticValve = false;
             }
             case CARBON_CAPTURE -> {
                 secondaryPid.setSetpoint(state.carbonCapture.regenerationTemp);
@@ -92,6 +98,7 @@ public final class AutomationController {
                 houseValve = false;
                 ccsValve = true;
                 algaeValve = false;
+                plasticValve = false;
             }
             case ALGAE -> {
                 secondaryPid.setSetpoint(state.algae.optimalTemp);
@@ -100,6 +107,16 @@ public final class AutomationController {
                 houseValve = false;
                 ccsValve = false;
                 algaeValve = true;
+                plasticValve = false;
+            }
+            case PLASTIC_RECYCLING -> {
+                secondaryPid.setSetpoint(state.plasticRecycling.directSetpoint);
+                secondarySpeed = secondaryPid.update(state.plasticRecycling.directTemp, dt);
+                poolValve = false;
+                houseValve = false;
+                ccsValve = false;
+                algaeValve = false;
+                plasticValve = true;
             }
             default -> {
                 secondarySpeed = 0.0;
@@ -107,11 +124,12 @@ public final class AutomationController {
                 houseValve = false;
                 ccsValve = false;
                 algaeValve = false;
+                plasticValve = false;
             }
         }
 
         SafetyEvaluator.ActuatorClamp clamped = SafetyEvaluator.clamp(
-                reject, secondarySpeed, poolValve, houseValve, ccsValve, algaeValve, bounds
+                reject, secondarySpeed, poolValve, houseValve, ccsValve, algaeValve, plasticValve, bounds
         );
 
         if (bounds.forceFullReject && !anyLoadConnected(state)) {
@@ -121,7 +139,8 @@ public final class AutomationController {
                     clamped.poolValve(),
                     clamped.houseValve(),
                     clamped.ccsValve(),
-                    clamped.algaeValve()
+                    clamped.algaeValve(),
+                    clamped.plasticValve()
             );
         }
 
@@ -132,12 +151,14 @@ public final class AutomationController {
         actuators.houseValveOpen = clamped.houseValve();
         actuators.ccsValveOpen = clamped.ccsValve();
         actuators.algaeValveOpen = clamped.algaeValve();
+        actuators.plasticValveOpen = clamped.plasticValve();
         actuators.secondaryFlowKgS = clamped.secondaryPumpSpeed() * maxSecondaryFlow;
         return actuators;
     }
 
     private static boolean anyLoadConnected(SystemState state) {
         return state.pool.connected || state.aquaculture.connected || state.house.connected
-                || state.carbonCapture.connected || state.algae.connected;
+                || state.carbonCapture.connected || state.algae.connected
+                || state.plasticRecycling.connected;
     }
 }

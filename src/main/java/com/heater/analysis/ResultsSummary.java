@@ -87,10 +87,12 @@ public final class ResultsSummary {
                 "\"net_co2e_tonnes_per_year\":" + fmt(p.netCo2eTonnesPerYear()) + "," +
                 "\"heat_pool_mwh\":" + fmt(p.heatPoolMwh()) + "," +
                 "\"heat_aquaculture_mwh\":" + fmt(p.heatAquacultureMwh()) + "," +
+                "\"heat_plastic_mwh\":" + fmt(p.heatPlasticMwh()) + "," +
                 "\"heat_total_mwh\":" + fmt(p.heatTotalMwh()) + "," +
                 "\"olympic_pools_equiv\":" + fmt(p.olympicPoolsEquivalent()) + "," +
                 "\"aquaculture_raceways_equiv\":" + fmt(p.aquacultureRacewaysEquivalent()) + "," +
                 "\"fish_kg_per_year\":" + fmt(p.fishProductionKgPerYear()) + "," +
+                "\"pet_tonnes_equiv\":" + fmt(p.petTonnesEquivalent()) + "," +
                 "\"hot_showers_equiv\":" + fmt(p.hotShowersEquivalent()) +
                 "}";
     }
