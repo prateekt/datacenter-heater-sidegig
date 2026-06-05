@@ -22,6 +22,8 @@ class ConvectionTemplateExplainerTest {
         assertTrue(markdown.contains("plain English"));
         assertTrue(markdown.contains("published research"));
         assertTrue(markdown.contains("doi.org/10.1016/j.joule.2018.05.006"));
+        assertTrue(markdown.contains("Conclusion"));
+        assertTrue(markdown.contains("Chart interpretations"));
         assertTrue(markdown.contains("Honest limits"));
         assertTrue(markdown.toLowerCase().contains("speculative"));
 

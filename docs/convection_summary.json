@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-05T10:28:09.352120Z",
+  "generated_at": "2026-06-05T10:38:31.479294Z",
   "charts": ["docs/figures/convection_airflow_vs_height.png", "docs/figures/convection_co2_vs_height.png", "docs/figures/convection_fan_savings.png"],
   "points": [
     {"sweep_id":"reference","label":"Reference hall","chimney_height_m":120.0,"contactor_area_m2":50000.0,"waste_heat_to_air_fraction":0.35,"avg_waste_heat_mw":39.5231,"airflow_m3_s":267.1276,"fan_saved_mw":0.0845,"gross_co2_tonnes_yr":773.9983,"net_co2_tonnes_yr":629.8815,"delta_t_k":42.9379,"capture_rate_kg_s":0.0307},

@@ -25,8 +25,18 @@ public final class ConvectionExplainerValidator {
         if (!markdown.contains("published research")) {
             warnings.add("Missing literature comparison section");
         }
-        if (!markdown.contains("doi.org") && !markdown.contains("proceedings.aiche.org")) {
-            warnings.add("Missing academic citations (DOI or proceedings links)");
+        if (!markdown.contains("Conclusion")) {
+            warnings.add("Missing conclusion section");
+        }
+        if (!markdown.toLowerCase().contains("interpretation")) {
+            warnings.add("Missing scholarly interpretation section");
+        }
+        if (!markdown.contains("doi.org") && !markdown.contains("proceedings.aiche.org")
+                && !markdown.contains("arxiv.org")) {
+            warnings.add("Missing academic citations (DOI, arXiv, or proceedings links)");
+        }
+        if (!markdown.toLowerCase().contains("no nuclear")) {
+            warnings.add("Missing explicit no-nuclear energy policy statement");
         }
         if (!markdown.contains("speculative") && !markdown.contains("experimental")) {
             warnings.add("Missing speculative/experimental disclaimer");

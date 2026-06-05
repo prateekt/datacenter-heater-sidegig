@@ -1,12 +1,12 @@
 <p align="center">
   <strong>Data Center Heater Side Gig</strong><br>
-  <em>Job 1: cool the GPUs. Side gig: use the exhaust before it's thrown away.</em>
+  <em>Job 1: cool the GPUs. Side gig: put that exhaust to work — DAC, algae, shelter showers.</em>
 </p>
 
 <p align="center">
   <a href="#start-here">Start here</a> ·
   <a href="#the-big-idea">Big idea</a> ·
-  <a href="#what-we-found-nvidia-us">Thermal results</a> ·
+  <a href="#what-we-found-nvidia-us">Side gig results</a> ·
   <a href="#scalability-charts">Full analysis</a> ·
   <a href="#convection-speculative">Chimney DAC</a> ·
   <a href="#how-the-simulation-works">Methods</a> ·
@@ -26,20 +26,33 @@
 
 ## Start here
 
-> **In one sentence:** Data centers are giant heaters. We quantify **how much exhaust they produce**, **what temperatures are available**, and **which downstream processes can use that heat** before it is dissipated — without assuming a clean grid.
+> **In one sentence:** Data centers are giant heaters. **Job 1** is cooling the GPUs; the **side gig** is routing that exhaust to carbon capture, algae, shelter showers, and more — **before** it's thrown away.
 
-Companies like **NVIDIA** are building huge **data centers** full of powerful **GPUs**. Almost all the electricity they use becomes **waste heat** — usually dumped to ambient. **Data Center Heater Side Gig** simulates routing that exhaust to useful loads:
+Companies like **NVIDIA** are building huge **data centers** full of powerful **GPUs**. Almost all the electricity they use becomes **waste heat** — the data center's unwanted heater output. Today, **job 1** sends that heat outside and forgets it.
+
+**Data Center Heater Side Gig** is a **computer simulation** of the smarter second job:
 
 1. Capture hot water from liquid-cooled GPU loops.
-2. Deliver thermal service to **DAC**, **algae**, **pools**, **fisheries**, **shelter showers**, and more.
+2. Give that exhaust a **side gig** — **DAC**, **algae**, **pools**, **fisheries**, **shelter showers**, and more.
 3. Report **MW**, **GWh/yr**, and **temperature grades** (grid-agnostic). Grid-dependent CO₂ accounting is a separate, labeled scenario.
 4. *(Speculative)* Model **chimney convection** — warm exhaust rising through giant CO₂-catching walls, reducing fan power.
 
-Read [The big idea](#the-big-idea), then [Thermal results](#what-we-found-nvidia-us). For the experimental air-side path, see [Chimney DAC](#convection-speculative).
+Read [The big idea](#the-big-idea), then [Side gig results](#what-we-found-nvidia-us). For the experimental air-side path, see [Chimney DAC](#convection-speculative).
 
 ---
 
 ## The big idea
+
+### Job 1 vs. side gig
+
+| | **Job 1** (what data centers do today) | **Side gig** (what we simulate) |
+|---|----------------------------------------|-----------------------------------|
+| **Purpose** | Keep GPUs cool enough to run | Use exhaust **before** it's wasted |
+| **Typical fate** | Heat dumped to ambient | DAC, algae, showers, pools, fisheries |
+| **Question** | How big are the chillers? | How much **GWh/yr** can that heat deliver? |
+| **Grid assumption** | Doesn't matter — heat exists either way | Same — we lead with **thermodynamics**, not grid mix |
+
+The name **Side Gig** is deliberate: AI training still needs cooling. We're asking what else that unavoidable exhaust could do on the way out.
 
 ### The problem (explained simply)
 
@@ -82,9 +95,9 @@ We added a **separate, labeled experiment** for this idea. Warm exhaust creates 
 
 ---
 
-## What we found (NVIDIA U.S.)
+## Side gig results (NVIDIA U.S.)
 
-**TL;DR:** One **25,000-GPU** hall throws off **~34 MW** of waste heat and can deliver **~71 GWh/yr** of usable thermal service — enough for **~28 million shelter hot showers/year** or colocated DAC/algae. *Grid scenario:* ~38,000 tonnes CO₂/yr net removed.
+**TL;DR:** One **25,000-GPU** hall's exhaust could run a serious **side gig** — **~34 MW** of waste heat delivering **~71 GWh/yr** of usable thermal service, enough for **~28 million shelter hot showers/year** or colocated DAC/algae. *Grid scenario:* ~38,000 tonnes CO₂/yr net removed.
 
 Full thermal charts, downstream trade-offs, and the grid-dependent carbon appendix are in [Full analysis](#scalability-charts) below. Auto-generated when you run `./gradlew generateFigures`.
 
@@ -118,29 +131,29 @@ An earlier draft used ~37,000 GPUs (~50 MW). That was internally consistent but 
 
 Forecast rows use **public GTC / analyst targets**, not NVIDIA engineering data. See [`config/gpu_profiles.yaml`](config/gpu_profiles.yaml).
 
-### How we explain outputs (thermal first)
+### How we explain the side gig (thermal first)
 
 | Output | Role |
 |--------|------|
-| **MW waste heat** | Continuous thermal exhaust (grid-agnostic) |
-| **GWh/yr thermal service** | Heat delivered to downstream loads before rejection |
-| **Temperature grades** | Which processes can use available heat ([`config/thermal_grades.yaml`](config/thermal_grades.yaml)) |
+| **MW waste heat** | The exhaust **job 1** throws away (grid-agnostic) |
+| **GWh/yr thermal service** | What the **side gig** actually delivers before rejection |
+| **Temperature grades** | Which side-gig loads can use available heat ([`config/thermal_grades.yaml`](config/thermal_grades.yaml)) |
 | **Tonnes CO₂e/year** | *Grid scenario appendix only* — assumes 0.39 kg CO₂/kWh |
 
-Auto-generated analysis is in [Full analysis](#scalability-charts).
+Auto-generated side-gig analysis is in [Full analysis](#scalability-charts).
 
 ---
 
 <a id="scalability-charts"></a>
 
 <!-- SCALABILITY:BEGIN — auto-generated by ./gradlew generateFigures; do not edit -->
-## Thermal results: hyperscale waste-heat potential
+## Side gig results: what hyperscale exhaust can do
 
-*Auto-generated **output-side** results for **Data Center Heater Side Gig** — how much heat hyperscale AI halls produce, what temperatures are available, and which downstream processes can use it before dissipation. Grid-dependent carbon accounting is in the [appendix](#appendix-grid-dependent-carbon-scenario).*
+*Auto-generated results for **Data Center Heater Side Gig** — **job 1** cools the GPUs; the **side gig** routes that exhaust to DAC, algae, shelter showers, and more before dissipation. We quantify MW, GWh/yr, and temperature grades (grid-agnostic). Grid-dependent carbon accounting is in the [appendix](#appendix-grid-dependent-carbon-scenario).*
 
 ### Thesis
 
-> We do not assume clean electricity. We quantify the **output-side thermodynamic potential** of hyperscale AI data centers: how much heat is produced, what temperatures are available, and which downstream processes can use it before it is dissipated.
+> Data centers are giant heaters. **Job 1** is cooling the GPUs; the **side gig** is putting that exhaust to work before it's thrown away. We do not assume clean electricity — we quantify the **output-side thermodynamic potential**: how much heat is produced, what temperatures are available, and which downstream loads can use it.
 
 ### Executive summary
 
@@ -210,6 +223,8 @@ If this heat powers DAC on today's U.S. grid: **~37,776 tonnes CO₂e/yr** net r
 
 **Read:** Each doubling of GPUs (with scaled plant) roughly doubles **GWh/yr delivered** until equipment limits bind.
 
+**Interpretation:** Waste-heat supply scales with accelerator inventory when downstream thermal plant is co-provisioned — the same coupling hyperscalers already practice for chillers and power. The slope flattens only when capture or distribution capacity binds, not when the grid decarbonizes.
+
 **Highlighted point:** 25000 GPUs → **49.9 GWh/yr** thermal service at **24 MW** waste heat.
 
 ### Chart 2 — Hotter generations, same hall
@@ -221,6 +236,8 @@ If this heat powers DAC on today's U.S. grid: **~37,776 tonnes CO₂e/yr** net r
 *Y-axis: thermal service delivered (GWh/yr annualized from simulation)*
 
 **Read:** Same 25,000-GPU hall delivers more **GWh/yr** as chip TDP rises.
+
+**Interpretation:** Per-GPU waste heat is an **input-side** constraint set by silicon TDP and liquid-cooling architecture (SemiAnalysis NVL72). Hotter generations increase the thermodynamic budget available to the **side gig** without expanding hall footprint — a first-order reason to size downstream plant against forecast SKUs, not today's H100 envelope.
 
 **Highlighted point:** Blackwell Ultra → **81.4 GWh/yr** thermal service at **39 MW** waste heat.
 
@@ -234,6 +251,8 @@ If this heat powers DAC on today's U.S. grid: **~37,776 tonnes CO₂e/yr** net r
 
 **Read:** Pasting more GPUs onto a hall **without** scaling capture plant hits a **thermal service plateau**.
 
+**Interpretation:** This is the central engineering lesson: **exhaust exists whether or not you can use it**. Oversizing compute without matched DAC, algae, or district-heat capacity yields diminishing returns — analogous to Keith et al. (2018) plant-sizing curves, but here the binding constraint is thermal routing, not sorbent chemistry.
+
 **Highlighted point:** 1.3x heat (31250 GPUs equiv.) → **70.6 GWh/yr** thermal service at **30 MW** waste heat.
 
 ### Chart 4 — Multi-hall campus rollout
@@ -246,6 +265,8 @@ If this heat powers DAC on today's U.S. grid: **~37,776 tonnes CO₂e/yr** net r
 
 **Read:** Ten halls ≈ 250k GPUs — cumulative **GWh/yr** scales linearly when each hall is provisioned.
 
+**Interpretation:** Campus-scale rollouts (documented ~25k-GPU halls at Colossus) aggregate into a **district-energy** problem: hundreds of GWh/yr of colocated exhaust suitable for industrial symbiosis — pools, aquaculture, shelter heat, or capture — if thermal plumbing is planned with the campus, not retrofitted after heat is rejected.
+
 **Highlighted point:** 20 halls → **1418.4 GWh/yr** thermal service at **675 MW** waste heat.
 
 ### Chart 5 — Thermal load split (reference hall)
@@ -254,11 +275,15 @@ If this heat powers DAC on today's U.S. grid: **~37,776 tonnes CO₂e/yr** net r
 
 *Stacked annual thermal service by downstream load (DAC priority routing).*
 
+**Interpretation:** The stacked bars make the **policy choice** visible: the same thermodynamic budget can prioritize DAC regeneration, algae ponds, or community heat — but not all at full duty in our single-pipe MVP. Real campuses would parallelize loops; the chart shows why routing logic (and social license) matters as much as capture chemistry.
+
 ### Chart 6 — Waste heat per GPU by generation
 
 ![GPU waste heat timeline](docs/figures/gpu_tdp_timeline.png)
 
 **Input-side thermal envelope** — watts per GPU to the coolant loop (TDP + rack overhead). † = public roadmap forecast. Drives output GWh regardless of grid mix.
+
+**Interpretation:** This timeline is the **exogenous driver** for every downstream result. Grid decarbonization changes the carbon intensity of electricity; it does **not** change the fact that ~1 kW per B200-class GPU becomes coolant heat. Campus planners should treat rising TDP as a growing **thermal asset**, not merely a cooling liability.
 
 <a id="secondary-heat-applications"></a>
 
@@ -301,39 +326,46 @@ The same **~34 MW** waste-heat stream can be routed to **DAC**, **heated pools**
 
 **Rubin-era hall (forecast)** — **70.7 GWh/yr** thermal service at **34 MW** waste heat (DAC **71** · algae **0** · rejected **0 GWh/yr**). Grid scenario: **37,675 tonnes CO₂e/yr** net removed.
 
-### Conclusion — significance, limits, and what's worth it
+### Conclusion — synthesis, significance, and decision frame
 
-> **Verdict:** Routing hyperscale exhaust before dissipation is **worth doing** — **~34 MW** and **~71 GWh/yr** of deliverable thermal service per Colossus-class hall, regardless of whether the grid is coal, gas, solar, nuclear, or geothermal.
+> **Verdict:** Hyperscale AI is already a **district heating plant in disguise**. The **side gig** — routing **~34 MW** of continuous exhaust into **~71 GWh/yr** of deliverable thermal service per Colossus-class hall — is **thermodynamically real**, **grid-agnostic**, and **worth engineering** whether the marginal electron comes from coal, gas, solar, or geothermal.
 
-#### What is significant
+#### Scholarly synthesis
 
-- **34 MW** continuous waste heat — a physical output of compute, not a grid assumption
-- **70.9 GWh/yr** thermal service delivered from one hall — DAC, algae, or community loads
-- **709 GWh/yr at 10 halls** — campus-scale thermal budget for colocated industry
-- **+42% thermal service** H100 → B200 at same 25k footprint — hotter silicon = more output GWh
-- **Plant saturation is real** — past ~1.3× heat, GWh delivered barely moves without scaling downstream plant
-- **~28.4 million shelter hot showers/yr (~77,718/day)** from the same exhaust — enormous community heat potential
+Industrial ecology treats data centers as **energy conversion devices** whose primary product is computation and whose unavoidable coproduct is low- to medium-grade heat (Hamblin et al., 2024; Shi et al., 2023). This simulation quantifies that coproduct under documented hall sizes (ServeTheHome Colossus) and public GPU thermals (Introl B200; SemiAnalysis NVL72). The results support a **two-layer narrative**: Layer A establishes MW and GWh — physics any campus planner can bank on; Layer B, under explicit grid assumptions, asks whether DAC can **claw back** a fraction of operational CO₂ without pretending the hall is a national NET.
 
-#### What is not significant
+#### What the evidence supports
 
-- **Debating grid cleanliness to prove heat exists** — the exhaust is there either way
-- **National climate salvation from one hall** — see grid appendix for tonne-scale limits
-- **Assuming more GPUs automatically add service** — without proportional plant, **GWh plateaus** (Chart 3)
-- **Treating CO₂ charts as the primary output** — they are a **labeled grid scenario**, not thermodynamics
+- **34 MW** of continuous waste heat — a **first-law** output of compute, independent of grid mix
+- **70.9 GWh/yr** thermal service routed before rejection — sufficient for colocated DAC, algae, or **28 million shelter hot showers/yr** when prioritized for community heat
+- **709 GWh/yr across 10 halls** (~338 MW aggregate) — campus-scale **industrial symbiosis** budget
+- **+42% thermal headroom** (H100 → B200 at 25k GPUs) — generational TDP growth enlarges the side gig without new land
+- **Saturation bound** — fixed downstream plant absorbs only **~2.2%** more GWh past ~1.3× heat input (Chart 3)
+- **25% operational CO₂ recovery** under today's U.S. grid — **37,776 t/yr** removed vs **149,265 t/yr** from powering the same GPUs (grid appendix)
+- **~28.4 million shelter hot showers/yr (~77,718/day)** — dignified community heat from exhaust that would otherwise be rejected
+- **National scale context:** one hall's grid-scenario removal is ****38 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 132,359**)** — material for **operational clawback**, not U.S. inventory replacement (~**1 in 132,359**)
 
-#### What's worth it? — decision guide
+#### What the evidence does not support
 
-| If your goal is… | Worth it? | Simulation says… |
-|------------------|-----------|------------------|
-| Use waste heat before dumping to ambient | **Yes** | **70.9 GWh/yr** deliverable per hall |
-| Shelter showers / community heat near campus | **Yes — trade-off** | **~28.4 million shelter hot showers/yr (~77,718/day)** possible; routing choice sets DAC vs. showers |
-| Size Blackwell / Rubin halls with matched downstream plant | **Yes** | Hotter generations raise **GWh/hall** when plant scales |
-| Prove the hall is carbon-neutral | **No** | Grid scenario still shows net emitter — see appendix |
-| Replace national mitigation strategy | **No** | Output story is **per-campus thermodynamics**, not U.S. inventory |
+- **Equating grid cleanliness with heat availability** — exhaust exists on every grid mix
+- **Carbon-neutral hyperscale claims** from colocated DAC alone — reference hall remains a **net emitter** of **111,489 t/yr** after capture
+- **Uncapped GPU growth without thermal plant** — GWh and tonnes **plateau** when routing saturates
+- **Substituting national negative-emissions portfolios** (Minx & Fuss, 2018) with one campus loop
 
-#### Bottom line
+#### Decision frame — when the side gig is worth it
 
-**Significant:** tens of MW and tens of GWh/yr of routable exhaust, temperature grades for real downstream loads, and clear saturation lessons for plant sizing. **Not significant:** grid mix as a prerequisite, national CO₂ %, or carbon-neutral claims. **Worth it?** **Yes** to extract value from unavoidable exhaust; climate tonnes are a **separate question** under explicit grid assumptions.
+| Strategic goal | Assessment | Evidence from this run |
+|----------------|------------|------------------------|
+| Extract value from unavoidable exhaust | **Strong yes** | **70.9 GWh/yr** deliverable; **34 MW** continuous supply |
+| Community heat / shelter showers (routing trade-off) | **Yes — explicit trade-off** | **~28.4 million shelter hot showers/yr (~77,718/day)** at DAC-priority duty |
+| Co-design Blackwell/Rubin halls with downstream plant | **Yes** | +TDP raises GWh/hall when plant scales (Chart 2) |
+| Partial operational CO₂ clawback (grid scenario) | **Partial — 25%** | Not neutrality; **labeled** 0.39 kg/kWh assumption |
+| Prove campus carbon neutrality | **No** | Thermodynamics ≠ full lifecycle net-zero |
+| Replace federal NET strategy | **No** | Tonne share ~1 in 130 of U.S. annual emissions per hall |
+
+#### Closing synthesis
+
+**Data Center Heater Side Gig** is not a blueprint for a single climate silver bullet — it is a quantitative case that **job 1's exhaust deserves job 2**. At reference scale we find **34 MW**, **70.9 GWh/yr**, temperature grades compatible with DAC and community loads, and — under honest grid bookkeeping — **25% recovery** of GPU operational CO₂. The engineering imperative is clear: **route the heat before you reject it**; the policy choice is **what the side gig serves** (capture, cultivation, or care). Climate tonnes follow from that routing decision — they do not define whether the heat exists.
 
 <a id="appendix-grid-dependent-carbon-scenario"></a>
 
@@ -354,7 +386,7 @@ For NVIDIA-scale infrastructure, compare DAC removal to **CO₂ from powering th
 
 **Reference hall:** Facility draw **~383 GWh/year** (≈ 38 MW IT heat × PUE 1.15). At today's U.S. grid mix (0.39 kg CO₂/kWh), GPU operations emit **149,265 tonnes CO₂e/year**. DAC returns **37,776 tonnes CO₂e/year** — **25% operational recovery**. Still a **net emitter** of **111,489 tonnes CO₂e/year** after DAC — partial clawback, not full offset. As the grid decarbonizes, operational emissions fall but waste heat (and DAC opportunity) remain.
 
-**Strategic framing for NVIDIA:** Waste-heat DAC is **colocated carbon clawback** on heat already paid for — ~one quarter of operational CO₂ today, rising if grid greens and DAC scales with Blackwell/Rubin thermals. Not a license to build; a way to **extract value from unavoidable exhaust**.
+**Strategic framing for NVIDIA:** The **side gig** — waste-heat DAC — is **colocated carbon clawback** on heat already paid for — ~one quarter of operational CO₂ today, rising if grid greens and DAC scales with Blackwell/Rubin thermals. Not a license to build; a way to **extract value from unavoidable exhaust**.
 
 #### CO₂ vs. GPU count
 
@@ -365,6 +397,8 @@ For NVIDIA-scale infrastructure, compare DAC removal to **CO₂ from powering th
 *Y-axis: net CO₂e removed (metric tonnes per year, annualized from simulation)*
 
 **Read:** Net tonnes scale with GPUs when plant scales.
+
+**Interpretation:** Under explicit U.S. grid assumptions (0.39 kg CO₂/kWh), net removal tracks thermal service — but heat-pump electricity imposes a **gross-to-net penalty** documented in Keith (2018) and Shi et al. (2023). Tonnes are a **scenario layer**, not proof that exhaust exists.
 
 **Highlighted point:** 25000 GPUs → **26,583 tonnes CO₂e/year** net removed — **27 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 188,090**). Roughly **~53,166 acres** of USDA cover-crop program (~119 farms), or **~5,779 cars** gasoline cars / **~13,292 cars** EVs parked for a year.
 
@@ -378,6 +412,8 @@ For NVIDIA-scale infrastructure, compare DAC removal to **CO₂ from powering th
 
 **Read:** Hotter chips → more net removal at same hall size.
 
+**Interpretation:** Higher-TDP generations increase both operational emissions and capture potential. Recovery **%** can improve even when absolute tonnes rise — the right metric for colocated clawback, not national inventory share.
+
 **Highlighted point:** Blackwell Ultra → **43,372 tonnes CO₂e/year** net removed — **43 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 115,281**). Roughly **~86,745 acres** of USDA cover-crop program (~195 farms), or **~9,429 cars** gasoline cars / **~21,686 cars** EVs parked for a year.
 
 #### CO₂ saturation
@@ -390,6 +426,8 @@ For NVIDIA-scale infrastructure, compare DAC removal to **CO₂ from powering th
 
 **Read:** Fixed DAC plant → CO₂ plateau as heat rises.
 
+**Interpretation:** Mirrors Chart 3: climate benefit from DAC **saturates** with fixed regeneration plant — a caution against marketing "more GPUs" without proportional capture infrastructure.
+
 **Highlighted point:** 1.3x heat (31250 GPUs equiv.) → **37,597 tonnes CO₂e/year** net removed — **38 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 132,991**). Roughly **~75,193 acres** of USDA cover-crop program (~169 farms), or **~8,173 cars** gasoline cars / **~18,798 cars** EVs parked for a year.
 
 #### CO₂ multi-hall
@@ -401,6 +439,8 @@ For NVIDIA-scale infrastructure, compare DAC removal to **CO₂ from powering th
 *Y-axis: net CO₂e removed (metric tonnes per year, annualized from simulation)*
 
 **Read:** Campus-scale cumulative net removal.
+
+**Interpretation:** Aggregated tonnes remain **small relative to U.S. inventories** (~1 in 130 for one hall) yet material for **operational recovery** framing — partial clawback on emissions already incurred to train models, not a substitute for grid decarbonization.
 
 **Highlighted point:** 20 halls → **755,519 tonnes CO₂e/year** net removed — **756 thousand tonnes** of **5,000 million tonnes** U.S. annual emissions (~**1 in 6,618**). Roughly **~1,511,038 acres** of USDA cover-crop program (~3396 farms), or **~164,243 cars** gasoline cars / **~377,760 cars** EVs parked for a year.
 
@@ -422,7 +462,7 @@ As the U.S. grid decarbonizes, **GPU operational CO₂ falls** but **waste heat 
 
 **Pools, fisheries, showers vs. DAC?** Same exhaust, different router priority — a **policy choice** about where to send thermal service before dissipation.
 
-### Generated at: 2026-06-05T10:28:04.149527Z
+### Generated at: 2026-06-05T10:38:28.883578Z
 
 ### Sources
 
@@ -605,11 +645,11 @@ Annualized net removal: ... tonnes CO2e/yr
 
 | Complicated word | Think of it like… |
 |------------------|-------------------|
+| Waste heat | Computers get hot like a game console — that warmth is waste heat. |
 | Fans | The chimney does part of the leaf-blower's job. |
 | CO₂ capture sponge | A sponge in the air that grabs CO₂ molecules. |
 | Convection / chimney | Hot air rises like steam from soup — it pulls more air along. |
 | Regeneration | Heating the sponge to squeeze the CO₂ out, like wringing a towel. |
-| Waste heat | Computers get hot like a game console — that warmth is waste heat. |
 
 ### What the simulation tried (still experimental in real life)
 
@@ -651,6 +691,14 @@ Annualized net removal: ... tonnes CO2e/yr
 
 ![convection fan savings](docs/figures/convection_fan_savings.png)
 
+### Chart interpretations
+
+**Airflow vs. chimney height** — Draft scales with stack height per buoyancy theory (Zandian & Ashjaee, 2013). Sweep spans **30–200 m** → **168–317 m³/s**, confirming that taller warm columns materially increase passive throughput — the same lever cooling towers use, repurposed for CO₂ contact.
+
+**CO₂ vs. contactor area** — Capture rate tracks sorbent face area until mass-transfer or regeneration duty binds. **10,000–100,000 m²** spans **774–774 t/yr** gross — linear at this lumped fidelity, but still **orders of magnitude** below Mt-scale DAC literature (Keith 2018; McQueen 2021).
+
+**Fan savings vs. waste-heat coupling** — Fraction of hall heat routed to the air chimney (**10–50%** of **40 MW**) drives ΔT and draft. Fan duty falls from **0.02 to 0.12 MW** — modest in absolute terms because baseline fan power is small at this contactor resistance, but directionally consistent with passive-air DAC concepts (Lackner 2018).
+
 ### How this compares to published research
 
 Our speculative chimney model sits at the intersection of three literatures:
@@ -659,18 +707,34 @@ for moving large air volumes, and (3) **data-center waste heat** as a colocated
 thermal source. No published study yet combines all three at AI-campus scale —
 that gap is why we label this module experimental.
 
+**arXiv & top reviews — net zero & negative emissions:** [Lee, G.A., Shi, X., & Park, A.A. (2022)](https://arxiv.org/abs/2211.00791); [Minx, J.C., et al. (2018)](https://doi.org/10.1088/1748-9326/aabf9b); [Fuss, S., et al. (2018)](https://doi.org/10.1088/1748-9326/aabf9f); [Zhang, X., et al. (2025)](https://arxiv.org/abs/2510.12949)
+
+**arXiv & reviews — DAC scaling:** [McQueen, N., et al. (2021)](https://doi.org/10.1088/2516-1083/abf1ce); [Zhang, X., et al. (2025)](https://arxiv.org/abs/2510.20135)
+
+**Peer-reviewed DAC & chimney physics:** [Keith, D.W., Holmes, G., St. Angelo, D., & Heidel, K. (2018)](https://doi.org/10.1016/j.joule.2018.05.006); [Sabatino, F., et al. (2023)](https://doi.org/10.1016/j.jcou.2023.102587); [Shi, W.K., Zhang, X.J., Liu, X., Wei, S., Shi, X., Wu, C., & Jiang, L. (2023)](https://doi.org/10.1016/j.jclepro.2023.137889); [Hamblin, L., Lackner, K.S., & Green, M.D. (2024)](https://proceedings.aiche.org/conferences/aiche-annual-meeting/2024/proceeding/paper/365o-integration-low-grade-waste-heat-direct-air-capture-co2-systems-data-center-case-study); [Lackner, K.S., et al. (Arizona State University) (2018)](https://www.energy.gov/sites/prod/files/2018/10/f56/Klaus_Lackner_CCE_PanelDay2.pdf); [Zandian, A., & Ashjaee, M. (2013)](https://doi.org/10.1016/j.renene.2012.09.051); [Real, F.S., et al. (2023)](https://doi.org/10.1016/j.oneear.2023.11.004); [Meta; Alphabet X (reported by DataCenterDynamics, 2024) (2024)](https://www.datacenterdynamics.com/en/news/meta-and-alphabets-x-developing-direct-air-capture-systems-using-data-center-waste-heat/)
+
+**Nuclear + DAC comparisons (cited, not modeled):** [Bertoni, L., et al. (2024)](https://doi.org/10.1088/2515-7655/ad2374); [NETL / U.S. DOE (2023)](https://www.osti.gov/biblio/1998558); [McQueen, N., et al. (2020)](https://doi.org/10.3389/fclim.2020.618644); [Qvist, S.H., & Staffell, I. (2022)](https://doi.org/10.1016/j.ijggc.2022.103745)
+
 | Paper | What they report | How our sim compares |
 |-------|------------------|----------------------|
-| [Keith, D.W., Holmes, G., St. Angelo, D., & Heidel, K. (2018)](https://doi.org/10.1016/j.joule.2018.05.006) | 5.25–8.81 GJ/t-CO₂ thermal + 77–366 kWh/t electric; $94–232/t levelized (1 Mt/yr plant) | Our default regen duty is **5.5 GJ/t-CO₂** (`specific_heat_duty_j_per_kg: 5.5e6`) — inside the Keith solvent-DAC envelope. |
-| [Sabatino, F., et al. (2023)](https://doi.org/10.1016/j.jcou.2023.102587) | Solid sorbent regen: **0.5–18.75 GJ/t**; liquid solvent: **0.62–17.28 GJ/t** (work-equivalent) | Heat-pump-boosted 90 °C regen in our liquid path is a conventional TSA approach within this range. |
-| [Shi, W.K., Zhang, X.J., Liu, X., Wei, S., Shi, X., Wu, C., & Jiang, L. (2023)](https://doi.org/10.1016/j.jclepro.2023.137889) | TVSA with heat pump at 373 K: **176.7 $/t** levelized DAC cost; low-grade heat cuts net LCOD 5–25% | Closest published analog to **waste-heat + heat-pump regen** — our cyclic convection module copies this split. |
-| [Hamblin, L., Lackner, K.S., & Green, M.D. (2024)](https://proceedings.aiche.org/conferences/aiche-annual-meeting/2024/proceeding/paper/365o-integration-low-grade-waste-heat-direct-air-capture-co2-systems-data-center-case-study) | Multi-stage liquid sorbent upgrade using integrated DC waste heat; simulation + experiment | **Closest peer-reviewed DC + DAC case study** to our main liquid-loop path (not the chimney variant). |
-| [Lackner, K.S., et al. (Arizona State University) (2018)](https://www.energy.gov/sites/prod/files/2018/10/f56/Klaus_Lackner_CCE_PanelDay2.pdf) | Wind-driven contactors; minimal active fanning; moisture-swing regen | Conceptual predecessor to **passive air contact** — our chimney draft replaces wind as the driver. |
-| [Zandian, A., & Ashjaee, M. (2013)](https://doi.org/10.1016/j.renene.2012.09.051) | Hybrid cooling-tower chimney (HCTSC): **~10×** draft vs. Manzanares solar chimney; up to **3 MW** with 50 m diameter | Validates **waste-heat-warmed chimneys** as serious airflow engines — we reuse the stack-effect physics, not power-gen. |
-| [McQueen, N., et al. (2020)](https://doi.org/10.3389/fclim.2020.618644) | 1 Mt/yr solvent DAC: **$250–690/t** all-electric; thermal energy ~80% of total duty | Our **~630 t/yr** chimney result is **lab-scale throughput** — commercial DAC papers target 1,000× larger capture. |
-| [Real, F.S., et al. (2023)](https://doi.org/10.1016/j.oneear.2023.11.004) | Four DAC technologies plateau **$100–600/t-CO₂** by 2050 with learning + siting | Sets realistic **$/t expectations** — our sim reports tonnes/yr only, not LCO₂. |
-| [Prats-Salvado, E., Jagtap, N., Monnerie, N., & Sattler, C. (2024)](https://doi.org/10.1021/acs.est.3c08269) | Solar thermal for high-temp calcination; arid-site L-DAC cost vs. fossil baseline | Complements Shi (2023): external heat source for regen — we use **DC waste heat** instead of solar. |
-| [Meta; Alphabet X (reported by DataCenterDynamics, 2024) (2024)](https://www.datacenterdynamics.com/en/news/meta-and-alphabets-x-developing-direct-air-capture-systems-using-data-center-waste-heat/) | Liquid DAC + heat-pump regen from DC exhaust; patent filings 2021–2023 | Real companies pursue **liquid-loop regen**, not passive chimney contactors — our chimney path is more speculative than industry R&D. |
+| [Lee, G.A., Shi, X., & Park, A.A. (2022)](https://arxiv.org/abs/2211.00791) | DAC review for **negative emissions** and carbon-neutral world building; surfaces sorbent/solvent advances | Frames DAC as a **negative-emission technology** — same role as our grid-scenario CO₂ appendix, not our thermal-first story. |
+| [Minx, J.C., et al. (2018)](https://doi.org/10.1088/1748-9326/aabf9b) | 1.5 °C paths need **large-scale NETs**; no single NET suffices — portfolios required | Supports treating DAC as **one tool among many**, not a silver bullet; matches our modest ~600 t/yr chimney result. |
+| [Fuss, S., et al. (2018)](https://doi.org/10.1088/1748-9326/aabf9f) | NET cost/potential ranges; **DAC** among options with trade-offs and side effects | Reminds us every NET has **risks and limits** — including energy penalty and land/fan infrastructure for DAC. |
+| [Zhang, X., et al. (2025)](https://arxiv.org/abs/2510.12949) | Current decarbonization **falls short of net-zero**; DAC must navigate **grid electricity** cost and emissions | We use a **flat grid factor**, not hourly markets — but the paper warns net removal depends on *when* you run fans/heat pumps. |
+| [McQueen, N., et al. (2021)](https://doi.org/10.1088/2516-1083/abf1ce) | Gigaton scale needs **~50%/yr growth**; learning-by-doing; solid + liquid commercial paths | Our throughput is **pre-commercial** — useful for physics intuition, not deployment planning. |
+| [Zhang, X., et al. (2025)](https://arxiv.org/abs/2510.20135) | Solar-thermal regen at ~100 °C; **~$200/t-CO₂** LCCO₂ in sun-rich sites | Alternative low-carbon heat to **nuclear** — we use **DC waste heat** instead of solar thermal. |
+| [Bertoni, L., et al. (2024)](https://doi.org/10.1088/2515-7655/ad2374) | 50 MW SMR + solid DAC: **~0.3 MtCO₂/yr**; **~250 €/t** net removal | **Not modeled.** Cited to show nuclear papers target **1,000×** our capture scale with different energy assumptions. |
+| [NETL / U.S. DOE (2023)](https://www.osti.gov/biblio/1998558) | 1 GWₜ NPP + L-DAC: **12–15 MtCO₂/yr**; LCOD **$170–260/t** (liquid) vs **$650–680/t** (solid) | **Not modeled.** Illustrates why nuclear dominates some DAC cost studies — steady heat + electricity. |
+| [McQueen, N., et al. (2020)](https://doi.org/10.3389/fclim.2020.618644) | 1 Mt/yr solvent DAC: **$370–620/t** with nuclear; **$250–690/t** range across energy sources | **Not modeled.** Our heat-pump penalty uses **grid average**, not nuclear-specific ~0 gCO₂/kWh. |
+| [Qvist, S.H., & Staffell, I. (2022)](https://doi.org/10.1016/j.ijggc.2022.103745) | 2050 median LCO₂ removed: **$101.6/t** (71–154 $/t); flags **non-economic** barriers | **Not modeled.** Paper itself notes waste, proliferation, and social-license risks beyond economics. |
+| [Keith, D.W., Holmes, G., St. Angelo, D., & Heidel, K. (2018)](https://doi.org/10.1016/j.joule.2018.05.006) | 5.25–8.81 GJ/t-CO₂ thermal + 77–366 kWh/t electric; $94–232/t levelized (1 Mt/yr plant) | Our default regen duty is **5.5 GJ/t-CO₂** — inside the Keith solvent-DAC envelope. |
+| [Sabatino, F., et al. (2023)](https://doi.org/10.1016/j.jcou.2023.102587) | Solid sorbent regen: **0.5–18.75 GJ/t**; liquid solvent: **0.62–17.28 GJ/t** | Heat-pump-boosted 90 °C regen is a conventional TSA approach within this range. |
+| [Shi, W.K., Zhang, X.J., Liu, X., Wei, S., Shi, X., Wu, C., & Jiang, L. (2023)](https://doi.org/10.1016/j.jclepro.2023.137889) | TVSA + heat pump at 373 K: **176.7 $/t** LCOD; low-grade heat cuts net LCOD 5–25% | Closest analog to **waste-heat + heat-pump regen** in our cyclic convection module. |
+| [Hamblin, L., Lackner, K.S., & Green, M.D. (2024)](https://proceedings.aiche.org/conferences/aiche-annual-meeting/2024/proceeding/paper/365o-integration-low-grade-waste-heat-direct-air-capture-co2-systems-data-center-case-study) | Multi-stage liquid sorbent upgrade using integrated DC waste heat | **Closest DC + DAC case study** to our main liquid-loop path (not the chimney variant). |
+| [Lackner, K.S., et al. (Arizona State University) (2018)](https://www.energy.gov/sites/prod/files/2018/10/f56/Klaus_Lackner_CCE_PanelDay2.pdf) | Wind-driven contactors; minimal active fanning; moisture-swing regen | Conceptual predecessor to **passive air contact** — chimney draft replaces wind. |
+| [Zandian, A., & Ashjaee, M. (2013)](https://doi.org/10.1016/j.renene.2012.09.051) | HCTSC: **~10×** draft vs. Manzanares; up to **3 MW** with 50 m diameter | Validates **waste-heat-warmed chimneys** as airflow engines. |
+| [Real, F.S., et al. (2023)](https://doi.org/10.1016/j.oneear.2023.11.004) | Four DAC technologies plateau **$100–600/t-CO₂** by 2050; unlikely to hit $100/t everywhere | Includes **nuclear+heat-pump** scenarios we do **not** run — cited for cost context only. |
+| [Meta; Alphabet X (reported by DataCenterDynamics, 2024) (2024)](https://www.datacenterdynamics.com/en/news/meta-and-alphabets-x-developing-direct-air-capture-systems-using-data-center-waste-heat/) | Liquid DAC + heat-pump regen from DC exhaust | Industry pursues **liquid regen**, not passive chimney contactors. |
 
 **Our reference run vs. literature scale:**
 
@@ -686,21 +750,82 @@ that gap is why we label this module experimental.
 | Question | Answer from literature |
 |----------|------------------------|
 | Has anyone built chimney DAC at a GPU campus? | Not in published literature. Zandian & Ashjaee (2013) use power-plant cooling towers; Hamblin et al. (2024) study DC liquid-loop DAC — neither is our exact design. |
-| Is 5.5 GJ per tonne of CO₂ realistic? | Yes — Keith et al. (2018) report 5.25–8.81 GJ/t for solvent DAC; Sabatino et al. (2023) survey 0.5–18.75 GJ/t across sorbent types. |
-| Why is our capture only ~600 tonnes/year? | Commercial papers size plants at **0.9–1 Mt/yr** (Keith 2018, McQueen 2020). We model one hall with lumped contactor area — throughput, not physics, is the limit. |
+| Is 5.5 GJ per tonne of CO₂ realistic? | Yes — Keith et al. (2018) report 5.25–8.81 GJ/t; Sabatino et al. (2023) survey 0.5–18.75 GJ/t across sorbent types. |
+| Why is our capture only ~600 tonnes/year? | Commercial papers size plants at **0.9–1 Mt/yr** (Keith 2018). Nuclear studies target **0.3–15 Mt/yr** per reactor — we model one hall with lumped contactor area. |
+| Why don't we use nuclear if papers say it's cheaper? | We deliberately use **grid-average electricity** and **existing GPU waste heat** — not new reactors. Nuclear DAC papers assume steady carbon-free power; they also downplay waste, accident, and proliferation concerns that many people find unacceptable. |
+| What do net-zero papers say about DAC? | Minx & Fuss (2018) and Lee et al. (arXiv:2211.00791) treat DAC as one **negative-emission tool** in a portfolio — necessary at scale for 1.5 °C, but not sufficient alone. |
 
 #### Full references
 
+- Lee, G.A., Shi, X., & Park, A.A. (2022). *Technologies to Capture CO₂ directly from Ambient Air.* arXiv (physics.chem-ph). arXiv:2211.00791 — https://arxiv.org/abs/2211.00791
+- Minx, J.C., et al. (2018). *Negative emissions — Part 1: Research landscape and synthesis.* Environmental Research Letters. https://doi.org/10.1088/1748-9326/aabf9b
+- Fuss, S., et al. (2018). *Negative emissions — Part 2: Costs, potentials and side effects.* Environmental Research Letters. https://doi.org/10.1088/1748-9326/aabf9f
+- Zhang, X., et al. (2025). *Enhancing Profit and CO₂ Mitigation: Commercial DAC Design and Operation with Power Market Volatility.* arXiv. arXiv:2510.12949 — https://arxiv.org/abs/2510.12949
+- McQueen, N., et al. (2021). *A review of direct air capture (DAC): scaling up commercial technologies and innovating for the future.* Progress in Energy. https://doi.org/10.1088/2516-1083/abf1ce
+- Zhang, X., et al. (2025). *Design Optimization and Global Impact Assessment of Solar-Thermal Direct Air Carbon Capture.* arXiv. arXiv:2510.20135 — https://arxiv.org/abs/2510.20135
+- Bertoni, L., et al. (2024). *Integrating direct air capture with small modular nuclear reactors.* Journal of Physics: Energy. https://doi.org/10.1088/2515-7655/ad2374
+- NETL / U.S. DOE (2023). *Assessment of Nuclear Energy to Support Negative Emission Technologies.* DOE Technical Report. https://www.osti.gov/biblio/1998558
+- McQueen, N., et al. (2020). *Natural Gas vs. Electricity for Solvent-Based DAC (incl. nuclear scenarios).* Frontiers in Climate. https://doi.org/10.3389/fclim.2020.618644
+- Qvist, S.H., & Staffell, I. (2022). *The prospects of massively scalable nuclear-powered direct air capture.* International Journal of Greenhouse Gas Control. https://doi.org/10.1016/j.ijggc.2022.103745
 - Keith, D.W., Holmes, G., St. Angelo, D., & Heidel, K. (2018). *A process for capturing CO₂ from the atmosphere.* Joule. https://doi.org/10.1016/j.joule.2018.05.006
 - Sabatino, F., et al. (2023). *A comprehensive review on regeneration strategies for direct air capture.* Journal of CO₂ Utilization. https://doi.org/10.1016/j.jcou.2023.102587
 - Shi, W.K., Zhang, X.J., Liu, X., Wei, S., Shi, X., Wu, C., & Jiang, L. (2023). *Temperature-vacuum swing adsorption for direct air capture by using low-grade heat.* Journal of Cleaner Production. https://doi.org/10.1016/j.jclepro.2023.137889
-- Hamblin, L., Lackner, K.S., & Green, M.D. (2024). *Integration of Low-Grade Waste Heat in Direct Air Capture of CO₂ Systems: A Data Center Case Study.* 2024 AIChE Annual Meeting. https://proceedings.aiche.org/conferences/aiche-annual-meeting/2024/proceeding/paper/365o-integration-low-grade-waste-heat-direct-air-capture-co2-systems-data-center-case-study
+- Hamblin, L., Lackner, K.S., & Green, M.D. (2024). *Integration of Low-Grade Waste Heat in DAC — A Data Center Case Study.* 2024 AIChE Annual Meeting. https://proceedings.aiche.org/conferences/aiche-annual-meeting/2024/proceeding/paper/365o-integration-low-grade-waste-heat-direct-air-capture-co2-systems-data-center-case-study
 - Lackner, K.S., et al. (Arizona State University) (2018). *Passive wind-driven direct air capture with moisture-swing sorbents.* U.S. DOE CCE workshop / ASU Tiburio design. https://www.energy.gov/sites/prod/files/2018/10/f56/Klaus_Lackner_CCE_PanelDay2.pdf
-- Zandian, A., & Ashjaee, M. (2013). *Thermal efficiency improvement of a steam Rankine cycle by hybrid cooling tower and solar chimney.* Renewable Energy. https://doi.org/10.1016/j.renene.2012.09.051
-- McQueen, N., et al. (2020). *Natural Gas vs. Electricity for Solvent-Based Direct Air Capture.* Frontiers in Climate. https://doi.org/10.3389/fclim.2020.618644
-- Real, F.S., et al. (2023). *The cost of direct air capture and storage can be reduced via strategic deployment but is unlikely to fall below stated cost targets.* One Earth. https://doi.org/10.1016/j.oneear.2023.11.004
-- Prats-Salvado, E., Jagtap, N., Monnerie, N., & Sattler, C. (2024). *Solar-Powered Direct Air Capture: Techno-Economic and Environmental Assessment.* Environmental Science & Technology. https://doi.org/10.1021/acs.est.3c08269
+- Zandian, A., & Ashjaee, M. (2013). *Hybrid cooling tower and solar chimney concept.* Renewable Energy. https://doi.org/10.1016/j.renene.2012.09.051
+- Real, F.S., et al. (2023). *The cost of DAC and storage can be reduced via strategic deployment.* One Earth. https://doi.org/10.1016/j.oneear.2023.11.004
 - Meta; Alphabet X (reported by DataCenterDynamics, 2024) (2024). *Direct air capture prototypes using data-center waste heat.* Industry reports (not peer-reviewed). https://www.datacenterdynamics.com/en/news/meta-and-alphabets-x-developing-direct-air-capture-systems-using-data-center-waste-heat/
+
+### Energy assumptions — no nuclear inputs
+
+**This simulator does not assume nuclear power** for data-center operation or DAC
+regeneration. Grid-dependent CO₂ accounting uses the **U.S. average grid** (0.39 kg
+CO₂/kWh in our default configs) — not nuclear-specific carbon intensity.
+
+We cite nuclear+DAC papers below for **honest comparison only**. Many find lower
+levelized costs when pairing DAC with steady nuclear heat/electricity, but we
+deliberately do **not** model that pathway here.
+
+**Why we cite nuclear papers but don't use them:** Several studies (Bertoni et al.
+2024; DOE NETL 2023; McQueen et al. 2020; Qvist & Staffell 2022) report that
+nuclear can cut DAC costs by ~7–13% versus fossil-powered baselines, with removal
+costs often quoted around **$100–250/t-CO₂** at large scale. Those results depend
+on assumptions about reactor build rates, waste handling, proliferation risk,
+accident tail risk, long-lived radioactive waste, and social license — topics we
+treat as **outside scope and genuinely concerning** for many communities.
+
+**Our alternative framing:** use **waste heat that already exists** from GPUs
+(Hamblin 2024; Meta/X industry reports) and **passive airflow** (Lackner 2018;
+Zandian 2013) rather than building new nuclear capacity to feed DAC.
+
+### Conclusion — synthesis and research positioning
+
+> **Verdict:** Chimney convection is a **credible physics sketch**, not a deployment plan. At reference scale (**120 m** stack, **50,000 m²** contactors, **40 MW** waste heat) passive draft moves **267 m³/s** (sweep range **168–317 m³/s**), saves **0.08 MW** fan duty, and yields **630 t/yr** net CO₂ under grid scenario — roughly **1163× below** a 0.9 Mt/yr Keith-class plant, but aligned with the **side-gig philosophy**: use exhaust already on site before building new energy infrastructure.
+
+#### Scholarly synthesis
+
+This module occupies a **deliberate gap** in the literature: Hamblin et al. (2024) integrate liquid-loop DC waste heat; Lackner (2018) and Zandian & Ashjaee (2013) motivate passive airflow; Keith (2018) and McQueen (2021) size Mt-scale fan-driven plants. No peer-reviewed study yet combines **GPU-campus exhaust**, **chimney draft**, and **cyclic sorbent regeneration** at hyperscale. Our lumped solver therefore functions as a **feasibility screen**: it asks whether buoyancy and bed resistance permit useful airflow without claiming commercial LCO₂.
+
+#### What the sweep supports
+
+- **Height sensitivity** — taller chimneys increase draft monotonically in our sweep (168–317 m³/s)
+- **Contactor area dominates throughput** — **774 t/yr** gross at reference **50,000 m²** face
+- **Regeneration penalty** — **19%** gross-to-net gap from heat-pump electricity (5.5 GJ/t duty, grid 0.39 kg/kWh) — consistent with solvent-DAC literature
+- **Fan substitution is real but small** — **0.08 MW** saved vs. **40 MW** hall heat — Opex lever, not primary climate story
+
+#### What it does not support
+
+- **Campus-scale negative emissions** without orders-of-magnitude larger contactor area or multi-hall aggregation
+- **Replacing liquid-loop DAC** pursued by industry (Meta/X) — air-side path remains more speculative
+- **Nuclear or dedicated low-carbon heat** — we deliberately use **existing GPU exhaust** only (see energy policy above)
+
+#### Relationship to the main side gig
+
+The **primary** Data Center Heater Side Gig story routes **liquid** waste heat to DAC and community loads (~**71 GWh/yr** per hall). Chimney convection is an **air-side appendix**: same regeneration chemistry, different contactor physics. If passive draft reduces fan Opex and enables larger face area at fixed electricity, it merits pilot study; if not, the liquid path remains the conservative baseline (Shi et al., 2023; Hamblin et al., 2024).
+
+#### Closing synthesis
+
+Treat this module as **structured speculation**: physics plausible, economics unproven, scale pre-commercial. It strengthens the broader thesis that hyperscale exhaust is **too large to ignore** — whether captured through pipes or chimneys — while keeping climate claims **proportionate** to **630 t/yr** net removal at reference geometry, not Mt-scale promises from the DAC literature.
 
 ### Honest limits
 
@@ -709,7 +834,7 @@ that gap is why we label this module experimental.
 - Liquid-cooled halls may need extra steps to warm the air chimney
 - Speculative — physics is plausible, real plants are not built yet. Computer experiment only.
 
-### Generated at: 2026-06-05T10:33:07.779810Z
+### Generated at: 2026-06-05T10:38:31.479294Z
 
 ### Sources
 
@@ -777,10 +902,16 @@ datacenter-heater-sidegig/
 
 ## Literature & state-of-the-art context
 
-This repo is a **teaching simulation**, not a peer-reviewed plant design. We anchor defaults to published DAC and chimney literature:
+This repo is a **teaching simulation**, not a peer-reviewed plant design. We anchor defaults to published DAC and chimney literature.
+
+**Energy policy — no nuclear inputs:** Grid-dependent CO₂ accounting uses the **U.S. average grid** (0.39 kg CO₂/kWh in default configs), not nuclear-specific carbon intensity. We cite nuclear+DAC studies for honest comparison only; we do **not** model reactors, SMRs, or dedicated nuclear heat for regeneration.
 
 | Topic | Representative sources | What they say | Our default |
 |-------|------------------------|---------------|-------------|
+| **Net zero & negative emissions** | [Minx et al., 2018](https://doi.org/10.1088/1748-9326/aabf9b); [Fuss et al., 2018](https://doi.org/10.1088/1748-9326/aabf9f); [Lee et al., arXiv:2211.00791](https://arxiv.org/abs/2211.00791) | 1.5 °C paths need **large-scale NETs**; DAC is one portfolio tool, not a silver bullet | Chimney appendix reports modest **~600 t/yr** net removal |
+| **Net-zero gap & grid DAC** | [Zhang et al., arXiv:2510.12949](https://arxiv.org/abs/2510.12949) | Decarbonization **falls short of net-zero**; DAC must navigate **power-market** cost and emissions | Flat grid factor in sim — not hourly markets |
+| **DAC scaling** | [McQueen et al., 2021](https://doi.org/10.1088/2516-1083/abf1ce) | Gigaton scale needs **~50%/yr growth**; solid + liquid commercial paths | Our throughput is **pre-commercial** |
+| **Solar-thermal DAC (non-nuclear heat)** | [Zhang et al., arXiv:2510.20135](https://arxiv.org/abs/2510.20135) | Solar-thermal regen ~100 °C; **~$200/t-CO₂** in sun-rich sites | We use **DC waste heat** instead |
 | **Liquid DAC energy** | [Keith et al., 2018](https://doi.org/10.1016/j.joule.2018.05.006) | 5.25–8.81 GJ/t-CO₂ + electricity; $94–232/t at 1 Mt/yr | **5.5 GJ/t** heat duty via heat pump |
 | **Regen energy range** | [Sabatino et al., 2023](https://doi.org/10.1016/j.jcou.2023.102587) | 0.5–18.75 GJ/t (solids), 0.62–17.28 GJ/t (liquids) | 90 °C TSA regen window |
 | **Low-grade heat + DAC** | [Shi et al., 2023](https://doi.org/10.1016/j.jclepro.2023.137889) | TVSA with heat pump; **176.7 $/t** LCOD at 373 K | Closest analog to our liquid regen path |
@@ -788,9 +919,10 @@ This repo is a **teaching simulation**, not a peer-reviewed plant design. We anc
 | **Passive air contact** | [Lackner, 2018](https://www.energy.gov/sites/prod/files/2018/10/f56/Klaus_Lackner_CCE_PanelDay2.pdf) | Wind-driven moisture-swing contactors | Conceptual predecessor to chimney draft |
 | **Waste-heat chimneys** | [Zandian & Ashjaee, 2013](https://doi.org/10.1016/j.renene.2012.09.051) | Hybrid cooling-tower chimney; **~10×** draft vs. Manzanares | Stack-effect physics we reuse |
 | **DAC economics** | [McQueen et al., 2020](https://doi.org/10.3389/fclim.2020.618644); [Real et al., 2023](https://doi.org/10.1016/j.oneear.2023.11.004) | $100–690/t depending on energy source; learning curves | We report **tonnes/yr**, not LCO₂ |
+| **Nuclear + DAC (cited, not modeled)** | [Bertoni et al., 2024](https://doi.org/10.1088/2515-7655/ad2374); [DOE NETL, 2023](https://www.osti.gov/biblio/1998558); [Qvist & Staffell, 2022](https://doi.org/10.1016/j.ijggc.2022.103745) | Often **$100–250/t** with steady nuclear heat; flags waste, proliferation, social-license risks | **Not in our sim** — we use existing GPU waste heat + grid-average electricity |
 | **Industry R&D** | [DataCenterDynamics, 2024](https://www.datacenterdynamics.com/en/news/meta-and-alphabets-x-developing-direct-air-capture-systems-using-data-center-waste-heat/) | Meta / Alphabet X liquid DAC + DC heat (not peer-reviewed) | Industry pursues **liquid regen**, not chimney contactors |
 
-**Gap we explore:** papers cover liquid-loop DC–DAC (Hamblin 2024) *or* passive airflow (Lackner 2018) *or* chimney physics (Zandian 2013) — but not **GPU-campus chimney contactors with cyclic regen**. That is why the convection module stays in a separate, speculative README block.
+**Gap we explore:** papers cover liquid-loop DC–DAC (Hamblin 2024) *or* passive airflow (Lackner 2018) *or* chimney physics (Zandian 2013) *or* nuclear-powered DAC at reactor scale — but not **GPU-campus chimney contactors with cyclic regen using waste heat only**. That is why the convection module stays in a separate, speculative README block.
 
 Full auto-generated comparison table (with our run numbers): [Chimney DAC → published research](#convection-speculative).
 
@@ -860,7 +992,7 @@ This is an educational simulation project. Run tests before changing physics or 
 
 <p align="center">
   <strong>Every data center is a heater.</strong><br>
-  This project gives that heat a side gig.
+  <strong>Job 1:</strong> cool the GPUs. <strong>Side gig:</strong> put the exhaust to work before it's thrown away.
 </p>
 
 <p align="center">

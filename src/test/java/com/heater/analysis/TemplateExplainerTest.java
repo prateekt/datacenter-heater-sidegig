@@ -14,7 +14,10 @@ class TemplateExplainerTest {
         ResultsSummary summary = runner.runAll();
         String markdown = TemplateExplainer.explain(summary, "config/gpu_profiles.yaml");
 
+        assertTrue(markdown.contains("side gig"));
         assertTrue(markdown.contains("output-side thermodynamic potential"));
+        assertTrue(markdown.contains("Interpretation"));
+        assertTrue(markdown.contains("Closing synthesis"));
         assertTrue(markdown.contains("thermal_service_vs_gpu_count.png"));
         assertTrue(markdown.contains("Appendix: Grid-dependent carbon scenario"));
         assertTrue(markdown.contains("co2_vs_gpu_count.png"));

@@ -11,6 +11,8 @@ import java.util.Map;
 public final class ConvectionLiterature {
 
     public final String comparisonIntro;
+    public final String energyPolicy;
+    public final String nuclearComparisonsNote;
     public final List<Paper> papers;
     public final List<ConvectionAnalogies.QuestionAnswer> plainEnglishGaps;
 
@@ -20,6 +22,7 @@ public final class ConvectionLiterature {
             int year,
             String title,
             String venue,
+            String arxivId,
             String doi,
             String url,
             String category,
@@ -29,10 +32,14 @@ public final class ConvectionLiterature {
 
     private ConvectionLiterature(
             String comparisonIntro,
+            String energyPolicy,
+            String nuclearComparisonsNote,
             List<Paper> papers,
             List<ConvectionAnalogies.QuestionAnswer> plainEnglishGaps
     ) {
         this.comparisonIntro = comparisonIntro;
+        this.energyPolicy = energyPolicy;
+        this.nuclearComparisonsNote = nuclearComparisonsNote;
         this.papers = papers;
         this.plainEnglishGaps = plainEnglishGaps;
     }
@@ -40,6 +47,8 @@ public final class ConvectionLiterature {
     public static ConvectionLiterature load(String path) throws IOException {
         Map<String, Object> root = ConfigLoader.load(path);
         String intro = String.valueOf(root.getOrDefault("comparison_intro", "")).trim();
+        String energyPolicy = String.valueOf(root.getOrDefault("energy_policy", "")).trim();
+        String nuclearNote = String.valueOf(root.getOrDefault("nuclear_comparisons_note", "")).trim();
 
         List<Paper> papers = new ArrayList<>();
         Object papersObj = root.get("papers");
@@ -52,6 +61,7 @@ public final class ConvectionLiterature {
                             intVal(m, "year"),
                             str(m, "title"),
                             str(m, "venue"),
+                            str(m, "arxiv_id"),
                             str(m, "doi"),
                             str(m, "url"),
                             str(m, "category"),
@@ -75,7 +85,11 @@ public final class ConvectionLiterature {
             }
         }
 
-        return new ConvectionLiterature(intro, papers, gaps);
+        return new ConvectionLiterature(intro, energyPolicy, nuclearNote, papers, gaps);
+    }
+
+    public List<Paper> byCategory(String category) {
+        return papers.stream().filter(p -> category.equals(p.category())).toList();
     }
 
     private static String str(Map<?, ?> m, String key) {
