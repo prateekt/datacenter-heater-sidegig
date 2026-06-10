@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-09T23:38:37.995425Z",
+  "generated_at": "2026-06-10T00:19:47.044404Z",
   "charts": ["docs/figures/fan_orchestra_cell.png", "docs/figures/fan_orchestra_at_scale.png", "docs/figures/acoustic_spl_vs_liner_depth.png", "docs/figures/acoustic_sqi_vs_water_flow.png", "docs/figures/acoustic_mdmg_vs_steps.png", "docs/figures/acoustic_coupling_comparison.png", "docs/figures/acoustic_orchestra_instrumented_fraction.png", "docs/figures/acoustic_orchestra_rack_count.png", "docs/figures/acoustic_orchestra_bow_covers.png", "docs/figures/acoustic_orchestra_bow_covers_spl.png"],
   "audio": ["docs/audio/fan_noise_baseline.wav", "docs/audio/mse_perimeter_decoupled.wav", "docs/audio/fan_orchestra_15k.wav", "docs/audio/fan_orchestra_vs_raw_fan.wav", "docs/audio/mse_perimeter_coupled.wav", "docs/audio/mdmg_output.wav"],
   "reference_runs": {"baseline_dba":78.8484,"mse_decoupled_dba":80.6995,"mse_coupled_dba":84.8252,"mdmg_spectral_distance":41.3232,"mdmg_harmonicity":0.9990,"mdmg_steps":40,"active_instrument_count":15000,"musical_content_db":69.4446,"sustain_index":0.4203,"tremolo_depth_db":10.0000},
